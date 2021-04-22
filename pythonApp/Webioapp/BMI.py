@@ -11,8 +11,6 @@ def bmi(height, weight):
     (40.0, '肥胖'),
     (float('inf'), '非常肥胖')
     ]
-    # (float('inf'):'非常肥胖')}
-
     for k, v in top_status:
         if bmi_value <= k:
             return bmi_value,v
