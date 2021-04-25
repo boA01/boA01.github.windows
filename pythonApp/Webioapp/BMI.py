@@ -1,5 +1,5 @@
 from pywebio.input import input, FLOAT
-from pywebio.output import put_text
+from pywebio.output import *
 
 def bmi(height, weight):
     bmi_value = weight/(height/100)**2
@@ -32,11 +32,11 @@ def main():
         ['Banner', '$6']
     ])
     
-    #输出图像
-    put_image(open('./image/AC.png', 'rb').read())
+    # 输出图像
+    # put_image(open(r'./image/AC.png', 'rb').read())
 
     #输出MarkDown
-    put_markdown('**Blod text')
+    # put_markdown('**Blod text')
 
     #输出通知消息
     toast('Awesome PyWebIO!!')
