@@ -16,6 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from App import views
+from functools import partial
+# from django.views.static import serve
+# from pywebio import STATIC_PATH
+# from pywebio.platform.django import webio_view
+
+# webio_view_func = webio_view(task_func)
 
 urlpatterns = [
     # App新建urls时，调用视图
@@ -24,5 +30,5 @@ urlpatterns = [
     # 直接调用view
     path('index/', views.index),
     path('hello/', views.hello),
-    
+    # path(r"tool", webio_view_func),
 ]
