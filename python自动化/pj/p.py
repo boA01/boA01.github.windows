@@ -58,9 +58,10 @@ class ServerThreading(threading.Thread):
                 if msg.strip().endswith('over'):
                     msg = msg[:-4]
                     break
-            sendmsg = Image.open(msg)
+            # sendmsg = Image.open(msg)
+
             # 发送数据
-            self._socket.send((f"{sendmsg}").encode(self._encoding))
+            self._socket.send((f"{msg}").encode(self._encoding))
             pass
         except Exception as e:
             self._socket.send("500".encode(self._encoding))

@@ -8,8 +8,9 @@
 
 import os
 print(f"父进程{os.getpid()} start!!!")
-pid = os.fork()
+pid = os.fork() 
 if pid == 0:
     print(f"子进程{os.getpid()} start!11")
 else:
     print("!!!")
+    print('I (%s) just created a child process (%s).' % (os.getpid(), pid))
