@@ -65,12 +65,14 @@ import shutil
 
 shutil.copyfile()
 
+
 import pickle
 import json
 d = dict(name="boA", age=21)
 # 序列化：把变量从内存中变成可存储或传输的过程
-josn_str = json.dumps(d) #str
-# json.dumps(s,default=student2dict) #序列化对象是，添加转dict函数
+bt = pickle.dumps(d) #>>>bytes
+josn_str = json.dumps(d) #>>>str
+# json.dumps(s,default=student2dict) #序列化对象是，添加转dict函数 >>>{}
 '''
 def student2dict(std):
     return {
@@ -79,13 +81,13 @@ def student2dict(std):
     }
 '''
 # json.dumps(s, default=lambda obj: obj.__dict__) #偷懒方法
-pickle.dumps(d) #>>>bytes
 
 with open(file="dump.txt",mode='wb') as f:
     json.dump(d,f) #file-like Object
     # pickle.dump(d,f)
 
 # 反序列化
+pickle.loads(bt)
 json.loads(josn_str)
 # print(json.loads(json_str, object_hook=dict2student)) #编写转换函数
 '''
@@ -96,6 +98,3 @@ with open("dump.txt","rb") as f:
     d = json.load(f)
     # d = pickle.load(f)
     print(d)
-
-
-

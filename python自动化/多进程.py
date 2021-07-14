@@ -1,5 +1,5 @@
-import multiprocessing as mt
-import threading as td
+import multiprocessing as mt #进程模块
+import threading as td #线程模块
 import time as tm
 import os
 
