@@ -14,12 +14,14 @@ $ 结尾
 * 任意个
 + 至少一个
 ? 0或1个
++? 防止贪婪
+
+re.match("rule", s)
+re.split("rule", s)
 '''
+
 def pd(s):
-    if re.match(r"\d{3}\w1.\d*@qq.com", str(s), "1"):
+    if re.match(r"w{3}\.\w.\.@qq.com", str(s), "1"):
         print("ok")
         return s
     return
-
-
-    

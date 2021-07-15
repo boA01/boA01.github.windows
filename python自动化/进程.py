@@ -1,17 +1,18 @@
 '''
-多道批：多任务
+多任务
     IO密集型：python，操作IO
     计算密集型：c，提高cpu利用率，尽量少切换，任务数=核数
+
+    同步：任务依次完成  子程序（函数<线程>）层级调用，通过栈实现，是线程切换
+    异步：任务可以中断  协程调用，由子程序自己控制，不是线程切换
 
     并发：交替（任务（进程）数大于核数）；切换（保存现场，准备新环境等）是占用时间的
     并行：同时（多处理器或多核）<日常：听歌时聊天>
 
-    同步：任务依次完成
-    异步：任务可以暂停
-
   多进程：听歌和聊天，稳定
-  多线程：看电影（视频和音频两线程同时），内存消耗较少
+  多线程：看电影（视频和音频两线程同时），内存消耗较少、要加锁
   多进程＋多线程，更充分也更复杂
+  多进程+协程
 
   异步IO：单核-单进程，n核-n进程，充分利用IO
 
@@ -25,16 +26,19 @@
 共享全局变量（Lock）
 只能分配到多个cpu
 
-协程（一个线程）
+协程（微线程）
 单线程的异步编程模型
+
+前两是抢占式，后者是自己控制
 '''
 
 import os
-import multiprocessing as mt #进程模块
-import threading as td #线程模块
 import time
 import random
+import multiprocessing as mt #进程模块
+import threading as td #线程模块
 import subprocess #子进程模块
+import asyncio
 
 # 进程（资源分配的最小单位）
 
@@ -115,8 +119,8 @@ def queue_test():
 
 # 线程（执行的最小单元）
 # 理论上，n核cpu需要n个死循环线程才能跑满；
-# python历史问题，解释器自带有GIL锁，不能多线程并发，利用率只能是100%
-# 可以用多进程来并行
+# python历史问题，解释器自带有GIL锁，不能多线程实现多核任务，利用率只能是100%
+# 可以用多进程来实现多核任务
 # cpu核数：mt.cpu_count()
 
 def in_to():
@@ -166,6 +170,59 @@ def t2():
     c2.join()
     print(p)
 
+#协程
+# 不是线程切换，由程序自身控制
+
+# 消费者 一个generator
+def consumer():
+    r = ''
+    while 1:
+        n = yield r # 发送r的值（中断），赋值接收的n
+        if not n: #没有生产
+            return
+        print(f"Consumer consuming {n}")
+        r = "吃完了" 
+
+# 生产者
+def producer(c):
+    c.send(None) # 启动生成器；等效：next(c)
+    n = 0
+    while n<5:
+        n+=1
+        print(f"Producer producing {n}")
+        r = c.send(n) #发送n的值, 并next(c)，赋值接收的r
+        print(f"Consumer return: {r}")
+    c.close() # 不生产了，要关闭消费者
+    print("歇业...")
+
+def cp():
+    c = consumer()
+    print("开始")
+    producer(c) #开始
+    
+'''
+@asyncio.coroutine -> async
+yield from -> await
+'''
+
+async def hello(s):
+    print(f"hello {s}")
+    # 异步调用asyncio.sleep(1)
+    await asyncio.sleep(1)
+    print("Hello again")
+
+def hello_():
+    # 获取EventLoop
+    loop = asyncio.get_event_loop()
+
+    tasks = [hello(i) for i in ['A','B','C']]
+
+    # 执行coroutine
+    loop.run_until_complete(asyncio.wait(tasks))
+    
+    loop.close()
+
+
 #测试
 def process_():
     print(f"parent process ({os.getpid()})")
@@ -178,11 +235,34 @@ def thread_():
     print(f"Thread({td.current_thread().name})")
     t2() #加锁；同一时刻，一个进程有锁
 
+def gen_():
+    # cp()
+    hello_()
+
+
 p=100
 # lock = td.Lock() #创建锁
 local_x = td.local() #创建全局ThreadLocal对象
 # 常用在为每个线程绑定数据库连接，http请求等，方便处理函数访问这些资源
 
+def score_():
+    l1 = [92,72,83,78,70,87,62,80]
+    print(sum(l1)/(len(l1)))
+    l2 = [95,64,61,61,90,88,87,83,90,87]
+    print(sum(l2)/(len(l2)))
+    l3 = [96,72,61,69,71,70,63]
+    print(sum(l3)/(len(l3)))
+    l4 = [68,76,73,86,78,63,75,88,95]
+    print(sum(l4)/(len(l4)))
+    l5 = [85,88,65,94,64,60,87,91,62,78,85,67,90,95]
+    print(sum(l5)/(len(l5)))
+    l6 = [90,61,63,63,78,71,87,93,72,67]
+    print(sum(l6)/(len(l6)))
+
+    print(sum([78,80.6,71.7,78,79.3,74.5])/6)
+
+
 if __name__ == '__main__':
     # process_()
-    thread_()
+    # thread_()
+    gen_()
