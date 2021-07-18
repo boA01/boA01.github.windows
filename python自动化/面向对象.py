@@ -155,3 +155,13 @@ if __name__ == "__main__":
     # 测试多态
     def test_twice(o):
         o.test()
+
+        """
+        print(__file__) >>>面向对象.py
+        print(sys.argv)：获取命令行参数
+        
+        int main(int argc, char* argv[]){
+            while(argc-- > 1)
+                printf("%s\n",*++argv)
+        }
+        """
