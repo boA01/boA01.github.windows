@@ -25,7 +25,7 @@ class B_Mixln():
     def hehe(self):
         return "hehehe"
 
-class C(O, A_Mixln, B_Mixln): #print(F.__mro__)继承顺序：广度优先
+class C(O, A_Mixln, B_Mixln): #print(C.__mro__)继承顺序：广度优先
     name = "C_class" #类属性
     a = 0
     __solts__ = ("color") #可以绑定ip（继承的）和color
