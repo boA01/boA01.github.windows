@@ -102,7 +102,7 @@ def p_r(q):
 
 # 分配到多核
 def queue_test():
-    q=mt.Queue()
+    q=mt.Queue() # 队列；LifoQueue 栈；PriorityQueue 优先级队列
     pw = mt.Process(target=p_w, args=(q,))
     pr = mt.Process(target=p_r, args=(q,))
 
@@ -122,17 +122,17 @@ def queue_test():
 # 可以用多进程来实现多核任务
 # cpu核数：mt.cpu_count()
 
-def in_to():
-    print(f"Thread({td.current_thread().name})")
-    global p
-    # 获取当前线程关联的m
-    p+=local_x.m
+def process_student():
+    print(f"Thread({td.current_thread().name}) ++")
+    # 获取当前线程关联的student
+    std = local_x.student
+    print(std)
     pass
     
-def out_to():
-    print(f"Thread({td.current_thread().name})")
-    global p
-    p-=local_x.m
+def process_thread(name):
+    print(f"Thread({td.current_thread().name}) --")
+    local_x.student = name
+    process_student()
     pass
 
 def change_it(n):
@@ -143,15 +143,10 @@ def change_it(n):
 
 # Lock（降低了效率）
 def run_thread(n):
-    global p
-    # 绑定ThreadLocal的m
-    # local_x.m=n
     for i in range(2):
         #获取锁
         lock.acquire()
         try:
-            # in_to()
-            # out_to()
             change_it(n)
         finally:
             #释放锁
@@ -160,8 +155,8 @@ def run_thread(n):
 
 def t2():
     print(p)
-    c1 = td.Thread(target=run_thread,args=(2,))
-    c2 = td.Thread(target=run_thread,args=(8,))
+    c1 = td.Thread(target=run_thread,args=(2,), name="c1")
+    c2 = td.Thread(target=run_thread,args=(8,), name="c2")
 
     c1.start()
     c2.start()
@@ -240,8 +235,8 @@ def gen_():
 
 
 p=100
-lock = td.Lock() #创建锁
-local_x = td.local() #创建全局ThreadLocal对象
+lock = td.Lock() #创建锁（同步）
+local_x = td.local() #创建全局ThreadLocal对象（传输传递）
 # 常用在为每个线程绑定数据库连接，http请求等，方便处理函数访问这些资源
 
 # def score_():
