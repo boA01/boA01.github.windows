@@ -145,17 +145,17 @@ def change_it(n):
 def run_thread(n):
     global p
     # 绑定ThreadLocal的m
-    local_x.m=n
+    # local_x.m=n
     for i in range(2):
         #获取锁
-        # lock.acquire()
+        lock.acquire()
         try:
             # in_to()
             # out_to()
             change_it(n)
         finally:
             #释放锁
-            # lock.release()
+            lock.release()
             pass
 
 def t2():
@@ -232,7 +232,7 @@ def process_():
 def thread_():
     # current_thread()返回当前线程实例
     print(f"Thread({td.current_thread().name})")
-    t2() #加锁；同一时刻，一个进程有锁
+    t2() #加锁；同一时刻，一个线程有锁
 
 def gen_():
     # cp()
@@ -240,7 +240,7 @@ def gen_():
 
 
 p=100
-# lock = td.Lock() #创建锁
+lock = td.Lock() #创建锁
 local_x = td.local() #创建全局ThreadLocal对象
 # 常用在为每个线程绑定数据库连接，http请求等，方便处理函数访问这些资源
 
@@ -263,5 +263,5 @@ local_x = td.local() #创建全局ThreadLocal对象
 
 if __name__ == '__main__':
     # process_()
-    # thread_()
-    gen_()
+    thread_()
+    # gen_()
