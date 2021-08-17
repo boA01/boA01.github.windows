@@ -51,7 +51,6 @@ def fork_test():
         print("!!!")
         print('I (%s) just created a child process (%s).' % (os.getpid(), pid))
 
-
 def proc(name):
     print(f"chile process {name}({os.getpid()})")
     start_time = time.time()
@@ -245,21 +244,21 @@ p=100
 local_x = td.local() #创建全局ThreadLocal对象
 # 常用在为每个线程绑定数据库连接，http请求等，方便处理函数访问这些资源
 
-def score_():
-    l1 = [92,72,83,78,70,87,62,80]
-    print(sum(l1)/(len(l1)))
-    l2 = [95,64,61,61,90,88,87,83,90,87]
-    print(sum(l2)/(len(l2)))
-    l3 = [96,72,61,69,71,70,63]
-    print(sum(l3)/(len(l3)))
-    l4 = [68,76,73,86,78,63,75,88,95]
-    print(sum(l4)/(len(l4)))
-    l5 = [85,88,65,94,64,60,87,91,62,78,85,67,90,95]
-    print(sum(l5)/(len(l5)))
-    l6 = [90,61,63,63,78,71,87,93,72,67]
-    print(sum(l6)/(len(l6)))
+# def score_():
+#     l1 = [92,72,83,78,70,87,62,80]
+#     print(sum(l1)/(len(l1)))
+#     l2 = [95,64,61,61,90,88,87,83,90,87]
+#     print(sum(l2)/(len(l2)))
+#     l3 = [96,72,61,69,71,70,63]
+#     print(sum(l3)/(len(l3)))
+#     l4 = [68,76,73,86,78,63,75,88,95]
+#     print(sum(l4)/(len(l4)))
+#     l5 = [85,88,65,94,64,60,87,91,62,78,85,67,90,95]
+#     print(sum(l5)/(len(l5)))
+#     l6 = [90,61,63,63,78,71,87,93,72,67]
+#     print(sum(l6)/(len(l6)))
 
-    print(sum([78,80.6,71.7,78,79.3,74.5])/6)
+#     print(sum([78,80.6,71.7,78,79.3,74.5])/6)
 
 
 if __name__ == '__main__':
