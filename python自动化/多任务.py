@@ -6,6 +6,7 @@
     同步：任务依次完成  子程序（函数<线程>）层级调用，通过栈实现，是线程切换
     异步：任务可以中断  协程调用，由子程序自己控制，不是线程切换
 
+    串行：顺序
     并发：交替（任务（进程）数大于核数）；切换（保存现场，准备新环境等）是占用时间的
     并行：同时（多处理器或多核）<日常：听歌时聊天>
 
@@ -14,7 +15,7 @@
   多进程＋多线程，更充分也更复杂
   多进程+协程
 
-  异步IO：单核-单进程，n核-n进程，充分利用IO
+  异步IO：n核-n进程，充分利用IO
 
 进程（任务）
 资源分配的最小单位
@@ -49,7 +50,7 @@ def fork_test():
         print(f"子进程{os.getpid()} start!")
     else:
         print("!!!")
-        print('I (%s) just created a child process (%s).' % (os.getpid(), pid))
+        print('(%s) just created a 子进程(%s).' % (os.getpid(), pid))
 
 def proc(name):
     print(f"chile process {name}({os.getpid()})")
@@ -71,7 +72,7 @@ def mt_test():
     for i in range(4):
         po.apply_async(proc,args=(i,)) #异步创建进程
     print("waiting fo all subprocess done...")
-    po.close() #关闭进程池
+    po.close() #关闭进程池，>>>>关键<<<<
     po.join() #等待所有子进程
     print("Done!")
 
@@ -119,18 +120,19 @@ def queue_test():
 # 线程（执行的最小单元）
 # 理论上，n核cpu需要n个死循环线程才能跑满；
 # python历史问题，解释器自带有GIL锁，不能多线程实现多核任务，利用率只能是100%
+# GIL会根据字节码行数或时间片或io操作自动释放
 # 可以用多进程来实现多核任务
 # cpu核数：mt.cpu_count()
 
 def process_student():
-    print(f"Thread({td.current_thread().name}) ++")
+    print(f"Thread({td.current_thread().name})")
     # 获取当前线程关联的student
     std = local_x.student
     print(std)
     pass
     
 def process_thread(name):
-    print(f"Thread({td.current_thread().name}) --")
+    print(f"Thread({td.current_thread().name})")
     local_x.student = name
     process_student()
     pass
@@ -158,9 +160,10 @@ def t2():
     c1 = td.Thread(target=run_thread,args=(2,), name="c1")
     c2 = td.Thread(target=run_thread,args=(8,), name="c2")
 
+    # c1.setDaemon(True) # 设置守护线程，主线程退出，子线程直接结束
     c1.start()
     c2.start()
-    c1.join()
+    c1.join() #阻塞，等待子线程执行完成
     c2.join()
     print(p)
 
@@ -236,7 +239,7 @@ def gen_():
 
 p=100
 lock = td.Lock() #创建锁（同步）
-local_x = td.local() #创建全局ThreadLocal对象（传输传递）
+local_x = td.local() #创建全局ThreadLocal对象（参数传递）
 # 常用在为每个线程绑定数据库连接，http请求等，方便处理函数访问这些资源
 
 # def score_():
