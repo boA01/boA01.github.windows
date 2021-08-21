@@ -1,6 +1,7 @@
 import threading as td #线程模块
 from concurrent import futures
 import time
+import random
 
 class GetDetailHtml(td.Thread):
     def __init__(self, name):
@@ -34,7 +35,7 @@ def test1():
     print("end")
 
 
-############线程同步###############
+############线程同步(协同步调)###############
 # 通过互斥锁完成
 '''
 错误做法
@@ -164,6 +165,42 @@ def test6():
     b.start()
 
 
+# 线程通信
+#queue队列
+from queue import Queue
+q = Queue()
+
+#生产者
+def producer(name):
+    count = 1
+    while count<=10:
+        print(f"{name}正在生产第{count}个包子")
+        time.sleep(2)
+        q.put(count)
+        print("生产完成")
+        count+=1
+
+#消费者
+def consumer(name):
+    count = 1
+    while count<=11:
+        time.sleep(3.5)
+        if not q.empty():
+            print(f"{name}的包子来了")
+            q.get()
+            print("享用ing")
+        else:
+            print("生产ing，请稍等")
+        count+=1
+
+def test8():
+    p1 = td.Thread(target=producer, args=("p1",))
+    c1 = td.Thread(target=consumer,args=("c1",))
+
+    c1.start()
+    p1.start()
+
+
 # 信号量，semaphore 用于控制进入数量的锁
 # 文件，多个线程多一个文件
 class HtmlSpider(td.Thread):
@@ -198,7 +235,6 @@ def test4():
 # 主线程中可以获取某个线程的状态或者某个任务的状态，以及返回值
 # 当一个线程完成时，主线程立即知道
 # futures可以让多线程和多进程编码接口一致
-
 def get_html(times):
     time.sleep(times)
     print(f"got html text {times} success")
@@ -232,9 +268,50 @@ def test5():
         print(f"get {data} page")
     '''
 
+
+#定时器
+class Code():
+    def __init__(self):
+        self.make_cache()
+    
+    def make_cache(self, second=10):
+        self._cache = self.mark_code()
+        print(self._cache)
+
+        self._time = td.Timer(second, self.make_cache) #定时5s后重新生成验证码
+        self._time.start()
+    
+    def mark_cache_immediate(self):
+        self._cache = self.mark_code()
+        print(self._cache)
+
+    def mark_code(self,n=4):
+        res = ''
+        for i in range(n):
+            s1 = str(random.randint(0,9))
+            s2 = chr(random.randint(65,90))
+            res+=random.choice([s1,s2]) #随机取一个
+        return res
+    
+    def check(self):
+        while True:
+            inp = input(">>>").strip()
+            if inp == self._cache:
+                print("验证成功")
+                self._time.cancel() #取消定时器
+                break
+            else:
+                self.mark_cache_immediate()
+
+def test7():
+    c = Code()
+    c.check()
+
 if __name__=="__main__":
-    # test()
+    test1()
     # test3()
     # test4()
     # test5()
-    test6()
+    # test6()
+    # test7()
+    # test8()

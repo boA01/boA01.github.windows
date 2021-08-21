@@ -87,8 +87,7 @@ def subpre_test():
     print(output.decode("utf-8"))
     print(f"exit code: {po.returncode}")
 
-# 进程间通信（管道<queue，pipe，fifo>，消息队列，信号，共享内存，套接字<网络，UNIX域>）
-
+# 进程间通信（管道<pipe，fifo>，消息队列<queue>，信号，共享内存，套接字<网络，UNIX域>）
 def p_w(q):
     for i in ["A","B","C"]:
         print(f"Process({os.getpid()}) to write：{i}")
@@ -97,12 +96,13 @@ def p_w(q):
     pass
 
 def p_r(q):
-    while 1:
+    while True:
         print(f"Process({os.getpid()}) to read：{q.get()}")
     pass
 
 # 分配到多核
 def queue_test():
+    #创建子进程,不共享全局变量
     q=mt.Queue() # 队列；LifoQueue 栈；PriorityQueue 优先级队列
     pw = mt.Process(target=p_w, args=(q,))
     pr = mt.Process(target=p_r, args=(q,))
@@ -173,11 +173,11 @@ def t2():
 # 消费者 一个generator
 def consumer():
     r = ''
-    while 1:
+    while True:
         n = yield r # 发送r的值（中断），赋值接收的n
         if not n: #没有生产
             return
-        print(f"Consumer consuming {n}")
+        print(f"消费者享用：{n}")
         r = "吃完了" 
 
 # 生产者
@@ -186,7 +186,7 @@ def producer(c):
     n = 0
     while n<5:
         n+=1
-        print(f"Producer producing {n}")
+        print(f"生产者生产：{n}")
         r = c.send(n) #发送n的值, 并next(c)，赋值接收的r
         print(f"Consumer return: {r}")
     c.close() # 不生产了，要关闭消费者
@@ -202,21 +202,30 @@ def cp():
 yield from -> await
 '''
 
-async def hello(s):
-    print(f"hello {s}")
+# 协程函数
+async def hello(s,w):
+    print(f"hello {w}")
     # 异步调用asyncio.sleep(1)
-    await asyncio.sleep(1)
+    await asyncio.sleep(s)
     print("Hello again")
+
+async def hello_main():
+    # await hello(1,"A")
+    # await hello(2,"B")
+
+    await asyncio.gather(
+        hello(1,"A"),
+        hello(3,"B")
+    )
 
 def hello_():
     # 获取EventLoop
     loop = asyncio.get_event_loop()
 
-    tasks = [hello(i) for i in ['A','B','C']]
-
+    tasks = [hello(1,i) for i in ['A','B','C']]
     # 执行coroutine
     loop.run_until_complete(asyncio.wait(tasks))
-    
+
     loop.close()
 
 
@@ -234,7 +243,8 @@ def thread_():
 
 def gen_():
     # cp()
-    hello_()
+    # hello_()
+    asyncio.run(hello_main())
 
 
 p=100
@@ -261,5 +271,5 @@ local_x = td.local() #创建全局ThreadLocal对象（参数传递）
 
 if __name__ == '__main__':
     # process_()
-    thread_()
-    # gen_()
+    # thread_()
+    gen_()
