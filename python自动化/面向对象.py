@@ -139,12 +139,15 @@ class ListMetaclass(type):
 class MyList(list, metaclass=ListMetaclass):
     pass
 
+
+################动态内存交换
 '''
 c = C()
 isinstance(c,O) c是O类么
-hasattr(c,"id") c有id属性么
+hasattr(c,"id") c有id属性么 *******大用********
 setattr(c,"ip","xxx") 设置一个c的属性
 getattr(c,"sex",'404') 获取c的属性，没有默认返回404
+delattr(c,"name") 删除c的属性
 
 实例绑定属性
 c.ip = "xxx" 
@@ -160,6 +163,7 @@ c.get_ip = mt(get_ip,c)
 类绑定方法
 C.get_ip = get_ip
 '''
+
 if __name__ == "__main__":
     # 测试多态
     def test_twice(o):
