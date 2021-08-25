@@ -3,10 +3,6 @@ from fastapi.responses import JSONResponse, HTMLResponse, FileResponse, Redirect
 from fastapi.templating import Jinja2Templates #模板引擎
 from tortoise.contrib.fastapi import register_tortoise #将app与数据库绑定
 
-# from os.sys import path
-# path.append(path.abspath(__file__))
-# from dao.models import Todo
-
 app = FastAPI()
 template = Jinja2Templates("page")
 
@@ -64,4 +60,3 @@ def todo(content:str=Form(None)):
     # await  Todo(content=content).save()
 
     return RedirectResponse("/", status_code=302) #状态码：302->get请求 307->post请求
-
