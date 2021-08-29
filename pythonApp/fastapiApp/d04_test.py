@@ -1,7 +1,8 @@
-from fastapi import FastAPI, Query, Path, Body, Header #Query 参数验证，Path 路径验证
+from fastapi import FastAPI, Query, Path, Body, Header, Depends #Query 参数验证，Path 路径验证, Depends 依赖
 from enum import Enum # 枚举
 from pydantic import BaseModel, HttpUrl #模板
 from typing import List
+from fastapi.security import OAuth2PasswordBearer
 
 class Name(str,Enum): # 数据字典
     A = "嘿嘿嘿"
@@ -32,7 +33,7 @@ async def get_str(who:Name):
 async def create_item1(item:Item):
     return item.dict()
 
-# 更新
+# 规则
 @app.put("/items/{item_id}")
 async def create_item2(images:List[Image],
                         user_agent:str=Header(None),
@@ -55,9 +56,15 @@ async def create_item2(images:List[Image],
     # print(result)
     return result
 
+
+# 令牌
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+
+
 @app.get("/")
-async def main():
-    return "你好 FastAPI"
+async def main(token:str=Depends(oauth2_scheme)):
+    return {"token":token}
+
 
 # if __name__=="__main__":
     # import uvicorn

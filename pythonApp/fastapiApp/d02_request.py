@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, Header, Body, Path, Form #Query 参数验证，Path 路径验证
+from fastapi import FastAPI, File, UploadFile, Query, Header, Body, Path, Form #Query 参数验证，Path 路径验证
 from enum import Enum # 枚举
 from pydantic import BaseModel, HttpUrl #模板
 from typing import List
@@ -40,6 +40,14 @@ def login_json(data=Body(None)):
 def login_form(userName=Form(None), userPwd=Form(None)):
     return {"data":{"name":userName,"passwd":userPwd}}
 
+#             接收字文件，两种形式
+@app.post("/upload_file")
+def upload_file(file:bytes=File(...), fileb:UploadFile=File(...)):
+    return {
+        "file_size":len(file),
+        "fileb_content_type":fileb.content_type
+    }
+
 """
 OPTIONS：返回特点资源所支持的请求方法
 HEAD：索要和get一致的响应，响应体不返回
@@ -60,12 +68,7 @@ async def get_str(who:Name):
         return f"你好 哈哈哈"
     return f"你好 憨憨"
 
-# 接收item对象
-@app.post("/items")
-async def create_item1(item:Item):
-    return item.dict()
-
-# 更新
+# 规则
 @app.put("/items/{item_id}")
 async def create_item2(images:List[Image],
                         user_agent:str=Header(None),
