@@ -60,10 +60,18 @@ async def create_item2(images:List[Image],
 # 令牌
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
+class User(BaseMode):
+    name:str
+    pwd:str 
+    disabled:bool=None
+
+async def get_access_user(token:str=Depends(oauth2_scheme)):
+    user = User(name=token+"xxx", pwd="123")
+    return user
 
 @app.get("/")
-async def main(token:str=Depends(oauth2_scheme)):
-    return {"token":token}
+async def main(current_user:User=Depends(get_access_user)):
+    return current_user
 
 
 # if __name__=="__main__":
