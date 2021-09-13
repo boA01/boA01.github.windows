@@ -5,7 +5,7 @@
 
 def f():
     l1 = (i for i in range(10))
-    l2 = iter([i for i in range(10)])
+    l2 = iter([i if i&2 else -i for i in range(10) if i>2])
 
 def fib(max):
     n, a, b = 0, 1, 0
