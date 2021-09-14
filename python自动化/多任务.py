@@ -242,9 +242,9 @@ def thread_():
     t2() #加锁；同一时刻，一个线程有锁
 
 def gen_():
-    # cp()
+    cp()
     # hello_()
-    asyncio.run(hello_main())
+    # asyncio.run(hello_main())
 
 
 p=100

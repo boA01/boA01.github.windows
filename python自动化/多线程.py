@@ -202,7 +202,7 @@ def test8():
 
 
 # 信号量，semaphore 用于控制进入数量的锁
-# 文件，多个线程多一个文件
+# 文件，多个线程一个文件
 class HtmlSpider(td.Thread):
     def __init__(self, url, sem):
         super().__init__()

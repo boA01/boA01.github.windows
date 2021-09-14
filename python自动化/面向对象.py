@@ -2,14 +2,13 @@ class O():
     name = "D_class" # 类属性
     __solts__ = ("ip") #槽，限制当前类实例绑定的属性，子类不影响
 
-    
     @staticmethod
-    def static_get(): #静态方法
+    def static_get(): #静态方法——类中的函数
         print("静态方法")
 
     @classmethod
     def class_get(cls): #类方法，不能访问实例属性
-        print(cls.name)
+        print(cls.name) #访问类属性
 
     def __init__(self, id):
         self.id = id # 实例属性
@@ -104,6 +103,17 @@ class C(O, A_Mixln, B_Mixln): #print(C.__mro__)继承顺序：广度优先
     
     # __setitem()__, __delitem__()
 
+    # 上下文管理器
+    def __enter__(self):
+        print("int __enter__")
+    def __exit__(self, exception_type, exception_value, traceback):
+        print("int __exit__")
+        if exception_type is None:
+            print("[in __exit__] Exited without exception")
+        else:
+            print("[in __exit__] Exited with exception: %s" % exception_value)
+            return False
+            
     # 调用不存在的属性或方法时被调用 s.qq s.qq()
     def __getattr__(self, attr):
         if attr == "qq":
