@@ -1,25 +1,25 @@
 class O():
     name = "D_class" # 类属性
-    __solts__ = ("ip") #槽，限制当前类实例绑定的属性，子类不影响
+    __solts__ = ("ip") # 槽，限制当前类实例绑定的属性，子类不影响
 
     @staticmethod
-    def static_get(): #静态方法——类中的函数
+    def static_get(): # 静态方法——类中的函数
         print("静态方法")
 
     @classmethod
-    def class_get(cls): #类方法，不能访问实例属性
-        print(cls.name) #访问类属性
+    def class_get(cls): # 类方法，不能访问实例属性
+        print(cls.name) # 访问类属性
 
     def __init__(self, id):
         self.id = id # 实例属性
     
-    def test(self):
+    def test(self): #实例方法，类名不可直接调用
         print("O test")
 
     def __len__(self): #len(o) == o.len()
         return 10
     
-    def __str__(self): #实例方法，类名不可直接调用
+    def __str__(self):
         return f"id:{self.id}"
 
 class A_Mixln():
