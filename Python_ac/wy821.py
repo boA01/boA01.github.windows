@@ -103,4 +103,52 @@ def fn6():
             pass
     print(max(res))
     '''
-fn6()
+# fn6()
+
+# 他们围成一圈，年龄高的小孩要比临近他的小孩
+# 多给纸张，求最少要给这些小孩多少纸张
+def fn7():
+    arr = list(map(int,input().split()))
+    arr1 = sorted(set(arr))
+    n = 1
+    m = 0
+
+    for i in arr1:
+        m += arr.count(i)*n
+        n+=1
+    print(m)
+# fn7()
+
+# abcxyz
+def fn8():          
+    arr = input()
+    s = ''
+    arr1 = [0]
+
+    for i in range(len(arr)):
+        if (ii:=arr[i]) in s: # 之后的个数
+            n = arr[i:].count(ii)
+            if n>1 and n&1==0: # 偶数个
+                arr1.append(arr.rindex(ii)+1-i)
+            elif n>2: # 奇数个
+                # print(ii, arr.rindex(ii))
+                # print(arr[i:arr.rindex(ii)].rindex(ii))
+                arr1.append(arr[i:arr.rindex(ii)].rindex(ii)+1-i)
+
+    print(max(arr1))
+
+# 0表示水，1表示陆地，2表示障碍物
+# 走水路要花2钱，走陆地要花1钱，障碍物没法走
+# 求从左上角，到右下角要花的最少的钱，如果走不过去，
+# 那么就返回-1
+def fn9():
+    arr = [[1,1,1,1,0],[0,1,0,1,0],[1,1,2,1,1],[0,2,0,0,1]]
+    for i in arr:
+        try:
+            print(arr[][1])
+            # print(arr[0].index(0))
+            # print(arr[][1].index(0))
+        except:
+            print("bc")
+
+fn9()
