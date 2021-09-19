@@ -58,7 +58,7 @@ class C(O, A_Mixln, B_Mixln): #print(C.__mro__)继承顺序：广度优先
     def p(self):
         print("O->C")
 
-    @property #getter方法变属性（只读）
+    @property #变属性，getter方法（只读）
     def sex(self):
         return self._sex
     

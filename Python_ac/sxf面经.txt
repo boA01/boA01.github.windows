@@ -33,12 +33,64 @@ for i in Counter(arr).items()
 
 3 装饰器解释  写一个运行时间装饰器 实现输出函数参数
 import time
-def dicter(fn):
-    def warrper(*args, **kwargs):
-        start = time.click()
-        fn()
-        end = time.click()
-    return warrper
+def decorator_args(d1=1): #接收装饰器参数
+    def decorator(fn):
+        def wrapper(*args, **kwargs):
+            print(d1, d2) #打印装饰器参数
+            print(args, kwargs) #打印方法参数
+            start = time.time()
+            fn(args, kwargs) #调用方法
+            end = time.time()
+            print(f"{fn.__name__} used: {end-start}")
+        return wrapper
+    return decorator
+
+@decorator_args(2)
+def fn1():.....
+作用域：L(local：局部作用域)，E(nolocal：嵌套作用域)，
+       G(global：全局作用域)，B(build：内建)
+@staticmethod 静态方法
+@classmethod 类方法
+@property getter方法（只读）
+
+单例模式
+def dl(cls):
+    def dl_wrapper(*args, **kwargs):
+        # 如果没有实例
+        if not dl_wrapper.instance():
+            # 创建实例（类装饰器作用于__init__()）
+            dl_wrapper.instance = cls(args, kwargs)
+            return dl_wrapper.instance
+    dl_wrapper.instance = None
+    return dl_wrapper
+@dl
+class MyClass():
+    f = True 
+    __new__(cls ):
+        f = False
+    __init__(self, x, y):
+        if f == True:
+            self.x = x 
+            self.y = y 
+类装饰器
+class logger():
+    def __init__(self, fn): #接收方法
+        self.fn = fn 
+    def __call__(self, *args, **kwargs): #实现逻辑
+        return self.fn(args, kwargs)
+
+class logger():
+    def __init__(self, y=2): #接收装饰器参数
+        self.y = y
+    def __call__(self, func): #接收方法
+        def wrapper(*args, **kwargs): #实现逻辑
+            return self.fn(args, kwargs)
+        return wrapper
+
+#@logger
+@logger(3)
+def fn2():....
+
 
 4 import之类的知识点。 做错了 
 import *
