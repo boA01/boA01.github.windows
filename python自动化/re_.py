@@ -16,8 +16,12 @@ $ 结尾
 ? 0或1个
 +? 防止贪婪
 
-re.match("rule", s)
-re.split("rule", s)
+re.match("rule", s) #从头匹配一个符合规则的字符串
+re.split("rule", s) #扫描整个string找到第一个匹配然后返回
+.group() 返回被 RE 匹配的字符串
+.start() 返回匹配开始的位置
+.end() 返回匹配结束的位置
+.span()返回一个元组包含匹配 (开始,结束) 的位置
 '''
 
 def pd(s):
