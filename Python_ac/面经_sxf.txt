@@ -26,7 +26,7 @@ for i in range(1,len(arr)):
         x = arr1[i]
 方法二：
 for i in set(arr):
-    print(i,arr1.rindex(i)-arr1.index(i))
+    print(i,arr1.rindex(i)-arr1.index(i)+1)
 方法三：
 from collection import Counter
 for i in Counter(arr).items()
@@ -420,11 +420,6 @@ class C():
         if not _isinit: #是否被构造
             cls._isnew = super.__new__(cls)
         return cls._isnew #返回对象
-    def __init__(self, x):
-        cls = type(self)
-        if not cls._isinit: # 是否被初始化
-            self.x = x
-            self._isinit = True
 
 8、场景题：设计服务器，服务器只开了一个端口，但要在一分钟
 内处理上万的请求，用Python该处理这种上万级的请求

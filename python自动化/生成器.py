@@ -19,17 +19,17 @@ def yanghuisanjiao():
     l = [1]
     while 1:
         i=1
-        temp = l[:]
-        while i<len(l):
+        temp = l[:] #深拷贝
+        while i<len(l): #2
             l[i]=temp[i-1]+temp[i]
             i+=1
-        yield(l[:])
-        l.append(0)
+        yield(l)
+        l.append(0) #关键点
 
 if __name__ == "__main__":
     # for i in fib(8):
         # print(i)
     yh = yanghuisanjiao()
-    for i in range(3):
+    for i in range(4):
         print(next(yh))
 
