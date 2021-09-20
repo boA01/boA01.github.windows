@@ -479,3 +479,80 @@ FastAPI是为了快速API而生的，快速，高效。与NodeJS和Go可以相�
 列表：[]，可变
 
 10.手撕快排，并解释
+# 按基准值，左大右小摆放，分而治之
+def quick_sort(arr):
+    if len(arr)>1: #递归入口
+        mid = arr[0] #基值
+        l, r = [], []
+        arr.remove(mid)
+        for i in arr:
+            if i>mid:
+                r.append(i) #大于基准值放右边
+            else:
+                l.append(i) #小于基准值放左边
+        return quick_sort(l) + [mid] + quick_sort(r)
+    else:
+        return arr
+
+
+Python垃圾回收机制，内存机制？
+引用计数（sys.getrefcount()-1）为主，
+标记清除(解决交叉引用)和分代回收(解决前者效率问题，gc.collect()可触发)为辅
+内存管理机制为Pymalloc（内存池（如小整数池））
+import psutil
+
+arr = [1,0,3,1,52,3,0]
+
+#本位与后面位比较，确定本位
+def select_sort(arr):
+    for i in range(len(arr)-1,0,-1):
+        for j in range(i):
+            if arr[i]<arr[j]:
+                arr[i],arr[j]=arr[j],arr[i]
+    return arr
+# 两两比较，确定末位
+def bubble_sort(arr):
+    for i in range(len(arr)-1, 1, -1):
+        flag = True
+        for j in range(i):
+            if arr[j] > arr[j+1]:
+                arr[j], arr[j+1]=arr[j+1], arr[j]
+                flag = False
+        if flag:
+            break
+    return arr
+
+# 按基准值，左大右小摆放，分而治之
+def quick_sort(arr):
+    if len(arr)>1: #递归入口
+        mid = arr[0] #基值
+        l, r = [], []
+        arr.remove(mid)
+        for i in arr:
+            if i>mid:
+                r.append(i) #大于基准值放右边
+            else:
+                l.append(i) #小于基准值放左边
+        return quick_sort(l) + [mid] + quick_sort(r)
+    else:
+        return arr
+
+#
+def insertion_sort(arr):
+    # 从数据第二个元素开始循环，直到最后一个元素
+    for i in range(1, len(arr)):
+        # 这个是我们想要放在正确位置的元素
+        key_item = arr[i]
+        # 初始化变量，用于寻找元素正确位置
+        j = i - 1
+        # 遍历元素左边的列表元素，一旦key_item比被比较元素小，那么找到正确位置插入。
+        while j >= 0 and arr[j] > key_item:
+            # 把被检测元素向左平移一个位置，并将j指向下一个元素（从右向左）
+            arr[j + 1] = array[j]
+            j -= 1
+        # 当完成元素位置的变换，把key_item放在正确的位置上
+        arr[j + 1] = key_item
+    return arr
+if __name__ == '__main__':
+    # print(bubble_sort(arr))
+    print(quick_sort(arr))
