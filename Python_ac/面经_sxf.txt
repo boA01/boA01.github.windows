@@ -90,22 +90,6 @@ def dl(cls):
 class C1():
     .....
 
-class MyClass():
-    _instance = None
-    _isinit = False
-
-    def __new__(cls, *args, **kwargs):
-        if not _instance:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
-    def __init__(self, x, y):
-        cls = type(self)
-        if not _isinit:
-            self.x = x 
-            self.y = y
-            cls.flag = True
-
 4 import之类的知识点。 做错了 
 import *
 from _ import _
@@ -551,3 +535,27 @@ def insertion_sort(arr):
 if __name__ == '__main__':
     # print(bubble_sort(arr))
     print(quick_sort(arr))
+
+# 单例模型
+#__new__()
+class Singletion():
+    def __new__(cls, *args, **kw):
+        if not hasttr(cls, "_instance"): #查是否存在_intance
+            cls._instance = super.__new__(cls)
+        return cls._instance
+
+class MyClass():
+    _instance = None
+    _isinit = False
+
+    def __new__(cls, *args, **kwargs):
+        if not _instance:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self, x, y):
+        cls = type(self)
+        if not _isinit:
+            self.x = x
+            self.y = y
+            cls.flag = True
