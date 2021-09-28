@@ -17,7 +17,6 @@ class SingleLink():
 
     '''
     长度
-    遍历一遍，返回计数变量
     '''
     def lenth(self):
         cur = self._head
@@ -60,7 +59,7 @@ class SingleLink():
     '''
     直插法
     '''
-    def insert(self, item, pos):
+    def insert(self, pos, item):
         if pos > self.lenth() or pos < 0:
             print("下标错误")
         elif pos == 0:

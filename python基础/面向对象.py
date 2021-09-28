@@ -44,7 +44,7 @@ class C(O, A_Mixln, B_Mixln): #print(C.__mro__)继承顺序：广度优先
     __solts__ = ("color") #可以绑定ip（继承的）和color
     
     def __init__(self, name=None, age=None, id=None, path=None):
-        O.__init__(id) 
+        O.__init__(id) #多继承调用父方法；单继承：super().__init__(id)
         self._name = name #实例属性, _"保护"
         self.__age = age #实例属性, __私有；类外访问：c._C__age
         self.__path = path
@@ -148,6 +148,7 @@ def fn(self, name="world"):
 
 Hello = type("Hello",(object,),dict(hello=fn))
 
+
 # metaclass(元类)创建或魔改类,必须从type派生
 # cls：当前类，name：类名，bases：父类集合，attrs：方法集合
 class ListMetaclass(type):
@@ -158,6 +159,31 @@ class ListMetaclass(type):
 # metaclass：关键字，指：用ListMeatclass.__new__()来创建
 class MyList(list, metaclass=ListMetaclass):
     pass
+
+
+# 单例模型
+#__new__()
+class Singletion():
+    def __new__(cls, *args, **kw):
+        if not hasattr(cls, "_instance"): #查是否存在_intance
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+class MyClass():
+    _instance = None
+    _isinit = False
+
+    def __new__(cls, *args, **kwargs):
+        if not _instance:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self, x, y):
+        cls = type(self)
+        if not _isinit:
+            self.x = x
+            self.y = y
+            cls.flag = True
 
 
 ################动态内存交换

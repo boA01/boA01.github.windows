@@ -540,7 +540,7 @@ if __name__ == '__main__':
 class Singletion():
     def __new__(cls, *args, **kw):
         if not hasattr(cls, "_instance"): #查是否存在_intance
-            cls._instance = super.__new__(cls)
+            cls._instance = super().__new__(cls)
         return cls._instance
 
 class MyClass():

@@ -11,7 +11,7 @@ widget组合起来就是一棵树。
 class Application(Frame):
     def __init__(self, master=None):
         Frame.__init__(self,master)
-        #pack()把widget加到容器中，并实现布局，grid()可以实现更复杂的布局
+        #pack()把widget加到容器中，并实现布局；grid()可以实现更复杂的布局
         # self.pack()
         self.grid()
         self.createWidgets()
