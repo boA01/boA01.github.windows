@@ -21,7 +21,6 @@ def test():
 
     tm.sleep(2) #父进程等待子进程结束
 
-
 def music():
     print('music', os.getpid())
     for i in range(5):
@@ -48,12 +47,12 @@ def test1():
     print("玩....",play_process.pid)
     print("音乐", music_process.pid)
 
-
 # 进程间通信：管道<pipe，fifo>，消息队列<queue>，信号，数据共享<meanager>，套接字<网络，UNIX域>
 #队列(Queue)
 def foo(q):
     tm.sleep(1)
     print("子进程")
+    # q.full() # 是否满了
     q.put(123)
     q.put("hello")
 
@@ -62,8 +61,10 @@ def test3():
     p = mt.Process(target = foo,args=(q,))
     p.start()
     print("主进程")
+    # q.empty() 是否空了
     print(q.get())
     print(q.get())
+    
 
 #管道(pipe，只能用于两个进程间通信，性能较高)
 def child(c_conn):
@@ -132,7 +133,6 @@ def test5():
     print(l)
     print("end")
 
-
 ############进程同步(协同步调，读写)###############
 def fun(lock,l,i):
     with lock:
@@ -154,7 +154,6 @@ def test6():
     tm.sleep(7)
     print(f"结果：{l}")
 
-
 # 进程池（共享数据用manager修饰）
 def run(n):
         tm.sleep(n)
@@ -166,8 +165,8 @@ def test2():
 
     # result = pool.apply_async(run,args=(3)) #异步提交
     # pool.close() #！！！！重点，满了就关闭进程池！！！！！
-    # pool.join() #等待所有进程完成
-    # print(result.get()) #得到返回值
+    # pool.join() # 等待所有进程完成
+    # print(result.get()) # 得到返回值
 
     #imap() #按可迭代对象输入顺序
     # for result in pool.imap(run, [1,3,2]):
@@ -176,7 +175,6 @@ def test2():
     #imap_unordered() #按结束时间顺序
     for result in pool.imap_unordered(run, [1,3,2]):
         print(f"sleep {result} sucess")
-
 
 if __name__ == "__main__":
     # test()

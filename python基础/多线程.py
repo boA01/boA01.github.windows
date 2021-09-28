@@ -76,7 +76,7 @@ def test2():
     xiaoai.start()
 '''
 
-# 通过condition完成同步
+# 通过condition（条件锁）完成同步
 class XiaoAi(td.Thread):
     def __init__(self, cond):
         super().__init__(name="小爱")
@@ -127,7 +127,7 @@ def test3():
     tianmao.start()
 
 
-#event同步对象
+#event（事件锁）同步对象
 class Boss(td.Thread):
     def __init__(self,event):
         super().__init__()
@@ -306,6 +306,30 @@ class Code():
 def test7():
     c = Code()
     c.check()
+
+
+import socket as sk
+
+def recv_msg(udp_socket):
+    while True:
+        recv_data = udp_socket.recvfrom(1024).decode("utf-8")
+        print(">>>",recv_data)
+def send_msg(udp_socket, dest_ip, dest_port):
+    while True:
+        send_data = input("<<<").encode("utf-8")
+        udp_socket.sendto(send_data, (dest_ip, dest_port))
+def didi():
+    # 1、建立udp套接字对象
+    udp_socket = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
+    # 2、绑定本地信息
+    udp_socket.bind(("", 8080))
+    # 3、获取对方ip，port
+    dest_ip, dest_port = input("ip:port ").split(":")
+    # 4、开启两线程
+    t_recv = td.Thread(target=recv_msg, args=(udp_socket,))
+    t_send = td.Thread(target=send_msg, args=(udp_socket, dest_ip, int(dest_port)))
+    t_recv.start()
+    t_recv.start()
 
 if __name__=="__main__":
     test1()

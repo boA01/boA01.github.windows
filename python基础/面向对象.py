@@ -138,6 +138,11 @@ class C(O, A_Mixln, B_Mixln): #print(C.__mro__)继承顺序：广度优先
         # return C('%s/%s' % (self.__path, path))
 
 # type()动态创建类，class就是调用type()
+'''
+type，既是一个类，也是一个对象，可以自身实例化
+object是顶层基类，由type实例化
+所以一切皆对象
+'''
 def fn(self, name="world"):
     print(f"hello {name}")
 

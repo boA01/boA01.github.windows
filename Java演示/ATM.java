@@ -43,14 +43,15 @@ public class ATM {
         p.setStatus(0);
     }
 
-     private void addUser(People user) {
-         if(this.n<this.N){
-             this.users[this.n] = new People();
-             this.users[this.n] = user;
-         }
-         else
-             System.out.println("is Full!!!");
-     }
+    private void addUser(People user) {
+        if(this.n<this.N){
+            this.users[this.n] = new People();
+            this.users[this.n] = user;
+        }
+        else
+            System.out.println("is Full!!!");
+    }
+    
     public void addOperate(People p, float f){
         p.setMoney(p.getMoney()+f);
     }
