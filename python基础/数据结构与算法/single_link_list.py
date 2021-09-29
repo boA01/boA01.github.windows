@@ -79,6 +79,7 @@ class SingleLink():
         cur = self._head
         if cur == None:
             return
+        # 删除首结点
         elif cur.data == item:
             self._head = cur.next
             return
