@@ -36,9 +36,9 @@ def gen1(n):
     yield from gen(n)
 
 
-def gen2_1(l):
-    for i in l:
+def gen2_1():
+    for i in range(3):
         yield i
 
 def gen2_2(l):
-    yield from l
+    yield from range(3)

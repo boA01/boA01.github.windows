@@ -249,7 +249,7 @@ def test5():
 
     print(task1.done()) #任务是否完成
     print(task1.result()) #任务的return
-    print(task2.cancel()) #取消任务（成功，运行中不能）
+    print(task2.cancel()) #取消任务（成功或运行中不能取消）
     '''
 
     urls = [2,1,3,4]
@@ -310,14 +310,19 @@ def test7():
 
 import socket as sk
 
+# 监听方
 def recv_msg(udp_socket):
     while True:
-        recv_data = udp_socket.recvfrom(1024).decode("utf-8")
-        print(">>>",recv_data)
+        # recv_data = udp_socket.recvfrom(1024) #方便udp，类似tcp的(recv(), accept())
+        recv_data = udp_socket.recv(1024)
+        print(">>>",recv_data.decode("utf-8"))
+
+# 发送发
 def send_msg(udp_socket, dest_ip, dest_port):
     while True:
         send_data = input("<<<").encode("utf-8")
         udp_socket.sendto(send_data, (dest_ip, dest_port))
+
 def didi():
     # 1、建立udp套接字对象
     udp_socket = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
@@ -329,13 +334,14 @@ def didi():
     t_recv = td.Thread(target=recv_msg, args=(udp_socket,))
     t_send = td.Thread(target=send_msg, args=(udp_socket, dest_ip, int(dest_port)))
     t_recv.start()
-    t_recv.start()
+    t_send.start()
 
 if __name__=="__main__":
-    test1()
+    # test1()
     # test3()
     # test4()
     # test5()
     # test6()
     # test7()
     # test8()
+    didi()

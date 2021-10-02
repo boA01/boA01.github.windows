@@ -68,7 +68,7 @@ class C(O, A_Mixln, B_Mixln): #print(C.__mro__)继承顺序：广度优先
         return self._sex
     
     @sex.setter #变setter方法（可写）
-    def sex(self,value):
+    def sex(self, value):
         if not (value=="男" or "女"):
             raise ValueError("error")
         self._sex=value
@@ -76,6 +76,24 @@ class C(O, A_Mixln, B_Mixln): #print(C.__mro__)继承顺序：广度优先
     @property #只读属性
     def birth(self):
         return 2021 - self.__age;
+
+    # 调用不存在的属性或方法时被调用 s.qq s.qq()
+    def __getattr__(self, attr):
+        if attr == "qq":
+            return "66666666" # return lambda:"666"
+        return f"no extis {attr}"
+
+    def __str__(self):
+        return super().__str__()+f" naem:{self._name} age:{self.__age}"
+
+    __repr__ = __str__ 
+    #让c 和 print(c)一样打印字符串；
+    #前者为了调试，是开发者看见的，后者用户看见的
+
+    # 实例本身调用，c()
+    def __call__(self,path=None):
+        print(f"{self.__class__.__name__}")
+        # return C('%s/%s' % (self.__path, path))
 
     # 可迭代
     def __iter__(self):
@@ -118,24 +136,7 @@ class C(O, A_Mixln, B_Mixln): #print(C.__mro__)继承顺序：广度优先
         else:
             print("[in __exit__] Exited with exception: %s" % exception_value)
             return False
-            
-    # 调用不存在的属性或方法时被调用 s.qq s.qq()
-    def __getattr__(self, attr):
-        if attr == "qq":
-            return "66666666" # return lambda:"666"
-        return f"no extis {attr}"
 
-    def __str__(self):
-        return super().__str__()+f" naem:{self._name} age:{self.__age}"
-
-    __repr__ = __str__ 
-    #让c 和 print(c)一样打印字符串；
-    #前者为了调试，是开发者看见的，后者用户看见的
-
-    # 实例本身调用，c()
-    def __call__(self,path=None):
-        print(f"{self.__class__.__name__}")
-        # return C('%s/%s' % (self.__path, path))
 
 # type()动态创建类，class就是调用type()
 '''

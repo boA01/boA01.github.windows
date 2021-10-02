@@ -10,3 +10,14 @@ print(int("1000", 2))
 print(int("12", 8))
 print(int("f", 16))
 print(int('11', 6))
+
+# 转换函数
+def n2N(n=4, arr='0123'):
+    l = len(arr)
+    arr1 = []
+
+    while n>0:
+        arr1.append(arr[n%l])
+        n = n//l
+
+    return ''.join(arr1.reverse())
