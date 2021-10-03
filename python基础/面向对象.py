@@ -139,21 +139,22 @@ class C(O, A_Mixln, B_Mixln): #print(C.__mro__)继承顺序：广度优先
 
 
 # type()动态创建类，class就是调用type()
-'''
-type，既是一个类，也是一个对象，可以自身实例化
-object是顶层基类，由type实例化
-所以一切皆对象
-'''
 def fn(self, name="world"):
     print(f"hello {name}")
 
 Hello = type("Hello",(object,),dict(hello=fn))
 
+'''
+type，既是一个类（元类），也是一个对象，可以自身实例化
+object是顶层基类，由type实例化
+所以一切皆对象
+'''
 
-# metaclass(元类)创建或魔改类,必须从type派生
-# cls：当前类，name：类名，bases：父类集合，attrs：方法集合
+#################### metaclass(元类)创建或魔改类
+# 必须从type派生
 class ListMetaclass(type):
     def __new__(cls,name,bases,attrs):
+        # cls：当前类，name：类名，bases：父类集合，attrs：方法集合
         attrs["add"] = lambda self, value:self.append(value)
         return type.__new__(cls,name,bases,attrs)
 
