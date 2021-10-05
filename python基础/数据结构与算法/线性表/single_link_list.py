@@ -1,8 +1,8 @@
 # 结点
 class Node():
-    def __init__(self, data, next=None):
+    def __init__(self, data):
         self.data = data
-        self.next = next
+        self.next = None
 
 # 链表
 class SingleLink():

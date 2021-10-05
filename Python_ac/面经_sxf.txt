@@ -543,24 +543,31 @@ if __name__ == '__main__':
 
 # 单例模型
 #__new__()
-class Singletion():
-    def __new__(cls, *args, **kw):
-        if not hasattr(cls, "_instance"): #查是否存在_intance
+class Single():
+    def __new__(cls):
+        if not hasattr(cls, "_instance"):
             cls._instance = super().__new__(cls)
         return cls._instance
 
-class MyClass():
-    _instance = None
-    _isinit = False
+# 工厂模式
+class Dog():
+    def __init__(self, *args, **kwargs):
+        pass
+class Cat():
+    def __init__(self, *args, **kwargs):
+        pass
 
-    def __new__(cls, *args, **kwargs):
-        if not _instance:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+def fac(animal):
+    if animal.lower()=='dog':
+        return Dog()
+    elif animal.lower()=='cat':
+        return Cat()
+    else:
+        print("工厂没模具")
 
-    def __init__(self, x, y):
-        cls = type(self)
-        if not _isinit:
-            self.x = x
-            self.y = y
-            cls.flag = True
+# 构造模式
+
+# 接口模式
+
+# 装饰器模式
+

@@ -1,10 +1,10 @@
 from single_link_list import SingleLink
 
 class Node():
-    def __init__(self, data, last=None, next=None):
+    def __init__(self, data):
         self.data = data
-        self.last = last
-        self.next = next
+        self.last = None
+        self.next = None
 
 class DoubleLink(SingleLink):
     def add(self, item):
