@@ -20,13 +20,13 @@ class Image(BaseModel):
 
 #             获取url参数
 # http://127.0.0.1:8000/user1/666
-@app.get("/user/{id}")
+@app.get("/user1/{id}")
 def get_user1(id):
     return {"id":id}
 
 #             接收请求头数据
 # http://127.0.0.1:8000/user2?id=666
-@app.get("/user")
+@app.get("/user2")
 def get_user2(id,token=Header(None)):
     return {"id":id, "token":token}
     
@@ -88,7 +88,6 @@ async def create_item2(images:List[Image],
         result.update({"pwd":passwd})
     if hobbyList:
         result.update({"hobbyList":hobbyList})
-    # print(result)
     return result
 
 

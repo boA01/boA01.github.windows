@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <link rel="shortcut icon" href="#">
+</head>
+<body>
+    <div style="width: 240px; margin:10% auto">
+        <img src="{{ url_for('static',path='/AC.png') }}" style="width: 240px;height: 100px">
+
+        <form action="/login" enctype="application/form-data" method="POST">
+            <input name="u_name" type="text"><br>
+            <input name="u_pwd" type="password">
+            <input type="submit" value="登录">
+        </form>
+    </div>
+</body>
+</html>
