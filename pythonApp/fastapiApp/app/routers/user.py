@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from fastapi import  Depends,HTTPException
 from models.crud import *
 from models.database import *
+
 usersRouter=APIRouter()
 
 def get_db():
@@ -19,6 +20,10 @@ def get_db():
 # 新建用户
 @usersRouter.post("/users/", tags=["users"], response_model=Users)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    """
+        - **email**: 用户的邮箱
+        - **password**: 用户密码
+    """
     db_crest = get_user_emai(db, user.email)
     if not db_crest:
         return db_create_user(db=db, user=user)

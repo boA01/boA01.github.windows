@@ -3,7 +3,7 @@
 '''
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
-from models.database import Base
+from models.database import Base, engine
 
 class User(Base):
     __tablename__ = "users"
@@ -20,3 +20,5 @@ class Item(Base):
     description = Column(String, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="items")
+
+Base.metadata.create_all(bind=engine)
