@@ -47,14 +47,14 @@ class Tree():
         '''深度优先：dfs'''
         if self.root is None:
             return
-        queue = [self.root]
-        while queue:
-            cur_node = queue.pop()
+        stack = [self.root]
+        while stack:
+            cur_node = stack.pop()
             print(cur_node.data, end=' ')
             if cur_node.rchild:
-                queue.append(cur_node.rchild)
+                stack.append(cur_node.rchild)
             if cur_node.lchild:
-                queue.append(cur_node.lchild)
+                stack.append(cur_node.lchild)
 
     def preorder(self, node):
         '''先序遍历'''
