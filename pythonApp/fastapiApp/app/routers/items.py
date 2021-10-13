@@ -3,7 +3,7 @@ from fastapi import  Depends
 from models.crud import *
 from models.database import *
 
-itemsRouter=APIRouter()
+itemsRouter = APIRouter()
 
 def get_db():
     """

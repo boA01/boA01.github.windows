@@ -20,6 +20,7 @@ def db_create_user(db: Session, user: UserCreate):
     db.commit()  # 提交保存到数据库中
     db.refresh(db_user)  # 刷新
     return db_user
+    
 def get_item(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Item).offset(skip).limit(limit).all()
 

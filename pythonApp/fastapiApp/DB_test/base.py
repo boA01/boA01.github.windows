@@ -1,16 +1,21 @@
-import sqlite3
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+from database import Base, engine
 
-#连接或创建数据库文件
-conn = sqlite3.connect("test.db")
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(length=252), unique=True, index=True)
+    hasded_password = Column(String(length=252))
+    is_active = Column(Boolean, default=True)
+    items = relationship("Item", back_populates="owner")
 
-#创建一个游标
-cursor= conn.cursor()
+class Item(Base):
+    __tablename__ = "items"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(length=252), index=True)
+    description = Column(String(length=252), index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner = relationship("User", back_populates="items")
 
-#创建表
-cursor.execute("create table user (id int primary key,name varchar(6),pwd varchar(16))")
-
-#获得结果集
-cursor.fetchall()
-
-# 关闭指针
-cursor.close()
+Base.metadata.create_all(bind=engine)

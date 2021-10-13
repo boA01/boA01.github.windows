@@ -46,5 +46,9 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 
 # 创建用户的item
 @usersRouter.post("/users/{user_id}/items", response_model=Items)
-def create_item_user(user_id: int, item: ItemCreate, db: Session = Depends(get_db)):
+def create_item_user(
+    user_id: int,
+    item: ItemCreate,
+    db: Session = Depends(get_db)
+):
     return create_user_item(db=db, item=item, user_id=user_id)
