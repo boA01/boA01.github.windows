@@ -192,10 +192,10 @@ ll | grep ".word." | wc -l
 场景有哪些（答了一些场景），比如红黑树一般会在哪里使用呢（不知道） ？
 有序树：用于查找
 哈夫曼树：带权路径最小的二叉树；电讯通信中，数据文件压缩
-红黑树：根节点（黑），红黑相隔；插入删除方便，map和set都是
-用红黑树实现的，linux中进程的调度用的是红黑树
 平衡二叉树（AVL）：左右子树树高不超过1；查找方便，windows对
 进程地址空间的管理用到了AVL树
+红黑树：根节点（黑），红黑相隔；插入删除方便，map和set都是
+用红黑树实现的，linux中进程的调度用的是红黑树
 B树：N叉（N-ary）平衡树，Balance(平衡)，每个节点可以存储多
 个数据，而且每个节点不止有两个子节点，最多可以有上千个子节点
 B+树：叶子节点保存了完整的索引和数据，叶子节点类似于一个单链
@@ -215,6 +215,9 @@ metaclass(元类)创建或魔改类
 
 
 13、什么是最小堆
+二叉堆中：根节点
+最大的为大根堆（最大堆），
+最小的为最小堆。
 
 14、动态规划是怎么解决问题的
 
@@ -333,8 +336,8 @@ collections
 6、re用过？讲讲用过哪些正则？
 re.search：扫描整个string找到第一个匹配然后返回
 re.match：从头匹配一个符合规则的字符串
-
 .group() 返回被 RE 匹配的字符串
+
 .start() 返回匹配开始的位置
 .end() 返回匹配结束的位置
 .span()返回一个元组包含匹配 (开始,结束) 的位置
@@ -593,8 +596,8 @@ def fac(animal):
 PV
 临界区：进程访问临界资源的那段代码
 信号量：同步，互斥
-P：使s=s-1，s>=0，该进程继续执行，否则进等待队列
-V：使s=s+1，s<=0，唤醒等待队列中的一个进程
+P：使s=s-1，s>=0，该进程继续执行；否则进等待队列
+V：使s=s+1；s<=0，唤醒等待队列中的一个进程
                     同步模型
 单缓冲区：s1 = 1，s2 = 0
 生产者                        消费者
@@ -609,10 +612,9 @@ V(S)
 甘特图：并行显示明显；
 PERT（计划流程图）：清晰看见依赖关系。
 
-单极性：高：0
+单极性：高：1
 双极性：+：0，-：1
-
-曼彻斯特：高到低：1；具有同步能力；10M以太网
+曼彻斯特：1：低到高；具有同步能力；10M以太网
 差分曼彻斯特：1：不变，0：变；令牌环网
 两者利用率50%
 
@@ -623,7 +625,13 @@ PERT（计划流程图）：清晰看见依赖关系。
 时分复用（TDM）：
 码分复用（CDMA）：
 
-拓扑结构：总线，星型，令牌环网
+通信子网：通信节点（集线器，交换机，路由器等）和通信链路（电话线，光纤）
+用户资源子网：PC，服务器等
+
+拓扑结构：总线，星型，环型，树型，全网型，不规则型
+
+T1：1.544Mbps
+E1：2.048Mbps,32个8位数据样本组成125us的基本帧，（CH0和CH16）用于控制指令，其余用于语音传送。
 
 局域网标准
 802.3:CSMA/CD介质接入控制方法和物理层技术规范
@@ -631,31 +639,289 @@ PERT（计划流程图）：清晰看见依赖关系。
 冲突检测：传输时延>=2*传播时延（2τ）
 发现冲突，停止发送：
 
-
 802.4:令牌总线网标准
 802.5:令牌环网标准
 802.11:无线局域网标准
-
-级联：一根双绞线连接不同厂家的交换机
-堆叠：专用的堆叠模块和堆叠线缆，只能自家设备间连接，可以当一个整体；菊花链，星型
 
 无线局域网
 AC+瘦AP
 胖AP
 
-
+电路交换
+报文交换
 分组交换：
-虚电路（ATM）
-数据包（ip数据包）
+    虚电路（X.25，帧中继（FR），ATM）
+    数据包（ip数据包）
 
-广域网技术
-HDLC：0比特填充技术
-PPP：
-MD5摘要算法（单向）
+交换机：
+    存储转发式交换：完整接收数据帧，缓存、验证、碎片过滤，然后转发，
+        优点：可以提供差错校验和非对称交换
+        缺点：延迟大
+    直通式交换：输入端口扫描到目标地址后立即转发
+        优点：延迟小，交换速度快 
+        缺点：没有检错能力，不能实现非对称交换
+    碎片过滤式交换：转发时看数据包是否够64B，小于就说明时冲突碎片，
+    丢弃；否则转发
 
-xDSL：接入技术
+    VLAN：现在4094个
+
+    接口：以太网接口（LAN，WAN）
+
+级联：一根双绞线连接不同厂家的交换机
+堆叠：专用的堆叠模块和堆叠线缆，只能自家设备间连接，可以当一个整体；菊花链，星型
+
+以太网帧结构（二层封装）
+    目的地址，源地址：MAC地址
+    校验位：CRC 异或
+    最小长度：64B，最大长度：1518B
+    MTU：最短46，最长1500
+HDLC：0比特填充技术（思科协议，默认WAN口封装协议）
+    帧边界"01111110"
+    信息帧（I帧）
+    监控帧（S帧）
+    无编号帧（U帧）
+    REJ3：回退到3
+    SREJ3：重传3
+PPP：点到点协议（PAP：明文传输，DHAC：MD5摘要算法（单向））
+
+对称加密：
+    DES：密钥：56位，密文：64位
+    3DES：密钥：112位
+    IDEA：密钥：128位
+非对称加密：
+    AES：密钥：128，192或256
+    RC4：
+公钥加密：
+    RSA： 
+    DH：
+    公钥加密，私钥解密，保密通信（数字证书）
+    私钥加密，公钥解密，数字签名：抗抵赖性
+摘要算法：单向性，数完整性，防止篡改
+    MD5：按512分组，生成128位hash值
+    SHA：按512分组，生成160位hash值
+数字证书：接收方公钥加密，接收方私钥解密
+VPN：虚拟专用网 
+    二层：L2TP，PPTP（基于PPP）
+    三层：IPSec和GRE
+    四层：SSL，TLS
+IPSec:
+    认证头（AH）：提供数据完整性与数据源认证，采用摘要算法
+    封装安全负荷（ESP）：提供数据加密
+    因特网密钥交换协议（IKE）：用于密钥生成和分发
+SSL（安全套接层）：
+    SSL握手协议
+    SSL改变密码协议
+    SSL警告协议
+https：安全的超文本传输协议；使用ssl的TCP，全程加密
+S-HTTP：仅对数据加密，http形式传输
+
+PGP：完整的电子邮件安全软件包
+
+入侵防御系统IPS：串行部署；能检测，还能自动防御
+防火墙：区域隔离，访问控制
+入侵检测系统IDS：旁路部署；异常检测，误用检测和混合检测；记录日志并报告
+
+
+FC-SAN
+IP-SAN
+
+路由器：
+    接口：
+        Serial：帧中断
+        RJ-45：双绞线以太网
+
+三层网络架构
+    出口层：广域网接入，出口策略，带宽控制
+    接入层：提供接口，安全准入，访问控制，端口安全配置
+    核心层：高速转发，服务器接入，路由选择
+    汇集层：流量汇聚，链路冗余，设备冗余，路由选择
+    
+
+xDSL：接入技术（x:H，S对称的，其余非对称 ）
 AON:有源光网络
 [A,E,G]PON:无源光网络
 
-标志：DF，MF
-偏移量：偏移/8
+标志：DF（是否可分片），MF（是否有分片）
+偏移量：偏移字节序号/8
+TTL:生存周期
+
+ICMP网间控制报文协议:
+    ping：TTL(开始64)，路由计数
+    traceroute/tracert：路由跟踪
+
+ipv6:
+    单播：不确定地址 :: ，回环地址 ::1
+    任播：只能给路由器
+    组播：代替广播
+    没有广播
+
+头部长度
+    UDP:8B
+    TCP:20B
+    ipv4:20B IHL(5——15)
+    ipv6:40B
+
+隧道技术：v6之间通过v4进行通信
+    6 to 4
+双栈技术：同时运行v4和v6
+翻译技术：解决纯v6与纯v4间通信
+
+DNS
+    浏览器缓存
+    系统缓存 #ipconfig /displaydns
+    hosts记录
+    本地DNS缓存
+    递归查询（老好人）
+    迭代查询（踢皮球）
+    ipcofnig /displaydns #查看缓存
+    ipconfig /flushdns #清除缓存
+    linux下 Bind 搭建DNS服务器
+
+
+DHCP：
+    客户端：DHCP discover(广播)，寻找DHCP服务器
+    服务端：DHCP Offer(单播)，携带分配的ip
+    客户端：DHCP Request(广播)，告知服务端，使用某ip
+    服务端：DHCP Ack(单播)，最终确认，告知客户端可以使用该ip
+    思科全是广播
+    DHCP中继：广播转单播（路由器隔广播）
+
+FTP：
+    匿名登录：anonymous
+    主动模式：服务器（20）主动连接客户端
+    被动模式：客户端连接服务器一个端口（高位端口）
+
+IIS：
+    web，ftp，smtp（没有POP3和MAP）
+
+SNMP：UDP承载
+    客户端：161，接收get/set
+    服务端：162，接收trap
+    效率高，不可靠
+    v2:增加了管理站之间通信和数据块检索
+    v3：加入了网络管理框架和安全机制；
+        没解决拒绝服务和通信分析
+
+虚拟存储：辅存当内存
+
+华为设备配置
+    system-view #进入系统
+    sysname Switch1 #设备重命名
+    ip route-static 0.0.0.0 0 12.1.1.1 preference 50 #配置静态路由，并且自定义优先级50
+    ip routing-table #查看路由表
+    ip address x.x.x.x 24 配置ip
+
+    display current-configuration #查看全局配置
+
+    ##########策略路由
+    bfd #开启bfd
+    bfd xxx bind peer-id 目的ip source-ip 源ip auto #监测xxx
+    ip route-static 0.0.0.0 0 12.1.1.1 preference 50 track bfd-session xxx #设置静态路由
+
+    
+    #########VLAN
+    valn 10 #创建valn10
+    vlan 【batch】 10 20 #批量创建vlan
+    interface 【gigabitethernet】 0/0/1 #进入接口
+    port linebreaks-type [access] #接口模式设置为access
+    prot [default] vlan 10 #划入vlan10
+
+    prot [trunk] allow-pass valn all #开启trunk
+
+    【interface】 vlanif 10 #进入三层vlanif接口
+
+    ###########DHCP
+    system-view
+    dhcp enable #开启dhcp服务
+    ip 【pool】 1 #创建ip地址池
+    network 10.1.1.0 mask (25)255.255.255.128 #配置ip范围
+    dns-list 10.1.1.1 #配置DNS
+    gateway-list 10.1.1.1 #配置网关
+    【excluded-ip-address】 10.1.1.2 #保留ip地址
+    excluded-ip-address 10.1.1.4 #保留ip地址
+    【lease】 10 #配置租期
+    quit
+    ...
+    dhcp select global/interface #全局或接口dhcp服务器
+
+    ##########RIP
+    rip
+    version 2
+    network 192.168.30.0 #宣告网段
+
+    ##########OSPF
+    ospf 1 #
+    area 0 #区域0
+    network 192.168.1.0 0.0.0.255 #宣告192192.168.1.0网段
+    ospf peer brief #查看状态
+
+
+    ##########Telnet
+    telnet server 【enable】 #开启telnet
+    【user-interface】 vty 0 4 #进入虚拟接口0-4
+    protocol 【inbound】 telnet #透过telnet协议登录
+    authentication-mode aaa #认证方式为aaa
+    aaa #启用aaa
+    local-user admin123 password admin123 #配置用户名和密码
+    local-user admin123 service-type telnet #用户用于telnet
+    local-user admin123 privilege level 15 #用户等级
+
+    #############ACL（2000-2999 普通ACL，只能使用源IP地址；3000-3999是高级ACL）
+    time-range workday 8:30 to 18:30 working-day #设置时段
+    acl 2000 #启用2000编号的ACL
+    rule 【permit】 source 192.168.1.10 0 time-range workday #允许当前ip在工作日使用
+    rule 【deny】 #可以不写
+    user-intervace vty 0 4 #进入虚拟接口0-4
+    acl 2000 inbound #应用ACL
+
+    ##############NAT 
+    nat static global 122.1.2.1 inside 192.168.1.1 #静态绑定
+
+    nat address-group 1 2.2.2.100 2.2.2.200 #配置NAT地址池1
+    nat address-group 2 2.2.2.80 2.2.2.83 #配置NAT地址池2
+    acl 2000 #配置ACL2000 （2000-2999 普通ACL，只能使用源IP地址）
+    rule 5 【permit】 source 192.168.20.0 0.0.0.255 #配置为5的规则
+    quit
+    acl 2001 #配置ACL2001
+    rule 5 【permit】 source 10.0.0.0 0.0.0.255 #允许上述地址通过
+    quit 
+    interface gigabitethernet 3/0/0 #进入接口
+
+    nat outbound 2000 address-group 1 no-pat #设置ACL2000匹配的源地址，转换为地址池1的地址，不开启 端口转换
+    nat outbound 2001 address-group 2 #设置ACL2001匹配的源地址，转换为地址池2的地址，默认开启端口转换（NAPT）
+    
+    nat outbound 2000 #配置端口ip（Easy IP）
+
+    nat server protocl tcp global 202.10.10.1 www inside 192.168.10.1 8080 #端口映射
+
+    quit #退出当前视图，返回上一级
+
+掩码：IP，DHCP
+反掩：ACL，NAT，OSPF
+
+以太网传输效率
+    1518*8/100Mb/s=121.44us=发送时间
+    2000m/200m/us=10us=传播时间
+    64*8/100Mb/s=5.12us=确认帧发送时间
+    121.44+5.12+10*2=146.56us=总时间
+    1518*8b/146.56us=82.86Mb/s
+
+
+
+
+#############加法#############
+a, b = 2, 3
+def add(a,b):
+    c = a&b<<1 #4
+    d = a^b    #1
+
+    while c&d: #0
+        a,b = c,d
+        c = a&b<<1 #是否有进位
+        d = a^b    #不进位的
+
+    return c | d #5
+
+#############减法#############
+def sub(a,b):
+    return add(a, add(~b, 1)) # 
