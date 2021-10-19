@@ -1,0 +1,17 @@
+DevOps
+    CI：持续集成 Jenkins
+    CD：持续交付
+
+https://gitee.com/ma-zhengboA/dev-ops_demo
+
+
+pkg_dir=/var/www/html/deploy/pkgs
+cp -r mysite-$version $pkg_dir
+cd $pkg_dir
+rm -rf mysite-$version/.git
+tar czf mysite-$version.tar.gz mysite-$version
+rm -rf mysite-$version
+md5sum mysite-$version.tar.gz | awk "{print $1}" > mysite-$version.tar.gz.md5
+cd ..
+[ -f live_ver ] && cat live_ver > last_ver
+echo -n $version > live_ver
