@@ -5,21 +5,20 @@ import os
 
 def test():
     print("我不会被复制")
+    print(f"父进程{os.getpid()}")
+    os.waitpid(-1, 0) #父进程挂起，（-1，1）不挂起
 
-    pid = os.fork()
-    '''
-    fork()，linux和unix下使用
-    复制父进程，父子都运行，子进程运行fork()后面的代码
-    '''
-    print("我会被复制")
+    for i in range(3):
+        pid = os.fork()
+        '''
+        fork()，linux和unix下使用
+        复制父进程，父子都运行，子进程运行fork()后面的代码
+        '''
+        print("我会被复制")
 
-    if pid == 0:
-        print(f"子进程{os.getpid()}的父进程是{os.getppid()}")
-        pass
-    else:
-        print(f"父进程{pid}")
-
-    tm.sleep(2) #父进程等待子进程结束
+        if pid == 0:
+            print(f"子进程{os.getpid()}的父进程是{os.getppid()}")
+            exit() #进程彻底结束 否则有2^n-1个子进程
 
 def music():
     print('music', os.getpid())
