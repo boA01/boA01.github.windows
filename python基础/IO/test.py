@@ -71,7 +71,7 @@ import json
 d = dict(name="boA", age=21)
 # 序列化：把变量从内存中变成可存储或传输的过程
 bt = pickle.dumps(d) #>>>bytes
-josn_str = json.dumps(d) #>>>str
+josn_str = json.dumps(d, inident=4, ensure_ascii=False) #>>>str
 # json.dumps(s,default=student2dict) #序列化对象是，添加转dict函数 >>>{}
 '''
 def student2dict(std):
