@@ -759,8 +759,8 @@ VPN：虚拟专用网；替换源，目的ip
     四层：SSL，TLS  （常用安全连接）
 IPSec：（先路由，再NAT（deny：nat豁免），后IPSec）
     两种模式：
-        传输模式：速度快
-        隧道模式：更安全
+        传输模式：速度快 End-to-End
+        隧道模式：更安全 Site-to-Site
     两阶段：
       管理连接：
           因特网密钥交换协议（IKE）：用于密钥生成和分发（DH）
@@ -823,6 +823,7 @@ RAID：独立磁盘冗余阵列
     分块 条带 热备 重构
     1.0：多对一重构
     2.0：多对多重构，负载均衡
+    备份：完全 增量 差量
 
 磁盘阵列
     DAS：块级    通用
@@ -848,12 +849,12 @@ AON:有源光网络
 
 长度
     帧头:14B
-    帧尾:4B
     MTU：ip总长度
     ipv4:20B-60B IHL(5——15)
     ipv6:40B
     UDP:8B
     TCP:20B-40B
+    帧尾:4B
 
 ipv4：
     标志：DF（是否可分片），MF（是否有分片）
@@ -900,6 +901,11 @@ ARP：地址解析协议；IP转MAC
         3.硬件防御（交换机上arp绑定）
 
 RARP：反向地址解析协议
+
+帧头：
+    目的MAC 
+    源MAC
+    类型
 
 DNS：域名系统；域名转IP
     浏览器缓存
@@ -985,6 +991,7 @@ SNMP：UDP承载
 
     【interface】 vlanif 10 #进入三层vlanif接口
     ip address ip 掩码 #设置网段
+    vrrp vrid 10 virtual-ip 192.168.10.254 priority 120 #自定义优先级
 
     #########STP
     stp enable #开启服务
@@ -1005,7 +1012,7 @@ SNMP：UDP承载
     dns-list 10.1.1.1 #配置DNS
     【excluded-ip-address】 10.1.1.2 #保留ip地址
     excluded-ip-address 10.1.1.4 10.1.1.6 #保留ip地址段
-    【lease】 10 #配置租期
+    【lease】 day 10 #配置租期
     quit
     ...
     dhcp select global/interface #全局或接口dhcp服务器
@@ -1019,11 +1026,12 @@ SNMP：UDP承载
     ospf 1 #
     area 0 #区域0（主干区域）
     network 192.168.1.0 0.0.0.255 #宣告192.168.1.0网段
+    return #
+    
     ospf peer brief #查看状态
     display ospf peer #查看邻居信息
     display ospf biref #概要信息
     display ospf routinf #路由表信息
-
 
     ##########Telnet
     telnet server 【enable】 #开启telnet
@@ -1035,7 +1043,7 @@ SNMP：UDP承载
     local-user admin123 service-type telnet #用户用于telnet
     local-user admin123 privilege level 15 #用户等级
 
-    #############ACL（2000-2999 普通ACL，只能使用源IP地址；3000-3999是高级ACL）
+    #############ACL（2000-2999 普通ACL，只能使用源IP地址；3000-3999是高级ACL，destination 目的地）
     time-range workday 8:30 to 18:30 working-day #设置时段
     acl 2000 #启用2000编号的ACL
     rule 【permit】 source 192.168.1.10 0 time-range workday #允许当前ip在工作日使用
@@ -1050,12 +1058,14 @@ SNMP：UDP承载
     ##############NAT 
     nat address-group 1 2.2.2.100 2.2.2.200 #配置NAT地址池1
     nat address-group 2 2.2.2.80 2.2.2.83 #配置NAT地址池2
+
     acl 2000 #配置ACL2000 （2000-2999 普通ACL，只能使用源IP地址）
     rule 5 【permit】 source 192.168.20.0 0.0.0.255 #配置为5的规则
     quit
     acl 2001 #配置ACL2001
     rule 5 【permit】 source 10.0.0.0 0.0.0.255 #匹配上述地址
-    quit 
+    quit
+
     interface gigabitethernet 3/0/0 #进入接口
 
     nat outbound 2000 address-group 1 no-pat #设置ACL2000匹配的源地址，转换为地址池1的地址，不开启 端口转换
@@ -1063,7 +1073,7 @@ SNMP：UDP承载
 
     nat static global 122.1.2.1 inside 192.168.1.1 #静态绑定
     
-    nat outbound 2000 #配置端口ip（Easy IP）
+    nat outbound 2000 #配置端口ip（Easy IP是一种特殊napt，只能映射一个ip）
     
     nat server protocol tcp global 202.10.10.1 www inside 192.168.10.1 8080 #端口映射
 
