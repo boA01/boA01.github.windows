@@ -1,27 +1,31 @@
 package main //申明 main 包，表示当前为可执行程序
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt" //导入内置 fmt
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
 	"unsafe"
-	// "utils/while"
+	"encoding/json"
+	"errors"
+	"sort"
+	"bufio"
+	"os"
+	"io"
+	// "utils/while" // 自定义包 [src/]......
 )
-
-// ********作用域
-// 函数内部，类似private
-// 函数外部，类似protect
-// 函数外部且首字母大写，类似public
 
 // ********申明
 // var 变量
 // const 常量
 // type 类型
 // func 函数
+
+// ********作用域
+// 函数内部，类似private
+// 函数外部，类似protect
+// 函数外部且首字母大写，类似public
 
 var N int = 10 //public
 var n int = 1  //product
@@ -56,7 +60,7 @@ func data_type() {
 	*/
 
 	var s4 = fmt.Sprintf("%d %t", n, b)
-	var n2, _ = strconv.ParseInt(s1, 10, 8)
+	var n2, _ = strconv.ParseInt(s1, 10, 32)
 
 	fmt.Println("输入一个数")
 	fmt.Scanln(&n1)
@@ -74,26 +78,26 @@ func data_type() {
 func testIf(age int) (int, bool) {
 	var f bool
 
-	if age >= 18 && age < 100 {
+	if age >= 18 && age < 100 { // 必须带{}
 		f = true
 		fmt.Println("接受制裁")
-	} else { //不能换行；必须带{}
+	} else { // 不能换行
 		fmt.Println("饶你一命")
 	}
 	return age, f
 }
 
 func testSwitch(c byte) {
-	switch c { //可以不写表达式，下面的case就成了if-else
-	case 'a', '1': //可以有多个值；常量不能重复；变量可以欺骗过
-		fmt.Println("A")
-		fallthrough //switch穿透（一层），不推荐
-	case '0':
-		fmt.Println("第一个")
-	case 'b', '2': //是变量时，值和数据类型都要一致
-		fmt.Println("B")
-	default: //可以不写
-		fmt.Println("...")
+	switch c { // 可以不写表达式，下面的case就成了if-else
+		case 'a', '1': // 可以有多个值；常量不能重复；变量可以欺骗过
+			fmt.Println("A")
+			fallthrough // switch穿透（一层）
+		case '0':
+			fmt.Println("第一个")
+		case 'b', '2': // 是变量时，值和数据类型都要一致
+			fmt.Println("B")
+		default: // 可以不写
+			fmt.Println("...")
 	}
 }
 
@@ -133,7 +137,7 @@ func testGoto() {
 		goto label1
 	}
 	fmt.Println("2")
-label1:
+	label1:
 	fmt.Println("3")
 }
 
@@ -226,9 +230,9 @@ func testArr(){
         arr[0] = 3 // 不用解引用,等价 (*arr)[0] = 3
     }
 
-    f(intArr) //默认传值
+    f(intArr) // 默认传值
 	fmt.Println(intArr)
-    pf(&intArr)   //传址
+    pf(&intArr)   // 传址
 	fmt.Println(intArr)
 
 	var arr2 [5][5]int32
@@ -241,10 +245,10 @@ func testSlice() {
     arr := [...]int32{1,2,3,4}
     slice = arr[1:3] // 弱化的python操作
     /*
-    slice    = &{&arr[1], len(slice), cap(slice)}
-    结构体指针
+    slice    = &{&arr[1], len(slice), cap(slice)} 伪代码
+    结构体指针  结构体地址
 
-    slice = make([]int32, 5, 10) // make创建一个匿名数组
+    slice = make([]int32, 5, 10) // 创建一个匿名数组
     slice = []int32{1,2,3}
     */
 
@@ -252,14 +256,14 @@ func testSlice() {
     fmt.Printf("长度：%d, 容量：%d\n", len(slice), cap(slice))
 
     slice1 := append(slice, 10, 11) // 追加；创建新的数组
-    // slice = append(slice, slice...) //注意...
+    // slice = append(slice, slice...) // 注意...
     fmt.Println(slice1)
     fmt.Printf("长度：%d, 容量：%d\n", len(slice1), cap(slice1))
 
     slice2 := make([]int32, 10)
-    copy(slice2, slice1) // slice1拷贝到slice2
+    copy(slice2, slice1) // slice1对应替换到slice2
     fmt.Println(slice2)
-	fmt.Println(&slice1==&slice2) // 对应值拷贝
+	fmt.Println(&slice1[0] != &slice2[0]) // 对应值拷贝
 
     f := func(slice []int32) {
         slice[0] = 110
@@ -371,14 +375,10 @@ func testMap(){
 //引用类型  通常堆区 指针, slice, map, chan, interface
 //         逃逸分析
 // pn = new(int) // var pn *int,并且*pn=0；值类型分配内存
-// slice = make([]int32, 5, 10) // 引用类型分配内存
+// slice = make([]int32, 5, 10)；        引用类型分配内存
 
 func testPtr(ptr *int){ // ptr指向的空间存放n指向的地址
-    *ptr = N // * 解引用; 替换 n指向的空间里存放的值
-}
-
-func swap(n1, n2 *int) {
-	*n1, *n2 = *n2, *n1 // 像极了python
+    *ptr = N // * 解引用; 替换 n指向的空间里存放的值，n=10
 }
 
 func testTask(n int) {
@@ -407,6 +407,74 @@ func peach(n int) int {
 	}
 }
 
+// 闭包(缓存内嵌变量)
+func addUpper(m int) myFunType {
+	var x int = m // 初始化一次,实现累加功能
+	return func(n int) int { // 匿名函数
+		x += n
+		return x
+		// return m+n // 实现偏函数功能
+	}
+}
+
+// 函数当参数 (python装饰器，闭包的一种)
+func myFun(funvar myFunType, num int) int {
+	fmt.Println("start...")
+	res := funvar(num)
+	fmt.Println("end...")
+	return res
+}
+
+// 可变参数 (python元祖接收)
+func Sum(args... int) (sum int) { // args 是切片
+	for _, v := range args {
+		sum += v
+	}
+	return
+}
+
+// 返回值命名；可以返回多个值 (python返回元祖)
+func SumAndSub(n1 int, n2 int) (sum int, sub int) {
+	sum = n1 + n2
+	sub = n1 - n2
+	return //创建了返回变量
+}
+
+// defer后的语句被压栈（defer栈），函数退出前出栈
+func testDefer() {
+	defer fmt.Println("1")
+	defer fmt.Println("2")
+	fmt.Println("3")
+}
+
+// defer, recover, panic
+func testErr() {
+	defer func() {
+		err := recover() // 捕获异常
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+	}() // 退出前自动调用
+
+	x, y := 1, 0
+	fmt.Println(x/y)
+}
+
+func testErr1(){
+	myErr := func(fName string) (err error) {
+		if fName == "xxx.txt" {
+			return nil
+		}
+		return errors.New("文件名错误") // 返回自定义错误类型
+	}
+
+	err := myErr("he.txt")
+
+	if err != nil {
+		panic(err) // 输出错误，停止程序
+	}
+}
+
 func testTime() {
 	now := time.Now()
 
@@ -423,85 +491,15 @@ func testTime() {
 	fmt.Println("用时", end.Second()-now.Second())
 }
 
-// 闭包(缓存内嵌变量)
-func addUpper(m int) myFunType {
-	var x int = m            //初始化一次,实现累加功能
-	return func(n int) int { //匿名函数
-		x += n
-		return x
-		// return m+n        //实现偏函数功能
-	}
-}
-
-// 函数当参数 (python装饰器，闭包的一种)
-func myFun(funvar myFunType, num int) int {
-	fmt.Println("start...")
-	res := funvar(num)
-	fmt.Println("end...")
-	return res
-}
-
-// 可变参数 (python元祖接收)
-func Sum(args ...int) (sum int) { //args 是切片
-	for _, i := range args {
-		sum += i
-	}
-	return
-}
-
-// 返回值命名;可以返回多个值 (python返回元祖)
-func SumAndSub(n1 int, n2 int) (sum int, sub int) {
-	sum = n1 + n2
-	sub = n1 - n2
-	return //创建了返回变量
-}
-
-// defer后的语句被压栈（defer栈），函数退出前出栈
-func testDefer() {
-	defer fmt.Println("1")
-	defer fmt.Println("2")
-	fmt.Println("3")
-}
-
-func testErr() {
-	// defer, recover, panic
-	defer func() {
-		err := recover() // 捕获异常
-		if err != nil {
-			fmt.Println("error:", err)
-		}
-	}() // 退出前自动调用
-
-	x, y := 1, 0
-	fmt.Println(x/y)
-}
-
-// 自定义异常
-func testErr1(){
-
-	myErr := func(fName string) (err error) {
-		if fName == "xxx.txt" {
-			return nil
-		}
-		return errors.New("文件名错误") // 返回自定义错误类型
-	}
-
-	err := myErr("he.txt")
-
-	if err != nil {
-		panic(err) // 输出错误，停止程序
-	}
-}
-
 ///////////////////OOP/////////////////
 
 type xxx struct {
     Name string
     Age int
     Color string
-	*Stu           // 继承（有名）
+	*Stu           // 继承（匿名）
 	// Stu
-    // stu *Stu    // 组合（匿名）
+    // stu *Stu    // 组合（有名）
     hobby []string // 封装
 	// int 可以匿名基础类型
 }
@@ -511,10 +509,10 @@ type Honor struct {
     Age int `json:"age"`
     Skill string `json:"skill"`
 }
-
+// 类型绑定方法
 func (h *Honor) str() { // 形参决定了 引用传递 or 值传递
 	fmt.Printf("name:%s\nage:%d\nskill:%s\n",
-	h.Name, h.Age, h.Skill)
+	h.Name, h.Age, h.Skill) // 编译器优化
 }
 
 func testStruct(){
@@ -527,9 +525,10 @@ func testStruct(){
 	x1.Stu = &Stu{"HaHaHa", 2}
 	// x1.Stu.name = "HaHaHa" // x1.name也行，大小写区分
 	// x1.Stu.age = 3
-	// x1.stu = &Stu{"tom", 12}
-	x1.hobby = make([]string, 3) // 必须要开辟空间
-	x1.hobby[0] = "play"
+	// x1.stu = &Stu{"tom", 12} // 组合变量赋值
+	x1.hobby = []string{"play", "eat"}
+	// x1.hobby = make([]string, 3) // 先开辟空间
+	// x1.hobby[0] = "play"
 	
 	fmt.Println(x2)
 	fmt.Println(*x1.Stu)
@@ -543,7 +542,7 @@ func testStruct(){
 	fmt.Println(string(jsonStr))
 
 	h1.str() // 调用方法
-	//(&h1).str() 同上，传递方式取决于定义，不在于调用（方法的特点）
+	// (&h1).str() 同上，传递方式取决于定义，不在于调用（方法的特点）
 }
 
 /*
@@ -560,9 +559,174 @@ func NewXXX(name string, age int, color string, stu *Stu, hobby []string) *xxx {
 // 封装（类型、属性首字母小写，通过工厂模式（函数）对包外开放）
 // 继承（嵌入匿名公共类型）
 // 组合（嵌入有名公共类型）
-// 多态（）
+// 多态（接口统一调用方法——鸭子类型）
 */
+
+// 接口（申明公共方法；高内聚，低耦合，多态；方法必须全部实现）
+
+type T interface {} // 空接口，没有方法申明；泛型
+
+type School interface {
+    Classing()
+}
+
+type Home interface {
+    Play()
+}
+
+type Life interface { // 方法不能重复
+    Home
+    School
+    Eat()
+}
+
+type Students struct {
+	identity string
+	age int32
+}
+func (s *Students) Classing() {
+    fmt.Println(s.age, "岁", s.identity, "正在上课.....")
+}
+func (s *Students) Play() {
+    fmt.Println(s.age, "岁", s.identity, "正在玩.....")
+}
+func (s *Students) Eat() {
+    fmt.Println(s.age, "岁", s.identity, "正在干饭.....")
+}
+
+type SchoolBoy struct {
+    *Students
+}
+
+type CollegeStudent struct {
+    *Students
+}
+func (c *CollegeStudent) Working() {
+	fmt.Println("正在工作...")
+}
+
+type People struct{
+    *SchoolBoy
+    *CollegeStudent
+}
+
+// 多态（统一化调用，鸭子类型思想; 接口是引用类型；空接口可以接收所有类型）
+func (p *People) Status(life Life) {
+	// fmt.Printf("^^^^^^%d, %T^^^^^^\n", unsafe.Sizeof(life), life) // 16
+	life.Classing()
+    life.Play()
+    life.Eat()
+}
+
+func testInterface(){
+	p1 := People{} // 不用取地址，传递类型取决权不足调用，方法特性
+    // sb := SchoolBoy{&Students{age:6}}
+    sb := SchoolBoy{&Students{"小学生", 6}}
+    cs := CollegeStudent{&Students{age:20, identity: "大学生"}}
+
+	// fmt.Printf("%d %T\n", unsafe.Sizeof(cs), cs) // 8 main.CollegeStudent
+    p1.Status(sb) // 方法调用，不用取地址<<<<<<<<<<<<<<<<<<
+    p1.Status(cs)
+
+	s := Students{"未知", 0}
+	var l Life = &s // 必须取地址，接口是引用类型<<<<<<<<<<<
+	// fmt.Printf("%d %d\n", unsafe.Sizeof(s), unsafe.Sizeof(&s)) //24 8
+	// fmt.Printf("%d\n", unsafe.Sizeof(l))  //16
+	l.Classing()
+
+    var t interface{} // t 泛型
+    t = cs // 接收所有类型
+	var _cs CollegeStudent
+	// _cs = t // 报错，必须类型断言
+	_cs, _ = t.(CollegeStudent) // 类型断言
+	fmt.Println(_cs)
+
+	dy := func (t... interface{}) {
+		for _, v := range t {
+			switch v.(type){ // 判断类型
+				case SchoolBoy:
+					fmt.Println("小学生")
+				case CollegeStudent:
+					fmt.Println("大学生")
+				default:
+					fmt.Printf("%T\n", t)
+			}
+		}
+	}
+	dy(cs, 1, true)
+}
+
+type stuSlice []Students
+// 实现Sort接口 Len(), Less(), Swap()
+func (s stuSlice) Len() int {
+    return len(s)
+}
+func (s stuSlice) Less(i, j int) bool {
+    return s[i].age > s[j].age // 降序；交换条件
+}
+func (s stuSlice) Swap(i, j int) {
+    s[i], s[j] = s[j], s[i]
+}
+
+func testSort() {
+	var s_Slice stuSlice
+	
+	for i:=0; i<10; i++ {
+		sn := Students{
+			age : int32(rand.Intn(100)),
+			identity : fmt.Sprintf("xm%d", int32(rand.Intn(100))),
+		}
+		s_Slice = append(s_Slice, sn)
+	}
+	
+	sort.Sort(s_Slice) // 对自定义类型排序
+	fmt.Println(s_Slice)
+}
+
 ////////////////////////////////////////////////////////////////////
+
+// 流：数据在 程序 与 文件 之间的路径
+// 输入流：读文件
+// 输出流：写文件
+
+func testFile() {
+	file := "/home/boa/test.txt"
+	
+    fp, err_ := os.OpenFile(file, os.O_WRONLY | os.O_CREATE, 0666)
+    if err_ != nil {
+        return
+    }
+    defer fp.Close()
+
+    str := "hello golang\r\n"
+    writer := bufio.NewWriter(fp)
+    for i:=0; i<5; i++ {
+       writer.WriteString(str)
+    }
+    // 还在缓存
+    writer.Flush() // 清空缓存；真正写到外存
+	fmt.Println("ok")
+
+	fp, err := os.Open(file)
+    if err != nil {
+        fmt.Println("打开失败", err)
+		return
+    }
+    defer fp.Close()
+    //err := file.Close()
+    //if err != nil {
+    //    fmt.Println(err)
+    //}
+
+    reader := bufio.NewReader(fp)
+    for {
+        str, err := reader.ReadString('\n') // 换行
+        if err == io.EOF {
+            break
+        }
+        fmt.Print(str)
+    }
+}
 
 // 全局变量初始化
 // var f = fu()
@@ -590,8 +754,7 @@ func main() {
 	// testPtr()
 	// var a, b int = 2, 3
 	// fmt.Println(a, b)
-	// swap(&a, &b)
-	// a,b=b,a // 和python一样
+	// a, b = b, a // 和python一样 原地交换
 	// fmt.Println(a, b)
 
 	// testTask(4)
