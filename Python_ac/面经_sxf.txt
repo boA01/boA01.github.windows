@@ -311,6 +311,11 @@ LVS：纯 4 层负载均衡，运行在内核态，性能是软件负载均衡�
 Nginx：支持 4 层/7 层负载均衡，支持 HTTP、E-mail 协议。
 HAproxy：是 7 层负载均衡软件，支持 7 层规则的设置，性能也不错。
 
+API网关
+    易于监控，易于认证，减少客户端与微服务的交互次数
+    Zuul：
+    Gateway：
+
 6、keepalived是什么及作用?
 是检测服务器的状态，服务器集群中自动化剔除和加入服务器
 
@@ -603,7 +608,7 @@ def fac(animal):
     增加了风险预测；适合大型复杂系统
 v模型：
 敏捷开发：
-DevOps：
+DevOps：CICD（持续交付，持续部署）
 
 PV
 临界区：进程访问临界资源的那段代码
@@ -901,6 +906,7 @@ ARP：地址解析协议；IP转MAC
         3.硬件防御（交换机上arp绑定）
 
 RARP：反向地址解析协议
+NDP：邻居发现协议，用于在IPv6中代替地址解析协议
 
 帧头：
     目的MAC 
@@ -947,6 +953,8 @@ FTP：
 
 IIS：
     web，ftp，smtp（没有POP3和MAP）
+
+CND：内容分发网络；就近访问节点，提高响应速度和命中率
 
 SNMP：UDP承载
     客户端：161，接收get/set
@@ -1055,7 +1063,7 @@ SNMP：UDP承载
     rule 10 deny ip source 172.16.4.13 0
     rule 10 deny ip source 172.16.4.13 0 【destination】172.16.3.0 0.0.0.255
 
-    ##############NAT 
+    ##############NAT （snat 内网访问外网；dnat 服务器映射）
     nat address-group 1 2.2.2.100 2.2.2.200 #配置NAT地址池1
     nat address-group 2 2.2.2.80 2.2.2.83 #配置NAT地址池2
 
