@@ -149,12 +149,12 @@ func testStr() {
 	fmt.Println(len(str1)) // 11
 
 	// 遍历
-	for _, c := range []rune(str1) { // 中文要转切片
+	for _, c := range []rune(str1) { // rune==int32
 		fmt.Printf("%c\n", c)
 	}
 
 	// 与byte数组互转
-	var bytes = []byte(str1)
+	var bytes = []byte("abc") // byte==uint8
 	s = string([]byte{97, 98, 99})
 	fmt.Println(bytes)
 	fmt.Println(s)
