@@ -82,6 +82,9 @@ class C(O, A_Mixln, B_Mixln): #继承顺序：print(C.__mro__)
         if attr == "qq":
             return "66666666" # return lambda:"666"
         return f"no extis {attr}"
+    
+    # def __setattr__(self, key, value):
+        # pass
 
     def __str__(self):
         return super().__str__()+f" naem:{self._name} age:{self.__age}"
@@ -101,16 +104,16 @@ class C(O, A_Mixln, B_Mixln): #继承顺序：print(C.__mro__)
     
     def __next__(self):
         self.a+=1
-        if self.a<6:
+        if self.a>6:
             raise StopIteration()
         return self._name
     
     # 序列化容器
     def __getitem__(self,n):
-        a,b=1,1
+        a, b = 1, 1
         if isinstance(n,int): #n是数字
             for i in range(n):
-                a,b=b,a+b
+                a, b = b, a+b
             return a
         if isinstance(n,slice): #n是切片
             start = n.start
@@ -121,7 +124,7 @@ class C(O, A_Mixln, B_Mixln): #继承顺序：print(C.__mro__)
             for i in range(stop):
                 if i >= start:
                     L.append(a)
-                a,b=b=a+b
+                a, b = b, a+b
             return L
     
     # __setitem()__, __delitem__()
@@ -142,7 +145,7 @@ class C(O, A_Mixln, B_Mixln): #继承顺序：print(C.__mro__)
 def fn(self, name="world"):
     print(f"hello {name}")
 
-Hello = type("Hello",(object,),dict(hello=fn))
+Hello = type("Hello", (object,), dict(hello=fn))
 
 '''
 type，既是一个类（元类），也是一个对象，可以自身实例化
@@ -153,10 +156,10 @@ object是顶层基类，由type实例化
 #################### metaclass(元类)创建或魔改类
 # 必须从type派生
 class ListMetaclass(type):
-    def __new__(cls,name,bases,attrs):
+    def __new__(cls, name, bases, attrs):
         # cls：当前类，name：类名，bases：父类集合，attrs：方法集合
         attrs["add"] = lambda self, value:self.append(value)
-        return type.__new__(cls,name,bases,attrs)
+        return type.__new__(cls, name, bases, attrs)
 
 # metaclass：关键字，指：用ListMeatclass.__new__()来创建
 class MyList(list, metaclass=ListMetaclass):

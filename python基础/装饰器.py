@@ -1,8 +1,28 @@
 import time
+from functools import wraps
+
+# 闭包，缓存内嵌变量，功能像类
+def add_x(x): #接收参数并保存到x中
+    def add(y):
+        return y+x
+    return add
+
+add5 = int_x(5)
+add5(6)
+
+# 装饰器，接收并返回方法，修饰函数或者方法，闭包的一种
+def deco(func):
+    print("start...")
+    return func
+
+@deco
+def test1():
+    print("装饰器")
 
 # 函数饰器
 def decorator_args(s=1): #接收装饰器参数
     def decorator(fn): #接收方法
+        # @wraps(fn) #消除一些副作用，保留被修饰方法的名字和docstring
         start = 0
         def wrapper(*args, **kwargs): #实现逻辑
             nonlocal start #嵌套变量
@@ -22,7 +42,7 @@ def fun1():
 # 类装饰器
 class logger1():
     def __init__(self, fn): #接收方法
-        self.fn = fn 
+        self.fn = fn
     def __call__(self, *args, **kwargs): #实现逻辑
         return self.fn(*args, **kwargs)
 
