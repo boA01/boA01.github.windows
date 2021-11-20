@@ -409,9 +409,9 @@ func peach(n int) int {
 
 // 闭包(缓存内嵌变量)
 func addUpper(m int) myFunType {
-	var x int = m // 初始化一次,实现累加功能
+	var x = m // x分配在堆上，实现累加功能
 	return func(n int) int { // 匿名函数
-		x += n
+		x += n // 函数引用了外部局部变量——闭包
 		return x
 		// return m+n // 实现偏函数功能
 	}
@@ -497,7 +497,7 @@ type xxx struct {
     Name string
     Age int
     Color string
-	*Stu           // 继承（匿名）
+	*Stu           // 组合（匿名）
 	// Stu
     // stu *Stu    // 组合（有名）
     hobby []string // 封装
@@ -512,7 +512,7 @@ type Honor struct {
 // 类型绑定方法
 func (h *Honor) str() { // 形参决定了 引用传递 or 值传递
 	fmt.Printf("name:%s\nage:%d\nskill:%s\n",
-	h.Name, h.Age, h.Skill) // 编译器优化
+	h.Name, h.Age, h.Skill) // 编译器优化，对象选择器自动解引用
 }
 
 func testStruct(){
@@ -525,7 +525,7 @@ func testStruct(){
 	x1.Stu = &Stu{"HaHaHa", 2}
 	// x1.Stu.name = "HaHaHa" // x1.name也行，大小写区分
 	// x1.Stu.age = 3
-	// x1.stu = &Stu{"tom", 12} // 组合变量赋值
+	// x1.stu = &Stu{"tom", 12}
 	x1.hobby = []string{"play", "eat"}
 	// x1.hobby = make([]string, 3) // 先开辟空间
 	// x1.hobby[0] = "play"
@@ -557,8 +557,7 @@ func NewXXX(name string, age int, color string, stu *Stu, hobby []string) *xxx {
     }
 }
 // 封装（类型、属性首字母小写，通过工厂模式（函数）对包外开放）
-// 继承（嵌入匿名公共类型）
-// 组合（嵌入有名公共类型）
+// 组合（嵌入匿名、有名公共类型）不是继承，没有继承，所以调用时接收者不会改变
 // 多态（接口统一调用方法——鸭子类型）
 */
 
@@ -728,6 +727,16 @@ func testFile() {
     }
 }
 
+func testChannel() {
+	ch := make(chan struct{}) // 无容量（缓冲）的channel
+	ch := make(chan struct{}, 10) // 容量为10的channel
+
+}
+
+// 进程（资源分配的最小单位）
+// 线程（调度的基本单位）有溢出风险
+// goroutine 协程（用户态线程）
+
 // 全局变量初始化
 // var f = fu()
 
@@ -801,3 +810,5 @@ func main() {
 
 // SDK 软件开发工具包
 // API 应用程序接口
+
+// :%!xxd
