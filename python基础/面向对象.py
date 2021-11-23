@@ -2,7 +2,7 @@ class O():
     name = "D_class" # 类属性
     __solts__ = ("ip") # 槽，限制当前类实例绑定的属性，子类不影响
 
-    def __new__(cls): # 类方法（特殊，不用加装饰器）
+    def __new__(cls, *args, **kwargs): # 类方法（特殊，不用加装饰器）
         print("构造方法")
         return super().__new__(cls)
 
@@ -216,11 +216,14 @@ C.get_ip = get_ip
 '''
 
 if __name__ == "__main__":
+    o = O(id=10)
+    o.static_get()
+    print(o)
     # 测试多态
-    def test_twice(o):
-        o.test()
+    # def test_twice(o):
+    #     o.test()
 
-        """
+    """
         print(__file__) >>>面向对象.py
         print(sys.argv)：获取命令行参数
         
@@ -228,4 +231,4 @@ if __name__ == "__main__":
             while(argc-- > 1)
                 printf("%s\n",*++argv)
         }
-        """
+    """
