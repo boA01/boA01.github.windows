@@ -13,12 +13,15 @@ import (
 	"bufio"
 	"os"
 	"io"
+	"flag"
+	"runtime"
+	"reflect"
 	// "utils/while" // 自定义包 [src/]......
 )
 
 // ********申明
 // var 变量
-// const 常量
+// const 常量 // 必须赋值
 // type 类型
 // func 函数
 
@@ -537,9 +540,17 @@ func testStruct(){
 
 	jsonStr, err := json.Marshal(h1) // 序列化
 	if err != nil {
-		fmt.Println("fail...")
+		fmt.Println("序列化失败...", err)
 	}
 	fmt.Println(string(jsonStr))
+
+	nmw = `{"name":"牛魔王", "age":502, "Skill":"牛毛细雨"}`
+	var h2 Honor
+	err = json.Unmarrshal([]byte(nmw), &h2) // 反序列化
+	if err != nil {
+		fmt.Println("反序列化失败...", err)
+	}
+	fmt.Println(h2)
 
 	h1.str() // 调用方法
 	// (&h1).str() 同上，传递方式取决于定义，不在于调用（方法的特点）
@@ -695,7 +706,6 @@ func testFile() {
     if err_ != nil {
         return
     }
-    defer fp.Close()
 
     str := "hello golang\r\n"
     writer := bufio.NewWriter(fp)
@@ -705,6 +715,9 @@ func testFile() {
     // 还在缓存
     writer.Flush() // 清空缓存；真正写到外存
 	fmt.Println("ok")
+
+	fp.Close() // 关闭文件
+	/////////////////////////////////////
 
 	fp, err := os.Open(file)
     if err != nil {
@@ -719,23 +732,225 @@ func testFile() {
 
     reader := bufio.NewReader(fp)
     for {
-        str, err := reader.ReadString('\n') // 换行
+        str, err := reader.ReadString('\n') // 行读
         if err == io.EOF {
             break
         }
         fmt.Print(str)
     }
+	/////////////////////////////////////
+
+	file2 = "/home/boa/test1.txt"
+	content, err := io.ioutil.ReadFile(file)
+	if err != nil{
+		fmt.Println("错误")
+		return
+	}
+
+	err = io.ioutil.WriteFile(file2, content, 0666)
+	if err != nil {
+		fmt.Println(err)
+	}
+	/////////////////////////////////////
+
+	// 将 /home/boa/bg.jpg拷贝到/home/boa/bg1.jpg
+	srcFileName := "/home/boa/bg.jpg"
+	dstFileName := "/home/boa/bg1.jpg"
+
+	// 打开原文件
+	srcFile, err := os.Open(srcFileName)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer srcFile.Close()
+	// 通过srcFile，获取Reader
+	reader := bufio.NewReader(srcFile)
+
+	dstFile, err := os.OpenFile(dstFileName, os.O_WRONLY | os.O_CREATE, 0666)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer dstFile.Close()
+	writer := bufio.NewWriter(dstFile)
+
+	io.Copy(writer, reader)
+	/////////////////////////////////////
+
+	PathExists := func(path string) (bool, error) {
+		_, err := os.Stat(path)
+		if err == nil {
+			return true, nil
+		}
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
 }
 
 func testChannel() {
-	ch := make(chan struct{}) // 无容量（缓冲）的channel
-	ch := make(chan struct{}, 10) // 容量为10的channel
+	var intChan chan int
+	intChan = make(chan int, 3)
+
+	fmt.Println(intChan)
+	intChan<- 10 // 推进
+	intChan<- 110
+	intChan<- 101
+	num := <-intChan // 推出
+	close(intChan) // 关闭后，可取不可加
+	fmt.Println(len(intChan), cap(intChan))
+	<-intChan
+	<-intChan
+
+	// ch := make(chan interface{}) // 无容量（缓冲）的channel，取出来后需要类型断言
+	// ch := make(chan struct{}, 10) // 容量为10的channel
+	
+	// 申明流向
+	// var ch chan<- int 只写
+	// var ch <-chan int 只读
+	// ch = make(chan int, 3) 不变
+
+	for {
+		select { // io多路复用
+			case v:= <-intChan: // 读完后不会阻塞
+				fmt.Println(v)
+			default:
+				return
+		}
+	}
+}
+
+// 进程（资源分配的基本单位）
+// 线程（调度的最小单位）有溢出风险
+// goroutine 协程（用户态线程）
+// M（主线程）P（上下文）G（协程）
+
+func putNum(intChan chan int) {
+	for i:=2; i<500; i++ {
+		intChan<- i
+	}
+	close(intChan)
+}
+
+func primeNum(intChan chan int, primeChan chan int, exitChan chan bool) {
+	var num int
+	var flag bool
+
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		fmt.Println("发生错误:", err)
+	// 	}
+	// }() 加强鲁棒性
+
+	for {
+		num, ok := <-intChan
+		for j:=2; j<num/2; j++ {
+			if num%j == 0 {
+				flag = true
+				break
+			}
+		}
+		if !flag {
+			primeChan<- i
+		}
+	}
+
+	exitChan<- true // 取完成
+
+	// for i := range intChan {
+	// 	for j:=2; j<i/2; j++ {
+	// 		if i%j == 0 {
+	// 			flag = true
+	// 			break
+	// 		}
+	// 	}
+	// 	if !flag {
+	// 		primeChan<- i
+	// 	}
+	// }
+}
+
+func testGoroutine() {
+
+	intChan := make(chan int, 100)
+	primeChan := make(chan int, 200)
+	exitChan := make(chan bool, 4) // 退出管道
+
+	// 开启写协程
+	go putNum(intChan) 
+	
+	// 开启4个取协程
+	for i:=0; i<4; i++ {
+		go primeNum(intChan, primeChan, exitChan)
+	}
+
+	// 等待协程结束，关闭管道
+	go func(){
+		for i:=0; i<4; i++ {
+			<-exitChan
+		}
+		close(primeChan)
+	}
+
+	for {
+		res, ok := <-primeChan
+		if !ok {
+			break
+		}
+		fmt.Println(res)
+	}
+}
+
+func testReflect1(t interface{}) {
+	/*
+	运行时的反射
+
+	// interface{} 转 Value
+	value := reflect.ValueOf()
+	
+	// Value 转 interface{}
+	iface := value.interface()
+	
+	// interface 转 类型
+	// obj := t.(xxx)
+	*/
+
+	rType := reflect.TypeOf(t)
+	fmt.Println(rType)
+
+	rValue : = reflect.ValueOf(t)
+	fmt.Println(rValue) // rValue != 2，rValue.Int() == 2
+	// rValue.Elem().SetInt(20)
+
+	iface := rValue.interface()
+	fmt.Printf("%v %T\n", iface, iface)
+
+	switch t.(type) {
+		case Stu:
+			t.(Stu)
+		case int:
+			t.(int)
+		default:
+			break
+	}
+
+	obj, ok := t.(Stu)
+	if ok {
+		return
+	}
+
 
 }
 
-// 进程（资源分配的最小单位）
-// 线程（调度的基本单位）有溢出风险
-// goroutine 协程（用户态线程）
+func testReflect() {
+	num := 2
+	stu = Stu{name:"hahaha", age:18}
+
+	testReflect1(&num)
+	testReflect1(&stu)
+}
 
 // 全局变量初始化
 // var f = fu()
@@ -752,6 +967,18 @@ func testChannel() {
 
 func main() {
 	fmt.Println(">>>Start")
+
+	// fmt.Println(os.Args) // 获取命令行参数
+
+	// main -u root -p 123 -port 3306
+	// var user string
+	// var passwd string
+	// var port int
+	// flag.StringVar(&user, "u", "root", "用户名，默认root")
+	// flag.StringVar(&passwd, "p", "", "密码，默认")
+	// flag.IntVar(&port, "port", 3306, "端口号，默认3306")
+	// flag.Parse() // 转换，表示调用该方法
+	// fmt.Println(user, passwd, port)
 
 	// testPtr(&n)
 
