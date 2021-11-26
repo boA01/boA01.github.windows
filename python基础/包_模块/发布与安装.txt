@@ -1,0 +1,32 @@
+包：模块的集合
+__init__.py
+
+模块：.py文件
+_开头 protected 保护类型（约定）  from module import *受限
+__开头 private 私有类型  类外访问受限
+__开头结尾 特殊类型  一般系统名字
+__all__ = ["方法","类",...]
+
+
+1.建立setup.py
+from distutils.core import setup
+setup(
+    name="模块名称",
+    version="版本号",
+    description="描述"
+    )
+author="作者"
+py_modules=["模块名（.py文件名）", ""]
+
+2.构建build文件夹
+python setup.py build
+
+3.打包
+python setup.py sdist
+
+4.安装
+解压tar包
+python setup.py install
+
+或直接
+pip install xxx.tar.gz
