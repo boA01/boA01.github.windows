@@ -632,20 +632,20 @@ func (p *People) Status(life Life) {
 }
 
 func testInterface(){
-    p1 := People{} // 不用取地址，传递类型取决权不足调用，方法特性
+    p1 := People{} // 不用取地址，传递方式取决权不在调用，在于定义（同559）
     // sb := SchoolBoy{&Students{age:6}}
     sb := SchoolBoy{&Students{"小学生", 6}}
     cs := CollegeStudent{&Students{age:20, identity: "大学生"}}
 
     // fmt.Printf("%d %T\n", unsafe.Sizeof(cs), cs) // 8 main.CollegeStudent
-    p1.Status(sb) // 方法调用，不用取地址<<<<<<<<<<<<<<<<<<
-    p1.Status(cs)
+    p1.Status(sb) // 不用取地址，因为类型里面就是指针<<<<<
+    p1.Status(cs)   //解释上一行 组合的是 *Student <<<<<<
 
     s := Students{"未知", 0}
-    var l Life = &s // 必须取地址，接口是引用类型<<<<<<<<<<<
+    var l Life = &s // 必须取地址，接口是引用类型<<<<<<<<<
     // fmt.Printf("%d %d\n", unsafe.Sizeof(s), unsafe.Sizeof(&s)) //24 8
     // fmt.Printf("%d\n", unsafe.Sizeof(l))  //16
-    l.Classing()
+    l.Classing() // 接口调用方法
 
     var t interface{} // t 泛型
     t = cs // 接收所有类型
