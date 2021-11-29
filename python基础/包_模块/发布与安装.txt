@@ -1,5 +1,4 @@
-包：模块的集合
-__init__.py
+包：模块的集合 含__init__.py的文件夹
 
 模块：.py文件
 _开头 protected 保护类型（约定）  from module import *受限
