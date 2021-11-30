@@ -318,7 +318,7 @@ func testMap(){
 
     /*
     var map_ map[string]int // 只是申明
-    map_ := make(map[sting]int, 3) // 分配空间，容量可以省略
+    map_ := make(map[sting]int, 3) // 分配空间，长度可以省略
 
 	map_ := map[string]int {
         "A":1,
@@ -327,7 +327,7 @@ func testMap(){
     }
     */
 
-    fmt.Println(map_)
+    fmt.Println(map_, len(map_)) // 没有cap
 
     map_["D"] = 4     // 无-添加，有-修改
     delete(map_, "B") // 删除（不存在时不报错）
@@ -391,12 +391,12 @@ func testMap(){
 }
 
 //值类型    通常栈区 int, string, struct, 数组（不同于c）
-//引用类型  通常堆区 指针, slice, map, chan, interface
+//引用类型  通常堆区 指针, slice, map, chan, interface  零值：nil
 //         逃逸分析
 // pn    = new(int) // var pn *int,并且*pn=0；值类型分配内存
-// slice = make([]int32, 1,       5)；      引用类型分配内存（必须有长度，底层是数组）
-// map   = make(map[string]int32, 5)；      引用类型分配内存
-// chan  = make(chan int32,       5)；      引用类型分配内存
+// slice = make([]int32, 1, 5)；      引用类型分配内存（必须有长度，底层是数组）
+// chan  = make(chan int32, 5)；      引用类型分配内存
+// map   = make(map[string]int32, 2)；引用类型分配内存
 
 func testPtr(ptr *int){ // ptr指向的空间存放n指向的地址
     *ptr = N // * 解引用; 替换 n指向的空间里存放的值，n=10
@@ -506,6 +506,7 @@ func testErr1(){
             return nil
         }
         return errors.New("文件名错误") // 返回自定义错误类型
+        // return fmt.Errorf("%s，文件名错误", fName) // 格式化字符串+error.New()
     }
 
     err := myErr("he.txt")
@@ -993,7 +994,7 @@ func testReflect() {
 //     return 0
 // }
 
-// 全局变量执行之后,main()执行之前,用于初始化工作
+// 全局变量执行之后,main()执行之前,用于初始化工作； 可以有多个
 // func init() {
 //     n = 1
 //     fmt.Println("init()...")
@@ -1060,7 +1061,9 @@ func main() {
 
     // testMap()
 
-    testStruct()
+    // testStruct()
+
+    testReflect
 
     fmt.Println("End<<<")
 }
