@@ -31,9 +31,9 @@ import (
 // 函数外部，类似protect
 // 函数外部且首字母大写，类似public
 
+var n int  //首字母小写，product
 var N int = 10 //首字母大写，public
-var n int = 1  //首字母小写，product
-const C = 1    //不用写类型，必须赋值
+const C, c = 1, 'c'   //不用写类型，但必须赋值
 
 // 自定义数据类型 (c typedef)
 type myInt int //虽然都是int,但是不完全等价,需要显示转换
@@ -96,25 +96,40 @@ func testSwitch(c byte) {
 	switch c { // 可以不写表达式，下面的case就成了if-else
 		case 'a', '1': // 可以有多个值；常量不能重复；变量可以欺骗过
 			fmt.Println("A")
-			fallthrough // switch穿透（一层）
+			fallthrough // switch穿透（一层）；默认break，编译器优化
 		case '0':
 			fmt.Println("第一个")
 		case 'b', '2': // 是变量时，值和数据类型都要一致
 			fmt.Println("B")
-		default: // 可以不写
+		default:
 			fmt.Println("...")
 	}
 }
 
 func testFor() {
-	for i := 0; i < 10; i++ {
-		fmt.Println(i)
+	for i,j := 10,1; i > j; i,j = i+1,j+2 { // 平行赋值；没有","表达式，++，--是语句
+		fmt.Println(i, j)
 	}
 
 	for i, k := range "hello" {
 		fmt.Printf("%d, %c\t", i, k)
 	}
 	fmt.Println()
+
+    Exit:
+        for i:=0; i<10; i++ {
+            for j:=0; j<10; j++ {
+                fmt.Println(i, j)
+                if i+j == 4 {
+                    continue
+                }else-if i+j == 10 {
+                    break
+                }else-if i+j == 15 {
+                    break Exit  // 高级break，提供goto功能
+                }
+                fmt.Println(i+j)
+            }
+        }
 }
 
 func testWhile(n int) {
@@ -385,6 +400,12 @@ func testMap(){
 
 func testPtr(ptr *int){ // ptr指向的空间存放n指向的地址
     *ptr = N // * 解引用; 替换 n指向的空间里存放的值，n=10
+    /*
+        GO指针不支持运算   # 区别C
+        uninptr 支持运算；实质是值类型，存放地址，毕竟地址也是值
+
+        unsafe.Pointer 类似 void* 弱类型语言特点
+    */
 }
 
 func testTask(n int) {
@@ -413,24 +434,6 @@ func peach(n int) int {
     }
 }
 
-// 闭包(缓存内嵌变量)
-func addUpper(m int) myFunType {
-    var x = m // x分配在堆上，实现累加功能
-    return func(n int) int { // 匿名函数
-        x += n // 函数引用了外部局部变量——闭包
-        return x
-        // return m+n // 实现偏函数功能
-    }
-}
-
-// 函数当参数 (python装饰器，闭包的一种)
-func myFun(funvar myFunType, num int) int {
-    fmt.Println("start...")
-    res := funvar(num)
-    fmt.Println("end...")
-    return res
-}
-
 // 可变参数 (python元祖接收)
 func Sum(args... int) (sum int) { // args 是切片
     for _, v := range args {
@@ -444,6 +447,37 @@ func SumAndSub(n1 int, n2 int) (sum int, sub int) {
     sum = n1 + n2
     sub = n1 - n2
     return //创建了返回变量
+}
+
+// 闭包(缓存内嵌变量)；
+func addUpper(m int) myFunType {
+    var x = m // x分配在堆上，实现累加功能
+    
+    return func(n int) int { // 匿名函数，可以在函数里写函数
+        x += n // 匿名函数使用内嵌变量——闭包
+        return x
+        // return m+n // 实现偏函数功能
+    }
+    
+    /*
+    values := []int{1,2,3}
+    for _, v := range values {
+        go func(v int) {
+            fmt.Printf("%p, %p, %v\n", &v, v, v)
+        }(v) //闭包好处 #
+        // }() range坑  #
+    }
+    */
+}
+
+// 函数作为 参数，返回值 (装饰器，闭包的一种)
+func myFun(funvar myFunType, num int) myFunType {
+    return func() int {
+        fmt.Println("start...")
+        res := funvar(num)
+        fmt.Println("end...")
+        return res
+    }
 }
 
 // defer后的语句被压栈（defer栈），函数退出前出栈
@@ -797,22 +831,22 @@ func testChannel() {
     intChan = make(chan int, 3)
 
     fmt.Println(intChan)
-    intChan<- 10 // 推进
+    intChan<- 10 // 流入
     intChan<- 110
     intChan<- 101
-    num := <-intChan // 推出
+    num := <-intChan // 流出
     close(intChan) // 关闭后，可取不可加
     fmt.Println(len(intChan), cap(intChan))
-    <-intChan
-    <-intChan
+    <-intChan // 0（关闭后，读取的是元素类型的默认值）
 
     // ch := make(chan interface{}) // 无容量（缓冲）的channel，取出来后需要类型断言
     // ch := make(chan struct{}, 10) // 容量为10的channel
+    // nil chan 未初始化的Chan
 
     // 申明流向
     // var ch chan<- int 只写
     // var ch <-chan int 只读
-    // ch = make(chan int, 3) 不变
+    // ch = make(chan int, 3) 申请内存，不变
 
     for {
         select { // io多路复用
@@ -904,7 +938,7 @@ func testGoroutine() {
     }
 }
 
-func testReflect1(t interface{}) {
+func reflect_(t interface{}) {
     /*
     运行时的反射
 
@@ -947,8 +981,8 @@ func testReflect() {
     num := 2
     stu = Stu{name:"hahaha", age:18}
 
-    testReflect1(&num)
-    testReflect1(&stu)
+    reflect_(&num)
+    feflect_(&stu)
 }
 
 // 全局变量初始化
@@ -961,8 +995,11 @@ func testReflect() {
 
 // 全局变量执行之后,main()执行之前,用于初始化工作
 // func init() {
+//     n = 1
 //     fmt.Println("init()...")
 // }
+
+// >>>>>>>>>>>>>>init(), main()没有参数和返回值<<<<<<<<<<<<<<<
 
 func main() {
     fmt.Println(">>>Start")
@@ -979,18 +1016,12 @@ func main() {
     // flag.Parse() // 转换，表示调用该方法
     // fmt.Println(user, passwd, port)
 
-    // testPtr(&n)
-
     // var age int
     // fmt.Println("输入年龄：")
     // fmt.Scanf("%d", &age)
     // fmt.Println(testIf(age))
-
-    // testPtr()
-    // var a, b int = 2, 3
-    // fmt.Println(a, b)
-    // a, b = b, a // 和python一样 原地交换
-    // fmt.Println(a, b)
+    
+    // testPtr(&n)
 
     // testTask(4)
 
