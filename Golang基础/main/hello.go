@@ -117,19 +117,19 @@ func testFor() {
 	fmt.Println()
 
     Exit:
-        for i:=0; i<10; i++ {
-            for j:=0; j<10; j++ {
-                fmt.Println(i, j)
-                if i+j == 4 {
-                    continue
-                }else-if i+j == 10 {
-                    break
-                }else-if i+j == 15 {
-                    break Exit  // 高级break，提供goto功能
-                }
-                fmt.Println(i+j)
+    for i:=0; i<10; i++ {
+        for j:=0; j<10; j++ {
+            fmt.Println(i, j)
+            if i+j == 4 {
+                continue
+            }else if i+j == 10 {
+                break
+            }else if i == 5 {
+                break Exit  // 高级break，提供goto功能
             }
+            fmt.Println(i+j)
         }
+    }
 }
 
 func testWhile(n int) {
@@ -396,7 +396,7 @@ func testMap(){
 // pn    = new(int) // var pn *int,并且*pn=0；值类型分配内存
 // slice = make([]int32, 1, 5)；      引用类型分配内存（必须有长度，底层是数组）
 // chan  = make(chan int32, 5)；      引用类型分配内存
-// map   = make(map[string]int32, 2)；引用类型分配内存
+// map_   = make(map[string]int32, 2)；引用类型分配内存
 
 func testPtr(ptr *int){ // ptr指向的空间存放n指向的地址
     *ptr = N // * 解引用; 替换 n指向的空间里存放的值，n=10
