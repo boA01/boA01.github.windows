@@ -162,6 +162,14 @@ func testGoto() {
 	fmt.Println("3")
 }
 
+//值类型    通常栈区 int, string, struct, 数组（不同于c）
+//引用类型  通常堆区 指针, slice, map, chan, interface  零值：nil
+//         逃逸分析
+// pn    = new(int) // var pn *int,并且*pn=0；值类型分配内存
+// slice = make([]int32, 1, 5)；      引用类型分配内存（必须有长度，底层是数组）
+// chan  = make(chan int32, 5)；      引用类型分配内存
+// map_  = make(map[string]int32, 2)；引用类型分配内存
+
 func testStr() {
 	var str1 string = "hello中国"
 	var s string
@@ -263,7 +271,7 @@ func testSlice() {
     var slice []int32 // 区别数组，不写长度；nil Slice，不分配内存
 
     arr := [...]int32{1,2,3,4}
-    slice = arr[1:3] // 弱化的python操作
+    slice = arr[1:3] // [i:j:K], 长度=j-i, 容量=k-i；不同于python切片
     /*
     slice    = &{&arr[1], len(slice), cap(slice)} 伪代码
     结构体指针  结构体地址
@@ -390,14 +398,6 @@ func testMap() {
     students[1003] = Stu{"Sam", 19}
     fmt.Println(students)
 }
-
-//值类型    通常栈区 int, string, struct, 数组（不同于c）
-//引用类型  通常堆区 指针, slice, map, chan, interface  零值：nil
-//         逃逸分析
-// pn    = new(int) // var pn *int,并且*pn=0；值类型分配内存
-// slice = make([]int32, 1, 5)；      引用类型分配内存（必须有长度，底层是数组）
-// chan  = make(chan int32, 5)；      引用类型分配内存
-// map_   = make(map[string]int32, 2)；引用类型分配内存
 
 func testPtr(ptr *int) { // ptr指向的空间存放n指向的地址
     *ptr = N // * 解引用; 替换 n指向的空间里存放的值，n=10
