@@ -35,8 +35,9 @@ var n int  //首字母小写，product
 var N int = 10 //首字母大写，public
 const C, c = 1, 'c'   //不用写类型，但必须赋值
 
+type Myint = int // 起别名，Myint==int
 // 自定义数据类型 (c typedef)
-type myInt int //虽然都是int,但是不完全等价,需要显示转换
+type myInt int // 虽然都是int,但是不完全等价,需要显示转换
 
 type myFunType func(int) int
 
@@ -220,7 +221,7 @@ func testStr() {
 	// strings.Trim("**hello**","**") // 两边**
 }
 
-func testArr(){
+func testArr() {
     var intArr [5]int32
 
     /*
@@ -259,7 +260,7 @@ func testArr(){
 }
 
 func testSlice() {
-    var slice []int32 // 区别数组，不写长度
+    var slice []int32 // 区别数组，不写长度；nil Slice，不分配内存
 
     arr := [...]int32{1,2,3,4}
     slice = arr[1:3] // 弱化的python操作
@@ -310,7 +311,7 @@ func testSlice() {
     fmt.Println(fbn(5))
 }
 
-func testMap(){
+func testMap() {
     map_ := make(map[string]int)
     map_["A"] = 1
     map_["B"] = 2
@@ -398,13 +399,22 @@ func testMap(){
 // chan  = make(chan int32, 5)；      引用类型分配内存
 // map_   = make(map[string]int32, 2)；引用类型分配内存
 
-func testPtr(ptr *int){ // ptr指向的空间存放n指向的地址
+func testPtr(ptr *int) { // ptr指向的空间存放n指向的地址
     *ptr = N // * 解引用; 替换 n指向的空间里存放的值，n=10
     /*
         GO指针不支持运算   # 区别C
         uninptr 支持运算；实质是值类型，存放地址，毕竟地址也是值
 
         unsafe.Pointer 类似 void* 弱类型语言特点
+
+        // 指针与引用（C++）
+        int i = 3;
+        int *ptr = &i;
+        int &ref = i; 指针常量
+
+        // i = 13
+        *ptr = 13;
+        ref = 13;
     */
 }
 
@@ -444,9 +454,9 @@ func Sum(args... int) (sum int) { // args 是切片
 
 // 返回值命名；可以返回多个值 (python返回元祖)
 func SumAndSub(n1 int, n2 int) (sum int, sub int) {
-    sum = n1 + n2
+    sum = n1 + n2 //已创建了返回变量
     sub = n1 - n2
-    return //创建了返回变量
+    return //已确定了返回变量
 }
 
 // 闭包(缓存内嵌变量)；
@@ -481,10 +491,28 @@ func myFun(funvar myFunType, num int) myFunType {
 }
 
 // defer后的语句被压栈（defer栈），函数退出前出栈
-func testDefer() {
+func testDefer() (r int) {
     defer fmt.Println("1")
     defer fmt.Println("2")
-    fmt.Println("3")
+    fmt.Println("3", r) // 0
+
+    defer func() {
+        fmt.Println(r) // 1 内联变量
+        r++ // 闭包引用（联系上下文）
+        fmt.Println("defer", r) // 2
+    }()
+
+    return func() int {
+        fmt.Println("return", r) // 0
+        return 1 // 影响testDefer返回
+    }()
+    /*
+    具名返回值与defer的纠葛（大坑）
+    return的三步走（非原子操作）
+    r = 1   # 返回变量赋值
+    r++     # 调用defer
+    return  # 返回值
+    */
 }
 
 // defer, recover, panic
@@ -500,7 +528,7 @@ func testErr() {
     fmt.Println(x/y)
 }
 
-func testErr1(){
+func testErr1() {
     myErr := func(fName string) (err error) {
         if fName == "xxx.txt" {
             return nil
@@ -556,7 +584,7 @@ func (h *Honor) str() { // 形参决定了 引用传递 or 值传递
     h.Name, h.Age, h.Skill) // 编译器优化，对象选择器自动解引用
 }
 
-func testStruct(){
+func testStruct() {
     x2 := xxx{"heheh", 2, "black", &Stu{"HaHaHa", 2}, nil}
 
     var x1 xxx
@@ -653,7 +681,7 @@ func (c *CollegeStudent) Working() {
     fmt.Println("正在工作...")
 }
 
-type People struct{
+type People struct {
     *SchoolBoy
     *CollegeStudent
 }
@@ -666,7 +694,7 @@ func (p *People) Status(life Life) {
     life.Eat()
 }
 
-func testInterface(){
+func testInterface() {
     p1 := People{} // 不用取地址，传递方式取决权不在调用，在于定义（同559）
     // sb := SchoolBoy{&Students{age:6}}
     sb := SchoolBoy{&Students{"小学生", 6}}
@@ -828,7 +856,7 @@ func testFile() {
 }
 
 func testChannel() {
-    var intChan chan int
+    var intChan chan int // nil chan
     intChan = make(chan int, 3)
 
     fmt.Println(intChan)
@@ -1047,7 +1075,7 @@ func main() {
 
     // fmt.Println(SumAndSub(5,3))
 
-    // testDefer()
+    // fmt.Println(testDefer())
 
     // testErr1()
 
