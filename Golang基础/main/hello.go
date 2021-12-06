@@ -2,27 +2,27 @@ package main //申明 main 包，表示当前为可执行程序
 
 //导入的是包所在目录的 相对路径
 import (
-	"fmt" //导入内置 fmt
-	"math/rand"
-	"strconv"
-	"strings"
-	"time"
-	"unsafe"
-	"encoding/json"
-	"errors"
-	"sort"
-	"bufio"
-	"os"
-	"io"
-	"flag"
-	"runtime"
-	"reflect"
-	// "utils" // 自定义包 [src/]......
+    "fmt" //导入内置 fmt
+    "math/rand"
+    "strconv"
+    "strings"
+    "time"
+    "unsafe"
+    "encoding/json"
+    "errors"
+    "sort"
+    "bufio"
+    "os"
+    "io"
+    "flag"
+    "runtime"
+    "reflect"
+    // "utils" // 自定义包 [src/]......
 )
 
 // ********申明
 // var 变量
-// const 常量
+// const 常量（不可寻址）
 // type 类型
 // func 函数
 
@@ -31,12 +31,33 @@ import (
 // 函数外部，类似protect
 // 函数外部且首字母大写，类似public
 
-var n int  //首字母小写，product
-var N int = 10 //首字母大写，public
-const C, c = 1, 'c'   //不用写类型，但必须赋值
+/*
+    《《《《《严谨的Go》》》》》》
+      导入的包和局部变量必须使用
+编译器优化，自动加 ;（所以{不能单独一行等）
+*/
 
-type Myint = int // 起别名，Myint==int
-// 自定义数据类型 (c typedef)
+var n int  //首字母小写，product
+var N = 10 //首字母大写，public
+const C, c = 1, 'c' //不用写类型，但必须赋值
+
+var (
+    x = 1 // 可以自动类型推导
+    y interface{} = nil // 必须申明类型
+)
+
+const (
+    a = iota // 计数器 0
+    b
+    c
+    d = "abc"
+    e // 同上原则
+    f = iota // 计算器 5
+)
+
+// 起别名
+type Myint = int // Myint==int
+// 类型定义
 type myInt int // 虽然都是int,但是不完全等价,需要显示转换
 
 type myFunType func(int) int
@@ -44,78 +65,78 @@ type myFunType func(int) int
 type myType struct {}
 
 type Stu struct {
-	name string
-	age int
+    name string
+    age int
 }
 
 func data_type() {
-	var b bool = false
+    var b bool = false
 
-	n1 := 10 //private
+    n1 := 10 //private
 
-	var f float32
-	// var f1 float = float(n)
-	var c1 byte = 'a' //ascii
-	// var c2 int = '中' //utf-8
+    var f float32
+    // var f1 float = float(n)
+    var c1 byte = 'a' //ascii
+    // var c2 int = '中' //utf-8
 
-	var s1 = "123"
-	/*
-		var s2 = `123\nabc` //原生字符串
-		var s3 = "hello"+
-		         "world"
-	*/
+    var s1 = "123"
+    /*
+        var s2 = `123\nabc` //原生字符串
+        var s3 = "hello"+
+                    "world"
+    */
 
-	var s4 = fmt.Sprintf("%d %t", n, b)
-	var n2, _ = strconv.ParseInt(s1, 10, 32)
+    var s4 = fmt.Sprintf("%d %t", n, b)
+    var n2, _ = strconv.ParseInt(s1, 10, 32)
 
-	fmt.Println("输入一个数")
-	fmt.Scanln(&n1)
-	fmt.Println("输入数字和字符")
-	fmt.Scanf("%d %s", &n, &s1)
+    fmt.Println("输入一个数")
+    fmt.Scanln(&n1)
+    fmt.Println("输入数字和字符")
+    fmt.Scanf("%d %s", &n, &s1)
 
-	fmt.Println("hello world")
-	fmt.Printf("n type %T, sizeof %d", n1, unsafe.Sizeof(n1))
-	fmt.Printf("c1: %c, %c", c1, c1+2) //字符可运算
-	fmt.Printf("f: %v", f)             //默认值
+    fmt.Println("hello world")
+    fmt.Printf("n type %T, sizeof %d", n1, unsafe.Sizeof(n1))
+    fmt.Printf("c1: %c, %c", c1, c1+2) //字符可运算
+    fmt.Printf("f: %v", f)             //默认值
 
-	fmt.Println(s4, n2)
+    fmt.Println(s4, n2)
 }
 
 func testIf(age int) (int, bool) {
-	var f bool
+    var f bool
 
-	if age >= 18 && age < 100 { // 必须带{}
-		f = true
-		fmt.Println("接受制裁")
-	} else { // 不能换行
-		fmt.Println("饶你一命")
-	}
-	return age, f
+    if age >= 18 && age < 100 { // 必须带{}
+        f = true
+        fmt.Println("接受制裁")
+    } else { // 不能换行
+        fmt.Println("饶你一命")
+    }
+    return age, f
 }
 
 func testSwitch(c byte) {
-	switch c { // 可以不写表达式，下面的case就成了if-else
-		case 'a', '1': // 可以有多个值；常量不能重复；变量可以欺骗过
-			fmt.Println("A")
-			fallthrough // switch穿透（一层）；默认break，编译器优化
-		case '0':
-			fmt.Println("第一个")
-		case 'b', '2': // 是变量时，值和数据类型都要一致
-			fmt.Println("B")
-		default:
-			fmt.Println("...")
-	}
+    switch c { // 可以不写表达式，下面的case就成了if-else
+        case 'a', '1': // 可以有多个值；常量不能重复；变量可以欺骗过
+            fmt.Println("A")
+            fallthrough // switch穿透（一层）；默认break，编译器优化
+        case '0':
+            fmt.Println("第一个")
+        case 'b', '2': // 是变量时，值和数据类型都要一致
+            fmt.Println("B")
+        default:
+            fmt.Println("...")
+    }
 }
 
 func testFor() {
-	for i,j := 10,1; i > j; i,j = i+1,j+2 { // 平行赋值；没有","表达式，++，--是语句
-		fmt.Println(i, j)
-	}
+    for i,j := 10,1; i > j; i,j = i+1,j+2 { // 平行赋值；没有","表达式，++，--是语句
+        fmt.Println(i, j)
+    }
 
-	for i, k := range "hello" {
-		fmt.Printf("%d, %c\t", i, k)
-	}
-	fmt.Println()
+    for i, k := range "hello" {
+        fmt.Printf("%d, %c\t", i, k)
+    }
+    fmt.Println()
 
     Exit:
     for i:=0; i<10; i++ {
@@ -134,32 +155,32 @@ func testFor() {
 }
 
 func testWhile(n int) {
-	// while
-	for n > 0 {
-		fmt.Println("hahaha")
-		n--
-	}
-	// do....while
-	for {
-		fmt.Println("hehehe")
-		n--
-		if n < 1 {
-			break
-		}
-	}
+    // while
+    for n > 0 {
+        fmt.Println("hahaha")
+        n--
+    }
+    // do....while
+    for {
+        fmt.Println("hehehe")
+        n--
+        if n < 1 {
+            break
+        }
+    }
 }
 
 func testGoto() {
-	n := 2
+    n := 2
 
-	fmt.Println("0")
-	fmt.Println("1")
-	if n == 2 {
-		goto label1 // 传送
-	}
-	fmt.Println("2")
-	label1:         // 标点
-	fmt.Println("3")
+    fmt.Println("0")
+    fmt.Println("1")
+    if n == 2 {
+        goto label1 // 传送
+    }
+    fmt.Println("2")
+    label1:         // 标点
+    fmt.Println("3")
 }
 
 //值类型    通常栈区 int, string, struct, 数组（不同于c）
@@ -167,66 +188,66 @@ func testGoto() {
 //         逃逸分析
 // pn    = new(int) // var pn *int,并且*pn=0；值类型分配内存
 // slice = make([]int32, 1, 5)；      引用类型分配内存（必须有长度，底层是数组）
-// chan  = make(chan int32, 5)；      引用类型分配内存
-// map_  = make(map[string]int32, 2)；引用类型分配内存
+// chan  = make(chan int32, 5)；      引用类型分配内存（容量为5）
+// map_  = make(map[string]int32, 2)；引用类型分配内存（长度可忽略，没有容量）
 
 func testStr() {
-	var str1 string = "hello中国"
-	var s string
+    var str1 string = "hello中国"
+    var s string
 
-	// 长度
-	fmt.Println(len(str1)) // 11
+    // 长度
+    fmt.Println(len(str1)) // 11
 
-	// 遍历
-	for _, c := range []rune(str1) { // rune==int32
-		fmt.Printf("%c\n", c)
-	}
+    // 遍历
+    for _, c := range []rune(str1) { // rune==int32
+        fmt.Printf("%c\n", c)
+    }
 
-	// 与byte数组互转
-	var bytes = []byte("abc") // byte==uint8
-	s = string([]byte{97, 98, 99})
-	fmt.Println(bytes)
-	fmt.Println(s)
+    // 与byte数组互转
+    var bytes = []byte("abc") // byte==uint8
+    s = string([]byte{97, 98, 99})
+    fmt.Println(bytes)
+    fmt.Println(s)
 
-	// 与数字互转
-	n, err := strconv.Atoi("123")
-	// s = strconv.Itoa(321)
-	// s = strconv.FormatInt(321, 2) // 类似 python int()
-	if err != nil {
-		fmt.Println("不能转换")
-	} else {
-		fmt.Println(n)
-	}
+    // 与数字互转
+    n, err := strconv.Atoi("123")
+    // s = strconv.Itoa(321)
+    // s = strconv.FormatInt(321, 2) // 类似 python int()
+    if err != nil {
+        fmt.Println("不能转换")
+    } else {
+        fmt.Println(n)
+    }
 
-	// 条件满足
-	b := strings.Contains(str1, "ll") //是否存在
-	fmt.Println(str1, " 中存在 ll?", b)
-	// strings.HasPrefix("https://www.qq.com", "https") // 是否开头
-	// strings.HasSuffix("1048523588@qq.com", "qq.com") // 是否结尾
+    // 条件满足
+    b := strings.Contains(str1, "ll") //是否存在
+    fmt.Println(str1, " 中存在 ll?", b)
+    // strings.HasPrefix("https://www.qq.com", "https") // 是否开头
+    // strings.HasSuffix("1048523588@qq.com", "qq.com") // 是否结尾
 
-	// 计数
-	num := strings.Count(str1, "l")
-	fmt.Println(str1, "有", num, "个l")
+    // 计数
+    num := strings.Count(str1, "l")
+    fmt.Println(str1, "有", num, "个l")
 
-	// 对比
-	fmt.Println("abc" == "Abc")
-	fmt.Println(strings.EqualFold("abc", "Abc"))
-	// strings.ToLower("Hello")
-	// strings.ToUpper("Hello")
+    // 对比
+    fmt.Println("abc" == "Abc")
+    fmt.Println(strings.EqualFold("abc", "Abc"))
+    // strings.ToLower("Hello")
+    // strings.ToUpper("Hello")
 
-	// 索引下标
-	fmt.Println(strings.Index(str1, "l"))
-	fmt.Println(strings.LastIndex(str1, "l"))
+    // 索引下标
+    fmt.Println(strings.Index(str1, "l"))
+    fmt.Println(strings.LastIndex(str1, "l"))
 
-	// 替换
-	fmt.Println(strings.Replace(str1, "hello", "hi", 1))
+    // 替换
+    fmt.Println(strings.Replace(str1, "hello", "hi", 1))
 
-	// 分割
-	fmt.Println(strings.Split("hello,hi,你好", ","))
+    // 分割
+    fmt.Println(strings.Split("hello,hi,你好", ","))
 
-	// 去除
-	fmt.Printf("%q\n", strings.TrimSpace(" jksj  kjsj  ")) // 两边空格
-	// strings.Trim("**hello**","**") // 两边**
+    // 去除
+    fmt.Printf("%q\n", strings.TrimSpace(" jksj  kjsj  ")) // 两边空格
+    // strings.Trim("**hello**","**") // 两边**
 }
 
 func testArr() {
@@ -291,7 +312,7 @@ func testSlice() {
     slice2 := make([]int32, 10)
     copy(slice2, slice1) // slice1对应替换到slice2
     fmt.Println(slice2)
-	fmt.Println(&slice1[0] != &slice2[0]) // 对应值拷贝
+    fmt.Println(&slice1[0] != &slice2[0]) // 对应值拷贝
 
     f := func(slice []int32) {
         slice[0] = 110
@@ -445,7 +466,7 @@ func peach(n int) int {
 }
 
 // 可变参数 (python元祖接收)
-func Sum(args... int) (sum int) { // args 是切片
+func Sum(args ...int) (sum int) { // args 是切片
     for _, v := range args {
         sum += v
     }
@@ -474,9 +495,10 @@ func addUpper(m int) myFunType {
     for _, v := range values {
         go func(v int) {
             fmt.Printf("%p, %p, %v\n", &v, v, v)
-        }(v) //闭包好处 #
-        // }() range坑  #
+        }(v) // 参数传递
+        // }() range，协程和闭包引用（坑）
     }
+    time.Sleep(time.Second * 3)
     */
 }
 
@@ -583,6 +605,7 @@ func (h *Honor) str() { // 形参决定了 引用传递 or 值传递
     fmt.Printf("name:%s\nage:%d\nskill:%s\n",
     h.Name, h.Age, h.Skill) // 编译器优化，对象选择器自动解引用
 }
+// 实现String()，格式化输出会自动调用。同java：toString()
 
 func testStruct() {
     x2 := xxx{"heheh", 2, "black", &Stu{"HaHaHa", 2}, nil}
@@ -717,7 +740,7 @@ func testInterface() {
     _cs, _ = t.(CollegeStudent) // 类型断言
     fmt.Println(_cs)
 
-    dy := func (t... interface{}) {
+    dy := func (t ...interface{}) {
         for _, v := range t {
             switch v.(type){ // 判断类型
                 case SchoolBoy:
@@ -759,7 +782,7 @@ func testSort() {
     fmt.Println(s_Slice)
 }
 
-////////////////////////////////////////////////////////////////////
+////////////////////////////////////////
 
 // 流：数据在 程序 与 文件 之间的路径
 // 输入流：读文件
@@ -855,18 +878,24 @@ func testFile() {
     }
 }
 
+// 进程（资源分配的基本单位）
+// 线程（调度的最小单位）有溢出风险
+// goroutine 协程（用户态线程）
+// M（主线程）P（上下文）G（协程）
+
 func testChannel() {
     var intChan chan int // nil chan
-    intChan = make(chan int, 3)
+    intChan = make(chan int, 3) // 缓冲为3；无缓冲chan是同步的
 
     fmt.Println(intChan)
     intChan<- 10 // 流入
     intChan<- 110
     intChan<- 101
+    // intChan<- 102 # 阻塞，因为缓冲满了
     num := <-intChan // 流出
     close(intChan) // 关闭后，可取不可加
-    fmt.Println(len(intChan), cap(intChan))
-    <-intChan // 0（关闭后，读取的是元素类型的默认值）
+    fmt.Println(len(intChan), cap(intChan)) // 2 3
+    <-intChan //（缓冲区为空后，返回零值）
 
     // ch := make(chan interface{}) // 无容量（缓冲）的channel，取出来后需要类型断言
     // ch := make(chan struct{}, 10) // 容量为10的channel
@@ -874,23 +903,47 @@ func testChannel() {
 
     // 申明流向
     // var ch chan<- int 只写
-    // var ch <-chan int 只读
-    // ch = make(chan int, 3) 申请内存，不变
+    // var ch <-chan int 只读 （不可以被关闭）
+    // ch = make(chan int, 3) 申请内存，不指明流向
 
     for {
         select { // io多路复用
             case v:= <-intChan: // 读完后不会阻塞
                 fmt.Println(v)
+                return
             default:
                 return
         }
     }
 }
 
-// 进程（资源分配的基本单位）
-// 线程（调度的最小单位）有溢出风险
-// goroutine 协程（用户态线程）
-// M（主线程）P（上下文）G（协程）
+func testSelect() {
+    ch1 := make(chan string)
+    ch2 := make(chan string)
+
+    go func(ch chan string) {
+            //time.Sleep(2 * time.Second)
+            ch <- "from service1"
+        }(ch1)
+
+    go func(ch chan string) {
+            //time.Sleep(1 * time.Second)
+            ch <- "from service2"
+        }(ch2)
+
+    time.Sleep(2*time.Second)
+
+    select { // 发生阻塞，等待可操作的case
+        case s1 := <-ch1:
+            fmt.Println(s1)
+        case s2 := <-ch2:
+            fmt.Println(s2)
+        case <-time.After(time.Second*2):
+            fmt.Println("等待2S")
+        default:
+            fmt.Println("no case ok")
+    }
+}
 
 func putNum(intChan chan int) {
     for i:=2; i<500; i++ {
@@ -966,6 +1019,8 @@ func testGoroutine() {
         fmt.Println(res)
     }
 }
+
+////////////////////////////
 
 func reflect_(t interface{}) {
     /*
