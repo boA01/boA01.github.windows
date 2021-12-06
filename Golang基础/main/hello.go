@@ -9,7 +9,7 @@ import (
     "time"
     "unsafe"
     "encoding/json"
-    "errors"
+    _ "errors"
     "sort"
     "bufio"
     "os"
@@ -34,7 +34,7 @@ import (
 /*
     《《《《《严谨的Go》》》》》》
       导入的包和局部变量必须使用
-编译器优化，自动加 ;（所以{不能单独一行等）
+ 编译器优化，自动加 ;（所以{不能单独一行等）
 */
 
 var n int  //首字母小写，product
@@ -176,7 +176,7 @@ func testGoto() {
     fmt.Println("0")
     fmt.Println("1")
     if n == 2 {
-        goto label1 // 传送
+        goto label1 // 传送；不能跳转到内层代码或其他函数
     }
     fmt.Println("2")
     label1:         // 标点
@@ -546,24 +546,18 @@ func testErr() {
         }
     }() // 退出前自动调用
 
-    x, y := 1, 0
-    fmt.Println(x/y)
-}
-
-func testErr1() {
     myErr := func(fName string) (err error) {
         if fName == "xxx.txt" {
             return nil
         }
-        return errors.New("文件名错误") // 返回自定义错误类型
-        // return fmt.Errorf("%s，文件名错误", fName) // 格式化字符串+error.New()
+        // return errors.New("文件名错误") // 返回自定义错误类型
+        return fmt.Errorf("%s，文件名错误", fName) // 格式化字符串+error.New()
     }
 
-    err := myErr("he.txt")
-
-    if err != nil {
-        panic(err) // 输出错误，停止程序
+    if err := myErr("he.txt"); err != nil {
+        panic(err) // 抛出错误，停止向后执行
     }
+    panic(2)
 }
 
 func testTime() {
@@ -604,8 +598,12 @@ type Honor struct {
 func (h *Honor) str() { // 形参决定了 引用传递 or 值传递
     fmt.Printf("name:%s\nage:%d\nskill:%s\n",
     h.Name, h.Age, h.Skill) // 编译器优化，对象选择器自动解引用
-}
+} 
 // 实现String()，格式化输出会自动调用。同java：toString()
+func (h *Honor) String() string { // 不同于普通方法
+    return fmt.Sprintf("name:%s\nage:%d\nskill:%s\n",
+        h.Name, h.Age, h.Skill) // 编译器优化，对象选择器自动解引用
+}
 
 func testStruct() {
     x2 := xxx{"heheh", 2, "black", &Stu{"HaHaHa", 2}, nil}
@@ -626,6 +624,7 @@ func testStruct() {
     fmt.Println(*x1.Stu)
 
     h1 := Honor{"孙悟空", 501, "金箍棒"}
+    fmt.Println(&h1)
 
     jsonStr, err := json.Marshal(h1) // 序列化
     if err != nil {
@@ -633,16 +632,17 @@ func testStruct() {
     }
     fmt.Println(string(jsonStr))
 
-    nmw = `{"name":"牛魔王", "age":502, "Skill":"牛毛细雨"}`
+    nmw := `{"name":"牛魔王", "age":502, "skill":"牛毛细雨"}`
     var h2 Honor
-    err = json.Unmarrshal([]byte(nmw), &h2) // 反序列化
+    err = json.Unmarshal([]byte(nmw), &h2) // 反序列化
     if err != nil {
         fmt.Println("反序列化失败...", err)
     }
-    fmt.Println(h2)
+    fmt.Println(&h2) // 必须取地址，实参与方法类型一致；不同于下面的str()调用
+    // h2.String() // 无限递归循环，栈溢出
 
     h1.str() // 调用方法
-    // (&h1).str() 同上，传递方式取决于定义，不在于调用（方法的特点）
+    (&h1).str() // 同上，传递方式取决于定义，不在于调用（方法的特点）
 }
 
 /*
@@ -733,8 +733,8 @@ func testInterface() {
     // fmt.Printf("%d\n", unsafe.Sizeof(l))  //16
     l.Classing() // 接口调用方法
 
-    var t interface{} // t 泛型
-    t = cs // 接收所有类型
+    var t interface{} // t 泛型；可以指向所有类型
+    t = cs
     var _cs CollegeStudent
     // _cs = t // 报错，必须类型断言
     _cs, _ = t.(CollegeStudent) // 类型断言
@@ -850,6 +850,7 @@ func testFile() {
     srcFile, err := os.Open(srcFileName)
     if err != nil {
         fmt.Println(err)
+        return
     }
     defer srcFile.Close()
     // 通过srcFile，获取Reader
@@ -1132,7 +1133,7 @@ func main() {
 
     // fmt.Println(testDefer())
 
-    // testErr1()
+    // testErr()
 
     // testStr()
 
