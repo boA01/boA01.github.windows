@@ -54,6 +54,9 @@ const (
     e // 同上原则
     f = iota // 计算器 5
     // iota 第一次出现不在第一行，则初始值非0
+    g = 010 // 八进制 8; 同0o10
+    h = 0x11 // 十六进制 17
+    j = 0b101 //二进制 5
 )
 
 // 起别名
@@ -311,7 +314,7 @@ func testSlice() {
     fmt.Printf("长度：%d, 容量：%d\n", len(slice1), cap(slice1))
 
     slice2 := make([]int32, 10)
-    copy(slice2, slice1) // slice1对应替换到slice2
+    copy(slice2, slice1) // slice1对应替换到slice2；返回最小长度
     fmt.Println(slice2)
     fmt.Println(&slice1[0] != &slice2[0]) // 对应值拷贝
 
