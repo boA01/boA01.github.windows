@@ -32,9 +32,10 @@ import (
 // 函数外部且首字母大写，类似public
 
 /*
-    《《《《《严谨的Go》》》》》》
-      导入的包和局部变量必须使用
- 编译器优化，自动加 ;（所以{不能单独一行等）
+  《《《《严谨的Go》》》》》》
+  导入的包和局部变量必须使用
+  := 局部变量（申明+初始化）；容易变量隐藏（坑）
+  编译器优化，自动加“;”（所以“{”不能单独一行等）
 */
 
 var n int  //首字母小写，product
@@ -50,13 +51,13 @@ var (
 )
 
 const (
-    a = iota // 计数器 0
+    // iota 第一次出现不在第一行，则初始值非0
+    a = iota // 行计数 0
     b
     c
     d = "abc"
     e // 同上原则
-    f = iota // 计算器 5
-    // iota 第一次出现不在第一行，则初始值非0
+    f = iota // 行计数 5
     g = 010 // 八进制 8; 同0o10
     h = 0x11 // 十六进制 17
     j = 0b101 //二进制 5
@@ -64,6 +65,7 @@ const (
 
 // 起别名
 type Myint = int // Myint==int
+
 // 类型定义
 type myInt int // 虽然都是int,但是不完全等价,需要显示转换
 
@@ -122,7 +124,7 @@ func testIf(age int) (int, bool) {
 }
 
 func testSwitch(c byte) {
-    switch c { // 可以不写表达式，下面的case就成了if-else
+    switch c { // 不写表达式，下面的case就成了if-else
         case 'a', '1': // 可以有多个值；常量不能重复；变量可以欺骗过
             fmt.Println("A")
             fallthrough // switch穿透（一层）；默认break，编译器优化
@@ -132,6 +134,12 @@ func testSwitch(c byte) {
             fmt.Println("B")
         default:
             fmt.Println("...")
+    }
+
+    switch y:=2; { // 等效于if-else
+        case y==2:
+            fmt.Println("y==2")
+            return
     }
 }
 
@@ -192,7 +200,8 @@ func testGoto() {
 
 //值类型    通常栈区 int, string, struct, 数组（不同于c）
 //指针类型  通常堆区 指针, slice, map, chan, interface  零值：nil
-//         逃逸分析
+//         内存逃逸 （例：fmt.Println()逃到堆，println()不逃） <<<<<重要概念
+//         内存管理  指针指向的变量的地址发生改变，指针指向也会自动改变
 // pn    = new(int) // var pn *int,并且*pn=0；值类型分配内存
 // slice = make([]int32, 1, 5)；      切片分配内存（必须有长度，底层是数组）
 // chan  = make(chan int32, 5)；      管道分配内存（容量为5）
@@ -203,15 +212,15 @@ func testStr() {
     var s string
 
     // 长度
-    fmt.Println(len(str1)) // 11
+    fmt.Println(len(str1)) // 11，UTF-8字符串
 
     // 遍历
-    for _, c := range []rune(str1) { // rune==int32
+    for _, c := range str1 {
         fmt.Printf("%c\n", c)
     }
 
-    // 与byte数组互转
-    var bytes = []byte("abc") // byte==uint8
+    // 与byte切片互转
+    var bytes = []byte("abc") // byte==uint8；rune==int32
     s = string([]byte{97, 98, 99})
     fmt.Println(bytes)
     fmt.Println(s)
@@ -258,11 +267,11 @@ func testStr() {
 }
 
 func testArr() {
-    var intArr [5]int32
+    var intArr [5]int32 // 显示指定长度
 
     /*
     intArr := [3]int32{1,2,3}
-    intArr := [...]int32{1,2,3}
+    intArr := [...]int32{1,2,3} // 隐式指定长度
     intArr := [...]int32{1:2, 2:3, 0:1}
     */
 
@@ -296,7 +305,7 @@ func testArr() {
 }
 
 func testSlice() {
-    var slice []int32 // 区别数组，不写长度；nil Slice，不分配内存
+    var slice []int32 // 区别数组，不写长度；nil Slice
 
     arr := [...]int32{1,2,3,4}
     slice = arr[1:3] // [i:j:K], 长度=j-i, 容量=k-i；不同于python切片
@@ -306,6 +315,7 @@ func testSlice() {
 
     slice = make([]int32, 5, 10) // 必须指定长度
     slice = []int32{1,2,3}
+    slice = []int32{010:3} // 长度为9，slice[8]==3
     */
 
     fmt.Println(slice)
@@ -329,11 +339,15 @@ func testSlice() {
 
     // 替换字符串元素（了解即可）
     str := "helio"
-    slice3 := []byte(str) // 字节切片
-    // slice3 := []rune(str) // 中文切片
+    slice3 := []byte(str) // uint8切片
+    // slice3 := []rune(str) // int32切片
     slice3[3] = 'l'
     str = string(slice3)
     fmt.Println(str)
+
+    // 排序(似python：sort(obj, key))
+    sort.Slice(slice3, func(i, j int) bool {return slice3[i]<slice3[j]})
+    fmt.Printf("%#v", slice3) // []byte{0x65, 0x68, 0x6c, 0x6c, 0x6f}
 
     fbn := func(n int)([]int) {
         fbnSlice := make([]int, n)
@@ -354,7 +368,7 @@ func testMap() {
     map_["C"] = 3
 
     /*
-    var map_ map[string]int // 只是申明
+    var map_ map[string]int // nil map，只是申明
     map_ := make(map[sting]int, 3) // 分配空间，长度可以省略
 
 	map_ := map[string]int {
@@ -893,19 +907,19 @@ func testFile() {
 
 func testChannel() {
     var intChan chan int // nil chan
-    intChan = make(chan int, 3) // 缓冲为3；无缓冲chan是同步的
+    intChan = make(chan int, 3) // 缓冲为3；无缓冲channel是同步的
 
     fmt.Println(intChan)
     intChan<- 10 // 流入
     intChan<- 110
     intChan<- 101
-    // intChan<- 102 # 阻塞，因为缓冲满了
+    // intChan<- 102 # 死锁，缓冲满了
     num := <-intChan // 流出
     close(intChan) // 关闭后，可取不可加
     fmt.Println(len(intChan), cap(intChan)) // 2 3
     <-intChan //（缓冲区为空后，返回零值）
 
-    // ch := make(chan interface{}) // 无容量（缓冲）的channel，取出来后需要类型断言
+    // ch := make(chan interface{}) // 无容量（缓冲）的channel；用于同步
     // ch := make(chan struct{}, 10) // 容量为10的channel
     // nil chan 未初始化的Chan
 
@@ -926,11 +940,12 @@ func testChannel() {
 }
 
 func testSelect() {
-    ch1 := make(chan string)
+    ch1 := make(chan string) // 无缓冲channel，读写立即阻塞当前协程
     ch2 := make(chan string)
 
     go func(ch chan string) {
             //time.Sleep(2 * time.Second)
+            // <-ch
             ch <- "from service1"
         }(ch1)
 
@@ -939,9 +954,10 @@ func testSelect() {
             ch <- "from service2"
         }(ch2)
 
-    time.Sleep(2*time.Second)
+    time.Sleep(2*time.Second) // 阻塞；生产中不能使用
+    // ch1<- "1" # 无缓冲channel的读写操作也会阻塞
 
-    select { // 发生阻塞，等待可操作的case
+    select { // 阻塞，等待可操作的case
         case s1 := <-ch1:
             fmt.Println(s1)
         case s2 := <-ch2:
@@ -1021,7 +1037,7 @@ func testGoroutine() {
 
     for {
         res, ok := <-primeChan
-        if !ok {
+        if !ok { // ok==false,管道关闭
             break
         }
         fmt.Println(res)
