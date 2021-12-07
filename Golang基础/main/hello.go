@@ -188,12 +188,12 @@ func testGoto() {
 }
 
 //值类型    通常栈区 int, string, struct, 数组（不同于c）
-//引用类型  通常堆区 指针, slice, map, chan, interface  零值：nil
+//指针类型  通常堆区 指针, slice, map, chan, interface  零值：nil
 //         逃逸分析
 // pn    = new(int) // var pn *int,并且*pn=0；值类型分配内存
-// slice = make([]int32, 1, 5)；      引用类型分配内存（必须有长度，底层是数组）
-// chan  = make(chan int32, 5)；      引用类型分配内存（容量为5）
-// map_  = make(map[string]int32, 2)；引用类型分配内存（长度可忽略，没有容量）
+// slice = make([]int32, 1, 5)；      切片分配内存（必须有长度，底层是数组）
+// chan  = make(chan int32, 5)；      管道分配内存（容量为5）
+// map_  = make(map[string]int32, 2)；map分配内存（长度可忽略，没有容量cap）
 
 func testStr() {
     var str1 string = "hello中国"
@@ -594,12 +594,12 @@ type xxx struct {
 }
 
 type Honor struct {
-    Name string `json:"name"`// 加标签
+    Name string `json:"name"`// 加标签（私有属性无效，因为外包访问不了）
     Age int `json:"age"`
     Skill string `json:"skill"`
 }
 // 类型绑定方法
-func (h *Honor) str() { // 形参决定了 引用传递 or 值传递
+func (h *Honor) str() { // 编译器优化，调用时自动转方法类型
     fmt.Printf("name:%s\nage:%d\nskill:%s\n",
     h.Name, h.Age, h.Skill) // 编译器优化，对象选择器自动解引用
 } 
@@ -713,7 +713,7 @@ type People struct {
     *CollegeStudent
 }
 
-// 多态（统一化调用，鸭子类型思想; 接口是引用类型；空接口可以接收所有类型）
+// 多态（统一化调用，鸭子类型思想; 接口是指针类型；空接口可以接收所有类型）
 func (p *People) Status(life Life) {
     // fmt.Printf("^^^^^^%d, %T^^^^^^\n", unsafe.Sizeof(life), life) // 16
     life.Classing()
@@ -732,7 +732,7 @@ func testInterface() {
     p1.Status(cs)   //解释上一行 组合的是 *Student <<<<<<
 
     s := Students{"未知", 0}
-    var l Life = &s // 必须取地址，接口是引用类型<<<<<<<<<
+    var l Life = &s // 必须取地址，接口是指针类型<<<<<<<<<
     // fmt.Printf("%d %d\n", unsafe.Sizeof(s), unsafe.Sizeof(&s)) //24 8
     // fmt.Printf("%d\n", unsafe.Sizeof(l))  //16
     l.Classing() // 接口调用方法
