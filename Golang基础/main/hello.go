@@ -44,6 +44,9 @@ const C, c = 1, 'c' //不用写类型，但必须赋值
 var (
     x = 1 // 可以自动类型推导
     y interface{} = nil // 必须申明类型
+    user string
+    passwd string
+    port int
 )
 
 const (
@@ -1086,6 +1089,9 @@ func testReflect() {
 // func init() {
 //     n = 1
 //     fmt.Println("init()...")
+//     flag.StringVar(&user, "u", "root", "用户名，默认root")
+//     flag.StringVar(&passwd, "p", "", "密码，默认")
+//     flag.IntVar(&port, "port", 3306, "端口号，默认3306")
 // }
 
 // >>>>>>>>>>>>>>init(), main()没有参数和返回值<<<<<<<<<<<<<<<
@@ -1096,12 +1102,6 @@ func main() {
     // fmt.Println(os.Args) // 获取命令行参数
 
     // main -u root -p 123 -port 3306
-    // var user string
-    // var passwd string
-    // var port int
-    // flag.StringVar(&user, "u", "root", "用户名，默认root")
-    // flag.StringVar(&passwd, "p", "", "密码，默认")
-    // flag.IntVar(&port, "port", 3306, "端口号，默认3306")
     // flag.Parse() // 转换，表示调用该方法
     // fmt.Println(user, passwd, port)
 
