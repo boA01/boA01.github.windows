@@ -444,10 +444,11 @@ func testMap() {
 func testPtr(ptr *int) { // ptr指向的空间存放n指向的地址
     *ptr = N // * 解引用; 替换 n指向的空间里存放的值，n=10
     /*
-        GO指针不支持运算   # 区别C
-        uninptr 支持运算；实质是值类型，存放地址，毕竟地址也是值
+        unsafe.Pointer （转换桥梁）；类似C：void* 
 
-        unsafe.Pointer 类似 void* 弱类型语言特点
+        GO指针不支持运算   # 区别C
+
+        uninptr 支持运算；实质是值类型，存放地址，毕竟地址也是值
 
         // 指针与引用（C++）
         int i = 3;
@@ -619,7 +620,7 @@ type Honor struct {
 func (h *Honor) str() { // 编译器优化，调用时自动转方法类型
     fmt.Printf("name:%s\nage:%d\nskill:%s\n",
     h.Name, h.Age, h.Skill) // 编译器优化，对象选择器自动解引用
-} 
+}
 // 实现String()，格式化输出会自动调用。同java：toString()
 func (h *Honor) String() string { // 不同于普通方法
     return fmt.Sprintf("name:%s\nage:%d\nskill:%s\n",
@@ -665,6 +666,20 @@ func testStruct() {
     h1.str() // 调用方法
     (&h1).str() // 同上，传递方式取决于定义，不在于调用（方法的特点）
 }
+
+/*
+ 内存对齐(空间换时间)
+    CPU以块读取内存，块大小——内存访问颗粒度
+    #pragma pack(n) // 变更默认对齐系数（4，8）
+    unsafe.Alignof("abc") // 对齐系数
+    unsafe.Sizeof("abc") // 内存长度
+    成员对齐：成员变量偏移量%对齐系数==0；第一个为0
+    整体对齐：总长度%Max对齐系数==0
+
+ C:防止内存对齐
+    __attribute__((packed)) // 关闭对齐优化
+    __attribute__((aligned(0))) // 0字节对齐
+*/
 
 /*
 // 工厂模式（解决作用域问题）
