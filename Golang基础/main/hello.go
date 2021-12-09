@@ -201,7 +201,6 @@ func testGoto() {
 //值类型    通常栈区 int, string, struct, 数组（不同于c）
 //指针类型  通常堆区 指针, slice, map, chan, interface  零值：nil
 //         内存逃逸 （例：fmt.Println()逃到堆，println()不逃） <<<<<重要概念
-//         内存管理  指针指向的变量的地址发生改变，指针指向也会自动改变
 // pn    = new(int) // var pn *int,并且*pn=0；值类型分配内存
 // slice = make([]int32, 1, 5)；      切片分配内存（必须有长度，底层是数组）
 // chan  = make(chan int32, 5)；      管道分配内存（容量为5）
@@ -444,7 +443,9 @@ func testMap() {
 func testPtr(ptr *int) { // ptr指向的空间存放n指向的地址
     *ptr = N // * 解引用; 替换 n指向的空间里存放的值，n=10
     /*
-        unsafe.Pointer （转换桥梁）；类似C：void* 
+        指针指向的变量的地址发生改变，指针指向会同步更新
+
+        unsafe.Pointer （转换桥梁）；类似C：void*
 
         GO指针不支持运算   # 区别C
 
@@ -678,7 +679,7 @@ func testStruct() {
 
  C:防止内存对齐
     __attribute__((packed)) // 关闭对齐优化
-    __attribute__((aligned(0))) // 0字节对齐
+    __attribute__((aligned(0))) // 0字节对齐 同 #pragma pack(0)
 */
 
 /*
@@ -971,6 +972,7 @@ func testSelect() {
 
     time.Sleep(2*time.Second) // 阻塞；生产中不能使用
     // ch1<- "1" # 无缓冲channel的读写操作也会阻塞
+    // runtime.Gosched() # 调度语句
 
     select { // 阻塞，等待可操作的case
         case s1 := <-ch1:
