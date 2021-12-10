@@ -56,6 +56,10 @@ go get xxx // 拉取并下载依赖
 
 go install test-folder // 安装
 
+go fix
+go fmt
+go doc
+go vet
 
 make build // 编译项目
 make test // 执行测试
