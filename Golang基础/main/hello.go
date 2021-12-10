@@ -9,7 +9,7 @@ import (
     "time"
     "unsafe"
     "encoding/json"
-    _ "errors"
+    _ "errors" // _ 包路径 #仅仅调用init()
     "sort"
     "bufio"
     "os"
@@ -201,10 +201,11 @@ func testGoto() {
 //值类型    通常栈区 int, string, struct, 数组（不同于c）
 //指针类型  通常堆区 指针, slice, map, chan, interface  零值：nil
 //         内存逃逸 （例：fmt.Println()逃到堆，println()不逃） <<<<<重要概念
-// pn    = new(int) // var pn *int,并且*pn=0；值类型分配内存
+// pn    = new(int) // var pn *int,并且*pn=0；主要分配值类型
 // slice = make([]int32, 1, 5)；      切片分配内存（必须有长度，底层是数组）
 // chan  = make(chan int32, 5)；      管道分配内存（容量为5）
 // map_  = make(map[string]int32, 2)；map分配内存（长度可忽略，没有容量cap）
+// new()返回指针，make()返回本身
 
 func testStr() {
     var str1 string = "hello中国"
@@ -1118,7 +1119,7 @@ func testReflect() {
 //     return 0
 // }
 
-// 全局变量执行之后,main()执行之前,用于初始化工作； 可以有多个
+// 全局变量执行之后,main()执行之前,用于初始化工作；可以定义多个，只能自动调用
 // func init() {
 //     n = 1
 //     fmt.Println("init()...")
