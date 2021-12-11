@@ -1,0 +1,1 @@
+docker-compose up  # 启动项目

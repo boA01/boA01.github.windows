@@ -1,0 +1,24 @@
+version "3.7"
+services:
+  mysql8:
+    # 使用mysql:8.0.19镜像
+    image: "mysql:8.0.19"
+    ports:
+      - "33061:3306"
+    command: "--default-authenticaton-plugin=mysql_native_passwd --init-file /data/application/init.sql"
+    environment:
+      MYSQL_ROOT_PASSWORD: "root1234"
+      MYSQL_DATABASE: "bubble"
+      MYSQL_PASSWORD: "root1234"
+    volumes:
+      - ./init.sql:/data/application/init.sql
+  bubble_app:
+    # 使用当前目录下的Dockerfile构建镜像
+    build: .
+    
+    command: sh -c "./wait-for.sh mysql8:3306 -- ./bubble ./config.ini"
+    # 指定依赖服务
+    depends_on:
+      - mysql8
+    ports:
+      - "8888:8888"
