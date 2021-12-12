@@ -1,3 +1,4 @@
+# 小版本golang
 FROM golang:alpine AS builder
 
 ENV GO111MoDULE=on \
