@@ -19,9 +19,9 @@ go-mod-test -->模块名
     Makefile
     bin
     src
-        config-folder -->目录  （导入）
+        config -->目录  （导入）
             config-file.go -->文件名
-                package xxx -->包名 （调用）
+                package config -->包名 （调用；通常与目录名相同）
         test-folder
             xxx_test.go
                 package test -->test包，测试
@@ -32,7 +32,7 @@ go-mod-test -->模块名
         main.go
             package main -->mian包，当前包可执行
             import (
-                "go-mod-test/src/pk1"
+                "go-mod-test/src/pk1" //路径以项目名开始
                 pk1pk1 "go-mod-test/src/pk1/pk1"  //目录名相同了，起别名
             )
     go.mod
