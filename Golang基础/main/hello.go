@@ -756,11 +756,10 @@ func (p *People) Status(life Life) {
 }
 
 func testInterface() {
-    p1 := People{} // 不用取地址，传递方式取决权不在调用，在于定义（同559）
-    // sb := SchoolBoy{&Students{age:6}}
     sb := SchoolBoy{&Students{"小学生", 6}}
     cs := CollegeStudent{&Students{age:20, identity: "大学生"}}
-
+    
+    p1 := People{} // 不用取地址，传递方式取决权不在调用，在于定义（同559）
     // fmt.Printf("%d %T\n", unsafe.Sizeof(cs), cs) // 8 main.CollegeStudent
     p1.Status(sb) // 不用取地址，因为类型里面就是指针<<<<<
     p1.Status(cs)   //解释上一行 组合的是 *Student <<<<<<
@@ -1064,51 +1063,59 @@ func testGoroutine() {
 
 ////////////////////////////
 
-func reflect_(t interface{}) {
+func reflect_(itf interface{}) {
     /*
-    运行时的反射
+        运行时的反射
 
-    // interface{} 转 Value
-    value := reflect.ValueOf()
+        // interface{} 转 Value
+        value := reflect.ValueOf()
 
-    // Value 转 interface{}
-    iface := value.interface()
+        // Value 转 interface{}
+        iface := value.interface()
 
-    // interface 转 类型
-    // obj := t.(xxx)
+        // interface 转 类型
+        // obj := t.(xxx)
     */
 
-    rType := reflect.TypeOf(t)
-    fmt.Println(rType)
+    t := reflect.TypeOf(itf)
+    fmt.Println(t)
 
-    rValue : = reflect.ValueOf(t)
-    fmt.Println(rValue) // rValue != 2，rValue.Int() == 2
-    // rValue.Elem().SetInt(20)
-
-    iface := rValue.interface()
-    fmt.Printf("%v %T\n", iface, iface)
-
-    switch t.(type) {
-        case Stu:
-            t.(Stu)
-        case int:
-            t.(int)
+    tk := t.Kind()
+    fmt.Println(tk)
+    switch tk {
+        case reflect.Struct:
+            fmt.Println("结构体")
+            itf.(Honor).Name // 类型断言
+        case reflect.Ptr:
+            fmt.Println("地址")
+            itf.(*Honor).Name // 类型断言
+        case reflect.Int:
+            fmt.Println("数字")
         default:
             break
     }
 
-    obj, ok := t.(Stu)
-    if ok {
-        return
-    }
+    v := reflect.ValueOf(itf)
+    fmt.Println(v)
+
+    e := v.Elem()
+    // e.Field(0) 序号取值
+    // e.FieldByName("Class") 具名取值
+    // e.FieldByIndex([]int{0,0}) 层级（匿名）加序号取值
+    e.FieldByName("Age").SetInt(999) //修改属性
+    // m := v.Method(0)
+    // fmt.Println(m) //地址
+    // m.Call([]reflect.Value{reflect.ValueOf{"哈哈哈"}}) //调用方法
 }
 
 func testReflect() {
-    num := 2
-    stu = Stu{name:"hahaha", age:18}
+    // num := 2
+    h1 := Honor{"孙悟空", 501, "金箍棒"}
 
-    reflect_(&num)
-    feflect_(&stu)
+    // reflect_(&num)
+    feflect_(&h1)
+
+    fmt.Println(h1)
 }
 
 // 全局变量初始化
