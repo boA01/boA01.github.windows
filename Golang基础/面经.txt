@@ -107,3 +107,25 @@ func maxStr(s []int) {
     }
     fmt.Println(dp, max, index)
 }
+
+1、go如何关闭协程？
+
+go协程池？
+
+go init 的执行顺序？
+
+context有什么作用？
+
+一颗CPU，两个协程，其中一个协程在死循环，会发生什么？
+
+Redis淘汰策略？
+默认策略，不淘汰任何key
+LRU，LFU
+随机淘汰，过期，TTL短的
+
+Redis高可用？
+主从复制：
+哨兵模式：无法较好的进行水平扩展
+集群模式：
+
+mysql备份还原？
