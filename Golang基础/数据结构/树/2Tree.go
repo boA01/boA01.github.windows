@@ -54,6 +54,71 @@ func GetDegree(root *BinaryTree) int {
     return maxDegree + 1
 }
 
+//层数(递归实现)
+//对任意一个子树的根节点来说，它的深度=左右子树深度的最大值+1
+func (node *Node) Layers() int {
+    if node == nil {
+        return 0
+    }
+    leftLayers := node.Left.Layers()
+    rightLayers := node.Right.Layers()
+    if leftLayers > rightLayers {
+        return leftLayers + 1
+    } else {
+        return rightLayers + 1
+    }
+}
+
+//层数(非递归实现)
+//借助队列，在进行按层遍历时，记录遍历的层数即可
+func (node *Node) LayersByQueue() int {
+    if node == nil {
+        return 0
+    }
+    layers := 0
+    nodes := []*Node{node}
+    for len(nodes) > 0 {
+        layers++
+        size := len(nodes) //每层的节点数
+        count := 0
+        for count < size {
+            count++
+            curNode := nodes[0]
+            nodes = nodes[1:]
+            if curNode.Left != nil {
+                nodes = append(nodes, curNode.Left)
+            }
+            if curNode.Right != nil {
+                nodes = append(nodes, curNode.Right)
+            }
+        }
+    }
+    return layers
+}
+
+//层次遍历(广度优先遍历)
+func (node *Node) BreadthFirstSearch() {
+    if node == nil {
+        return
+    }
+    result := []int{}
+    nodes := []*Node{node}
+    for len(nodes) > 0 {
+        curNode := nodes[0]
+        nodes = nodes[1:]
+        result = append(result, curNode.Value)
+        if curNode.Left != nil {
+            nodes = append(nodes, curNode.Left)
+        }
+        if curNode.Right != nil {
+            nodes = append(nodes, curNode.Right)
+        }
+    }
+    for _, v := range result {
+        fmt.Print(v, " ")
+    }
+}
+
 // 前序遍历： 根-> 左子树 -> 右子树
 func PreOrder(root *BinaryTree) {
     if root == nil {
