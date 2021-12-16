@@ -1,8 +1,8 @@
 package LinkList
 
 import (
-	"fmt"
-	_ "errors"
+    "fmt"
+    _ "errors"
 )
 
 type LinkNode struct {
@@ -22,9 +22,9 @@ func (pl *LinkNode) Append(v interface{}) {
 }
 
 func (pl *LinkNode) Select() {
-	cur := pl.next
-	for {
-		fmt.Println(cur.data)
+    cur := pl.next
+    for {
+        fmt.Println(cur.data)
         if cur.next == nil{
             break
         }
