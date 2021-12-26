@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"gt/ArrayList"
-	LinkList "gt/Linklist"
+
+	ArrayList "ds/ArrayList"
+	LinkList "ds/LinkList"
 )
 
 type List interface {
