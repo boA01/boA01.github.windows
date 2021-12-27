@@ -16,7 +16,6 @@ func HeartBeat(conn net.Conn, heartChan chan byte, timout int) {
 			log.Println(string(hc))
 			conn.SetDeadline(time.Now().Add(time.Duration(timout) * time.Second))
 		case <-time.After(time.Second * 30):
-			conn.Write([]byte("超时，已断开连接!!!"))
 			conn.Close()
 			return
 		}
@@ -70,7 +69,6 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-
 		go MsgHandler(newConn)
 	}
 }

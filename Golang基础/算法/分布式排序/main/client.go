@@ -15,6 +15,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	conn.Write([]byte("hello"))
 
 	var inputStr string
