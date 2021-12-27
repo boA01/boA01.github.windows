@@ -32,11 +32,12 @@ func InMemorySort(in <-chan int) <-chan int {
 
 		fmt.Println("数据读取完成", time.Since(startTime))
 		sort.Ints(data) //排序
-		fmt.Println(data)
 
 		for _, v := range data {
 			out <- v
 		}
+		close(out)
+		fmt.Println("排序完成", time.Since(startTime))
 	}()
 	return out
 }
@@ -59,14 +60,8 @@ func Merge(in1, in2 <-chan int) <-chan int {
 				v2, o2 = <-in2
 			}
 		}
-
-		fmt.Println(o1, o2)
-		if o1 {
-			out <- v1
-		}
-		if o2 {
-			out <- v2
-		}
+		close(out)
+		fmt.Println("归并完成", time.Since(startTime))
 	}()
 	return out
 }
@@ -78,7 +73,7 @@ func MergeN(inputs ...<-chan int) <-chan int {
 		return inputs[0]
 	}
 	m := length / 2
-	return Merge(MergeN(inputs[:m]...), MergeN(inputs[m:]...))
+	return Merge(MergeN(inputs[m:]...), MergeN(inputs[m:]...))
 }
 
 // 写入
@@ -110,6 +105,7 @@ func ReadSource(reader io.Reader, chunksize int) <-chan int {
 				break
 			}
 		}
+		close(out)
 	}()
 	return out
 }

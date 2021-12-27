@@ -1,20 +1,8 @@
-package main
-
-import (
-	"bufio"
-	"fmt"
-	"os"
-	"time"
-
-	"dc/pipelineMiddleWare"
-)
-
-func mainx() {
-	fmt.Println("hello main")
+// 生成随机数
+func main1() {
 	filename := "data.txt"
 	var count = 10000
 	file, _ := os.Create(filename)
-
 	defer file.Close()
 
 	mypipe := pipelineMiddleWare.RandomSourceArray(count)
@@ -36,23 +24,22 @@ func mainx() {
 	}
 }
 
-func main() {
+// 归并
+func main2() {
 	fmt.Println("<<<<<<<<<<<<<<")
-	// ch := make(chan int)
+	ch := make(chan int)
+	defer close(ch)
 
 	go func() {
 		p := pipelineMiddleWare.Merge(
-			pipelineMiddleWare.InMemorySort(pipelineMiddleWare.ArraySource(5, 3, 6)),
-			pipelineMiddleWare.InMemorySort(pipelineMiddleWare.ArraySource(2, 4, 7, 8)),
+			pipelineMiddleWare.InMemorySort(pipelineMiddleWare.ArraySource(5, 3, 8, 8)),
+			pipelineMiddleWare.InMemorySort(pipelineMiddleWare.ArraySource(2, 4, 6, 6)),
 		)
 
 		for v := range p {
 			fmt.Println(v)
 		}
-		// ch <- 0
-		// close(ch)
+		ch <- 0
 	}()
-	// <-ch
-	// runtime.Gosched()
-	time.Sleep(time.Second * 10)
+	<-ch
 }
