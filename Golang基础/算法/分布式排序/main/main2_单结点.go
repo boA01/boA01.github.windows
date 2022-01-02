@@ -2,10 +2,11 @@ package main
 
 import (
 	"bufio"
-	"dc/pipelineMiddleWare"
 	"fmt"
 	"os"
 	"strconv"
+
+	"dc/pipelineMiddleWare"
 )
 
 func createNetPipline(fileName string, fileSize int, chunkCount int) <-chan int {

@@ -2,57 +2,63 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net"
-	"os/exec"
-	"time"
+
+	"dc/pipelineMiddleWare"
 )
 
-// 心跳
-func HeartBeat(conn net.Conn, heartChan chan byte, timout int) {
-	for {
-		select {
-		case hc := <-heartChan:
-			log.Println(string(hc))
-			conn.SetDeadline(time.Now().Add(time.Duration(timout) * time.Second))
-		case <-time.After(time.Second * 30):
-			conn.Close()
-			return
-		}
+func MsgHandler(conn net.Conn) {
+	clientip := conn.RemoteAddr()
+
+	fmt.Println(clientip, "上线")
+
+	// 00 开始
+	btsStart := pipelineMiddleWare.IntToByte(0)
+	btsStart = append(btsStart, pipelineMiddleWare.IntToByte(0)...)
+	conn.Write(btsStart)
+
+	arr := []int{10, 9, 8, 7, 6, 1, 2, 3, 4, 5}
+	for _, v := range arr {
+		btsData := pipelineMiddleWare.IntToByte(1)
+		btsData = append(btsData, pipelineMiddleWare.IntToByte(v)...)
+		conn.Write(btsData)
 	}
+
+	// 01 结束
+	btsEnd := pipelineMiddleWare.IntToByte(0)
+	btsEnd = append(btsEnd, pipelineMiddleWare.IntToByte(1)...)
+	conn.Write(btsEnd)
+
+	fmt.Println("发送完成")
+	ServerMsgHandler(conn)
 }
 
-func MsgHandler(conn net.Conn) {
-	buf := make([]byte, 1024)
-	clientip := conn.RemoteAddr()
-	beatChan := make(chan byte)
-	defer close(beatChan)
+func ServerMsgHandler(conn net.Conn) {
+	var arr []int
+	buf := make([]byte, 16)
+	// beatChan := make(chan struct{})
+	// defer close(beatChan)
 
-	go HeartBeat(conn, beatChan, 30)
+	// go HeartBeat(conn, beatChan, 30)
 
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
-			log.Println(clientip, "time out")
 			return
 		}
+		if n == 16 {
+			n1 := pipelineMiddleWare.ByteToInt(buf[:8])
+			n2 := pipelineMiddleWare.ByteToInt(buf[8:])
+			// beatChan <- struct{}{}
 
-		msg := buf[0]
-		beatChan <- msg
-
-		// 自定义协议
-		if n != 0 {
-			s1 := string(msg)
-			s2 := string(buf[1:n])
-			str := string(buf[:n])
-			if s1 == "0" {
-				fmt.Println(clientip, " data:\n", s2)
-			} else if s1 == "1" {
-				exec.Command(s2).Run()
+			if n1 == 0 && n2 == 0 {
+				arr = make([]int, 0, 10)
+			} else if n1 == 1 {
+				arr = append(arr, n2)
 			} else {
-				fmt.Println(clientip, "\n", str)
+				fmt.Println("接收完成", arr)
+				return
 			}
-			conn.Write([]byte("收到" + str))
 		}
 	}
 }

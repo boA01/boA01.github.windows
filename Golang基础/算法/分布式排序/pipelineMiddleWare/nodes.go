@@ -1,10 +1,12 @@
 package pipelineMiddleWare
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
 	"math/rand"
+	"net"
 	"sort"
 	"time"
 )
@@ -73,7 +75,7 @@ func MergeN(inputs ...<-chan int) <-chan int {
 		return inputs[0]
 	}
 	m := length / 2
-	return Merge(MergeN(inputs[m:]...), MergeN(inputs[m:]...))
+	return Merge(MergeN(inputs[0:m]...), MergeN(inputs[m:]...))
 }
 
 // 写入
@@ -133,4 +135,33 @@ func ArraySource(num ...int) <-chan int {
 		close(out)
 	}()
 	return out
+}
+
+func IntToByte(n int) []byte {
+	data := int64(n)
+	byteBuf := bytes.NewBuffer([]byte{})
+
+	binary.Write(byteBuf, binary.BigEndian, data)
+	return byteBuf.Bytes()
+}
+
+func ByteToInt(bts []byte) int {
+	byteBuf := bytes.NewBuffer(bts)
+	var data int64
+	binary.Read(byteBuf, binary.BigEndian, &data)
+	return int(data)
+}
+
+// 心跳
+func HeartBeat(conn net.Conn, heartChan chan struct{}, timeout int) {
+	for {
+		select {
+		case <-heartChan:
+			// log.Println(hc)
+			conn.SetDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+		case <-time.After(time.Second * 30):
+			conn.Close()
+			return
+		}
+	}
 }
