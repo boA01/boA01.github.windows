@@ -15,12 +15,10 @@ func QuickSort(s []int) []int {
 		splitdata := s[n]
 		mid = append(mid, splitdata)
 
-		for i := 0; i < length; i++ {
+		for i, v := range s {
 			if i == n {
 				continue
 			}
-
-			v := s[i]
 
 			if v > splitdata {
 				rarr = append(rarr, v)
@@ -30,8 +28,7 @@ func QuickSort(s []int) []int {
 				mid = append(mid, v)
 			}
 		}
-		res := append(append(QuickSort(larr), mid...), QuickSort(rarr)...)
-		return res
+		return append(append(QuickSort(larr), mid...), QuickSort(rarr)...)
 	} else {
 		return s
 	}

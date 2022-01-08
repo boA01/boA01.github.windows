@@ -1065,10 +1065,10 @@ func reflect_(itf interface{}) {
 	*/
 
 	t := reflect.TypeOf(itf)
-	fmt.Println(t)
+	fmt.Println(t) // *main.Honor
 
 	tk := t.Kind()
-	fmt.Println(tk)
+	fmt.Println(tk) // ptr
 	switch tk {
 	case reflect.Struct:
 		fmt.Println("结构体")
@@ -1086,10 +1086,15 @@ func reflect_(itf interface{}) {
 	fmt.Println(v)
 
 	e := v.Elem()
+	for i := 0; i < e.NumField(); i++ {
+		filed := e.Type().Field(i)
+		tag := filed.Tag
+		fmt.Println(tag.Get("json"))
+	}
 	// e.Field(0) 序号取值
 	// e.FieldByName("Class") 具名取值
 	// e.FieldByIndex([]int{0,0}) 层级（匿名）加序号取值
-	e.FieldByName("Age").SetInt(999) //修改属性
+	// e.FieldByName("Age").SetInt(999) //修改属性
 	// m := v.Method(0)
 	// fmt.Println(m) //地址
 	// m.Call([]reflect.Value{reflect.ValueOf{"哈哈哈"}}) //调用方法
