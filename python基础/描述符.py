@@ -16,7 +16,7 @@ class Score():
     def __get__(self, instance, owner):
         return instance.__dict__[self.name]
     
-    def __delete__(slef):
+    def __delete__(self):
         del self._score
 
 class Student():
