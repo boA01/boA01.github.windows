@@ -25,7 +25,7 @@ func QuickSort(s []int) []int {
 		var larr, rarr, mid []int
 		mid = append(mid, s[0])
 
-		for i, v := range s[1:] {
+		for _, v := range s[1:] {
 			if v > splitdata {
 				rarr = append(rarr, v)
 			} else if v < splitdata {
@@ -127,13 +127,25 @@ func reverseStr(str string) string {
     return string(s)
 }
 
+reflect.StringHeader{}
+reflect.SliceHeader{}
+unsafe.Pointer(&x)
 
-1、go如何关闭协程？
+GMP模型？
+M：系统线程（有固定大小的栈）
+G：协程（栈动态扩缩；都需要一个P）
+P：上下文（默认大小cpu核数，原生代码不需要）
+
+context有什么作用？
+上下文，上层向下层传递内容（常用于 关闭后台协程）；阻塞
+
+go如何关闭协程？
 上下文，cancel()调用 <-ctx.Done() （控制流）
 
 go协程池？
 
 go的调度？
+1.14后，协作式抢占调度，用户态的协程调度器
 
 struct比较？
 相同类型
@@ -154,21 +166,19 @@ slice扩容？
 select作用？
 阻塞；随机
 
-GMP模型？
-M：操作系统进程
-G：协程（都需要一个P）
-P：上下文（默认大小cpu核数，原生代码不需要）
+一颗CPU，两个协程，其中一个协程在死循环，会发生什么？
+1.14前跑死；以后不会，
 
-context有什么作用？
-上下文，上层向下层传递内容；阻塞
-
-锁？
-sync.RWMutex（不可赋值, 不可重复上锁）
-nil channel
+阻塞？
+<-make(chan int)
+for{}
+select{}
+sync.Mutex（不可赋值, 不可重复上锁）
 wg = sync.WaitGroup{}
 wg.Add(num)
 wg.Done()
 wg.Wait()
+runtime.Gosched() // 调度语句
 
 判断接口是否为nil？
 类型，数据
@@ -179,9 +189,6 @@ func IsNil(i interface{}) {
     }
     return false
 }
-
-一颗CPU，两个协程，其中一个协程在死循环，会发生什么？
-1.14前跑死；以后不会
 
 web应用程序使用http协议传输，http是无状态协议。需要会话机制来记录
 cookie与session

@@ -27,7 +27,7 @@ import (
 
 // ********作用域
 // 函数内部，类似private
-// 函数外部，类似protect
+// 函数外部，类似product
 // 函数外部且首字母大写，类似public
 
 /*
@@ -332,7 +332,7 @@ func testSlice() {
 	f := func(slice []int32) {
 		slice[0] = 110
 	}
-	f(slice2) // 传址
+	f(slice2) // 传值，reflect.SliceHeader{}
 	fmt.Println(slice2)
 
 	// 替换字符串元素（了解即可）
@@ -442,13 +442,13 @@ func testMap() {
 func testPtr(ptr *int) { // ptr指向的空间存放n指向的地址
 	*ptr = N // * 解引用; 替换 n指向的空间里存放的值，n=10
 	/*
-	   指针指向的变量的地址发生改变，指针指向会同步更新
+	   go指针指向的变量的地址发生改变，指针指向会同步更新(go函数栈自动调整大小)
 
 	   unsafe.Pointer （转换桥梁）；类似C：void*
 
-	   GO指针不支持运算   # 区别C
+	   GO指针不支持运算，区别C
 
-	   uninptr 支持运算；实质是值类型，存放地址，毕竟地址也是值
+	   uintptr 支持运算；实质是值类型，存放地址，毕竟地址也是值(不安全)
 
 	   // 指针与引用（C++）
 	   int i = 3;

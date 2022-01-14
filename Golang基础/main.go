@@ -7,9 +7,12 @@ import (
 	"os/signal"
 	_ "reflect"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 )
+
+var N int32
 
 type s1 struct {
 	name string
@@ -21,43 +24,245 @@ type s2 struct {
 	age  int
 }
 
+func i2s() {
+	n := 13
+	// s1 := strconv.FormatInt(int64(n), 2)
+	s1 := fmt.Sprintf("%03o", n)
+	fmt.Println(s1)
+
+	// i1, _ := strconv.ParseInt("1001", 3, 32)
+	// fmt.Println(i1)
+}
+
 // 闭包
-func fun1() int {
-	a := 10
+func fun1() (a int) {
+	// a = 10
 	defer func() {
 		a += 1
 		fmt.Println(a) // 11
 	}()
 
-	return a // 10 具名返回值就是11
+	return 20 // 具名返回值就是21
 }
 
-// mutex
-func fun2() {
+// mutex 互斥锁
+func fun2_0() {
 	var mu sync.Mutex
-	n := 0
-	// mu.Lock()
-	for i := 0; i < 3; i++ {
-		go func() {
+	mu.Lock()
+	go func() {
+		defer mu.Unlock()
+		fmt.Println("hello world")
+	}()
+
+	mu.Lock() // 阻塞
+}
+
+func fun2_1() {
+	ch := make(chan struct{})
+
+	go func() {
+		fmt.Println("hello world")
+		// ch <- struct{}{}
+		close(ch) // 也行
+	}()
+
+	<-ch // 阻塞
+}
+
+// 同步-sync.Mutex
+func fun2_2() {
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+
+	wg.Add(100)
+	for i := 0; i < 100; i++ {
+		go func(wg *sync.WaitGroup) {
+			defer wg.Done()
 			mu.Lock()
-			defer mu.Unlock()
-			n++
-			fmt.Println("ok...", n)
-		}()
+			N++
+			mu.Unlock()
+		}(&wg)
+	}
+	wg.Wait() // 阻塞
+
+	fmt.Println(N)
+}
+
+// 同步-sync/atomic
+func fun2_3() {
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+
+		for range [100]struct{}{} {
+			atomic.AddInt32(&N, 1) // 原子操作
+		}
+	}(&wg)
+
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+
+		for range [100]struct{}{} {
+			atomic.AddInt32(&N, -1)
+		}
+	}(&wg)
+
+	wg.Wait()
+	fmt.Println(N)
+}
+
+type singleton struct{}
+
+type Once struct {
+	m    sync.Mutex
+	done uint32
+}
+
+func (o *Once) Do(f func()) {
+	if atomic.LoadUint32(&o.done) == 1 {
+		return
 	}
 
-	// mu.Unlock()
-	time.Sleep(time.Second)
+	o.m.Lock()
+	defer o.m.Unlock()
+
+	if o.done == 0 {
+		defer atomic.AddUint32(&o.done, 1)
+		f()
+	}
 }
 
-// 定时管道
+func fun_Instance() *singleton {
+	var once Once
+	var instance *singleton
+
+	once.Do(func() {
+		instance = &singleton{}
+	})
+	return instance
+}
+
+// 双chan妙用
 func fun3() {
-	t := time.NewTicker(time.Second)
-	for {
-		select {
-		case <-t.C:
-			fmt.Println("1s")
+	sig := make(chan os.Signal)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL) // 优雅退出
+	stopCh := make(chan chan struct{})
+
+	go func(stopChh chan chan struct{}) {
+		for {
+			select {
+			case ch := <-stopChh:
+				fmt.Println("stoped")
+				ch <- struct{}{}
+				return
+			default:
+				time.Sleep(time.Second)
+			}
 		}
+	}(stopCh)
+
+	<-sig
+	ch := make(chan struct{})
+	stopCh <- ch
+	<-ch
+	fmt.Println("finshed")
+}
+
+// context，上下文（既是数据流，也是控制流），只能上层向下层传递数据
+func fun4() {
+	sig := make(chan os.Signal)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL) // 优雅退出
+	ctx, cancel := context.WithCancel(context.Background())
+	finishCh := make(chan struct{})
+
+	go func(ctx context.Context, finishCh chan struct{}) {
+		for {
+			select {
+			case <-ctx.Done():
+				fmt.Println("stopped")
+				finishCh <- struct{}{}
+				return
+			default:
+				time.Sleep(time.Second)
+			}
+		}
+	}(ctx, finishCh)
+
+	<-sig
+	cancel() // 调用137行
+	<-finishCh
+	fmt.Println("finished")
+}
+
+func fun5() {
+	sig := make(chan os.Signal)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)
+	ctx, cancel := context.WithCancel(context.Background())
+	ch := make(chan int, 10)
+
+	// 生产者
+	go func(out chan<- int) {
+		defer close(out)
+
+		t := time.NewTicker(time.Second * 10) // 定时
+		for i := 0; ; i++ {
+			select {
+			case <-t.C:
+				fmt.Println("生产 结束")
+				return
+			case <-ctx.Done():
+				fmt.Println("over1")
+				return
+			default:
+				time.Sleep(time.Second * 2)
+				fmt.Println("生产", i)
+				out <- i
+			}
+		}
+	}(ch)
+
+	// 消费者
+	go func(in <-chan int) {
+		for {
+			select {
+			case v, ok := <-in:
+				if !ok {
+					return
+				}
+				time.Sleep(time.Second * 4)
+				fmt.Println("消费", v)
+			case <-ctx.Done():
+				fmt.Println("over2")
+				return
+			}
+		}
+	}(ch)
+
+	<-sig
+	cancel()
+	fmt.Println("ok")
+}
+
+// 切片
+func fun6() {
+	map_ := make(map[int][]byte)
+
+	for i := 0; i < 3; i++ {
+		data := []byte{byte(i), 1, 2, 3}
+		// map_[i] = data[:1] // 切片会将底层数组锁定，占用内存
+		// map_[i] = append([]byte{}, data[:1]...) // 拷贝一份，减小内存压力
+		copy(map_[i], data) // 不产生临时切片
+	}
+}
+
+func fun7() {
+	var arr [10]struct{}
+	// fmt.Printf("%v", arr)
+
+	for range arr {
+		fmt.Println("hello world")
 	}
 }
 
@@ -85,7 +290,7 @@ func maxSumStr(s []int) {
 }
 
 // 滑动窗口
-func fun4(s string) int {
+func maxLenStr(s string) int {
 	var start, end int
 	for i := 1; i < len(s); i++ {
 		if s[end] != s[i] {
@@ -98,67 +303,17 @@ func fun4(s string) int {
 	return end - start
 }
 
-// 双chan妙用
-func fun5() {
-	sig := make(chan os.Signal)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL) // 优雅退出
-	stopCh := make(chan chan struct{})
-
-	go func(stopChh chan chan struct{}) {
-		for {
-			select {
-			case ch := <-stopChh:
-				fmt.Println("stoped")
-				ch <- struct{}{}
-				return
-			default:
-				time.Sleep(time.Second)
-			}
-		}
-	}(stopCh)
-
-	<-sig
-	ch := make(chan struct{})
-	stopCh <- ch
-	<-ch
-	fmt.Println("finshed")
-}
-
-// context，上下文（既是数据流，也是控制流），只能上层向下层传递数据
-func fun6() {
-	sig := make(chan os.Signal)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL) // 优雅退出
-	ctx, cancel := context.WithCancel(context.Background())
-	finishCh := make(chan struct{})
-
-	go func(ctx context.Context, finishCh chan struct{}) {
-		for {
-			select {
-			case <-ctx.Done():
-				fmt.Println("stopped")
-				finishCh <- struct{}{}
-				return
-			default:
-				time.Sleep(time.Second)
-			}
-		}
-	}(ctx, finishCh)
-
-	<-sig
-	cancel() // 调用137行
-	<-finishCh
-	fmt.Println("finished")
-}
-
 func main() {
 	fmt.Println("hello")
 	// var c chan int
 	// c1 := make(chan int)
 	// fmt.Printf("%p", c1)
+	// i2s()
 	// fmt.Println(fun1())
-	// fun2()
-	// fun3()
-	fun5()
+	// fun2_2()
+	fun2_3()
+	// fun5()
+	// fun7()
 	// var t1, t3 s1
 	// var t2 s2
 	// fmt.Println(reflect.DeepEqual(t1, t3))
@@ -168,4 +323,17 @@ func main() {
 	// s1 = append(s1, 1)
 	// fmt.Println(len(s1), cap(s1))
 
+	// runtime.GOMAXPROCS(1) // 一个P
+	// go func() {
+	// 	for i := 0; i < 10; i++ {
+	// 		fmt.Println(i)
+	// 	}
+	// }() // 会执行
+	// for{}
+
+	// for i := 0; i < 5; i++ {
+	// 	defer func() {
+	// 		fmt.Println(i) // 5个5
+	// 	}()
+	// }
 }
