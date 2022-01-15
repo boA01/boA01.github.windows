@@ -1,0 +1,9 @@
+<h1 id='g' style='color:red'>hi golang</h1>
+<img id='i1' src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fup.enterdesk.com%2Fedpic_360_360%2F1a%2Ff3%2F8c%2F1af38c8d1ef7e3c3662169b654cd6f91.jpg&refer=http%3A%2F%2Fup.enterdesk.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1641922238&t=d9683ad79d77a29b6038a9d9384b0afa">
+<button id='b1'>切换</button>
+
+<script>
+document.getElementById('b1').onclick=function(){
+    document.getElementById('i1').src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fup.enterdesk.com%2Fedpic%2Fdc%2Fd2%2Fe3%2Fdcd2e350f4fcae5d336b04756417c6dd.jpg&refer=http%3A%2F%2Fup.enterdesk.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1641922238&t=c447af6322c950ef627edce851f47bd3"
+}
+</script>

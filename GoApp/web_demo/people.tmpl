@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <title>People</title>
+</head>
+<body>
+  {{ $slice := . }}
+  {{ range $i, $v :=  $slice }}
+    <p>hello {{ $v.Name }}</p>
+    <p>年龄：{{ $v.Age }}</p>
+    <hr>
+  {{ else }}
+    <p>无</p>
+  {{ end }}
+</body>
+</html>

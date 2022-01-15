@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>tmpl test</title>
+</head>
+<body>
+    <p>你好 {{ . }}</p>
+    <h1>嵌套template练习</h1>
+    <hr>
+    {{ template "ul.tmpl" }}
+    <hr>
+    {{ template "ol.tmpl" }}
+</body>
+</html>
+
+{{ define "ol.tmpl" }}
+<ol>
+    <li>吃饭</li>
+    <li>学习</li>
+    <li>睡觉</li>
+</ol>
+{{ end }}
