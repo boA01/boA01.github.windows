@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/signal"
 	_ "reflect"
+	re "regexp"
+	str "strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -13,6 +15,7 @@ import (
 )
 
 var N int32
+var c1 = make(chan struct{})
 
 type s1 struct {
 	name string
@@ -22,6 +25,11 @@ type s1 struct {
 type s2 struct {
 	name string
 	age  int
+}
+
+func hello(n int) {
+	fmt.Println("f", n)
+	c1 <- struct{}{}
 }
 
 func i2s() {
@@ -144,8 +152,35 @@ func fun_Instance() *singleton {
 	return instance
 }
 
+// 单chan控制多个协程结束
+func fun3_0() {
+	for i := 1; i < 5; i++ {
+		go func(i int) {
+			fmt.Println(i)
+			for i <= 10000 {
+				i += i
+			}
+			close(c1)
+		}(i)
+	}
+	<-c1 // 等待第一个完成
+}
+
+// 单chan控制多个协程交替执行
+func fun3_1() {
+	defer close(c1)
+
+	for i := 0; i < 10; i++ {
+		go hello(1)
+		<-c1
+		go hello(2)
+		<-c1
+	}
+	fmt.Println("End...")
+}
+
 // 双chan妙用
-func fun3() {
+func fun3_2() {
 	sig := make(chan os.Signal)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL) // 优雅退出
 	stopCh := make(chan chan struct{})
@@ -175,24 +210,29 @@ func fun4() {
 	sig := make(chan os.Signal)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL) // 优雅退出
 	ctx, cancel := context.WithCancel(context.Background())
-	finishCh := make(chan struct{})
+	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// finishCh := make(chan struct{})
+	var wg sync.WaitGroup
 
-	go func(ctx context.Context, finishCh chan struct{}) {
+	wg.Add(1)
+	go func(ctx context.Context, wg *sync.WaitGroup) {
+		defer wg.Done()
+
 		for {
 			select {
 			case <-ctx.Done():
 				fmt.Println("stopped")
-				finishCh <- struct{}{}
 				return
 			default:
 				time.Sleep(time.Second)
 			}
 		}
-	}(ctx, finishCh)
+	}(ctx, &wg)
 
 	<-sig
 	cancel() // 调用137行
-	<-finishCh
+	wg.Wait()
+
 	fmt.Println("finished")
 }
 
@@ -266,6 +306,24 @@ func fun7() {
 	}
 }
 
+func str_re() {
+	s1 := "helllolo string"
+	s2 := "中国"
+	myRe, _ := re.Compile("l.?o")
+	fmt.Println(myRe.FindString(s1))
+	fmt.Println(s2, len(s2))
+
+	// for _, v := range s2 {
+	// 	fmt.Printf("%c\n", v)
+	// }
+
+	/*
+		Find(All)?(String)?(Submatch)?(Index) //16个组合
+	*/
+
+	fmt.Println(str.TrimRight(s1, "rign"))
+}
+
 // 动态规划（dp数组存放标记）
 func maxSumStr(s []int) {
 	l := len(s)
@@ -306,12 +364,11 @@ func maxLenStr(s string) int {
 func main() {
 	fmt.Println("hello")
 	// var c chan int
-	// c1 := make(chan int)
-	// fmt.Printf("%p", c1)
 	// i2s()
 	// fmt.Println(fun1())
 	// fun2_2()
-	fun2_3()
+	// fun2_3()
+	// fun3_0()
 	// fun5()
 	// fun7()
 	// var t1, t3 s1
@@ -329,11 +386,8 @@ func main() {
 	// 		fmt.Println(i)
 	// 	}
 	// }() // 会执行
-	// for{}
-
-	// for i := 0; i < 5; i++ {
-	// 	defer func() {
-	// 		fmt.Println(i) // 5个5
-	// 	}()
+	// for {
 	// }
+
+	// <-time.After(time.Second * 3)
 }

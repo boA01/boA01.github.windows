@@ -141,6 +141,7 @@ context有什么作用？
 
 go如何关闭协程？
 上下文，cancel()调用 <-ctx.Done() （控制流）
+close(ch)，广播
 
 go协程池？
 
