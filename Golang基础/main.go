@@ -212,12 +212,8 @@ func fun4() {
 	ctx, cancel := context.WithCancel(context.Background())
 	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	// finishCh := make(chan struct{})
-	var wg sync.WaitGroup
 
-	wg.Add(1)
-	go func(ctx context.Context, wg *sync.WaitGroup) {
-		defer wg.Done()
-
+	go func(ctx context.Context) {
 		for {
 			select {
 			case <-ctx.Done():
@@ -227,11 +223,10 @@ func fun4() {
 				time.Sleep(time.Second)
 			}
 		}
-	}(ctx, &wg)
+	}(ctx)
 
 	<-sig
 	cancel() // 调用137行
-	wg.Wait()
 
 	fmt.Println("finished")
 }
@@ -241,10 +236,14 @@ func fun5() {
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)
 	ctx, cancel := context.WithCancel(context.Background())
 	ch := make(chan int, 10)
+	var wg sync.WaitGroup
+
+	wg.Add(2)
 
 	// 生产者
 	go func(out chan<- int) {
 		defer close(out)
+		defer wg.Done()
 
 		t := time.NewTicker(time.Second * 10) // 定时
 		for i := 0; ; i++ {
@@ -265,10 +264,13 @@ func fun5() {
 
 	// 消费者
 	go func(in <-chan int) {
+		defer wg.Done()
+
 		for {
 			select {
 			case v, ok := <-in:
 				if !ok {
+					fmt.Println("吃饱")
 					return
 				}
 				time.Sleep(time.Second * 4)
@@ -282,6 +284,7 @@ func fun5() {
 
 	<-sig
 	cancel()
+	wg.Wait()
 	fmt.Println("ok")
 }
 
@@ -361,9 +364,15 @@ func maxLenStr(s string) int {
 	return end - start
 }
 
+// defer栈
+func b() {
+	for i := 0; i < 4; i++ {
+		defer fmt.Print(i)
+	}
+}
+
 func main() {
 	fmt.Println("hello")
-	// var c chan int
 	// i2s()
 	// fmt.Println(fun1())
 	// fun2_2()
@@ -371,6 +380,7 @@ func main() {
 	// fun3_0()
 	// fun5()
 	// fun7()
+	// b()
 	// var t1, t3 s1
 	// var t2 s2
 	// fmt.Println(reflect.DeepEqual(t1, t3))
