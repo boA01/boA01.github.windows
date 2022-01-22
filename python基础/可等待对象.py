@@ -14,8 +14,8 @@ def func2():
     print(4)
 
 def test1():
-    gr1 = greenlet(func1)
     gr2 = greenlet(func2)
+    gr1 = greenlet(func1)
     
     gr1.switch()
 
@@ -90,6 +90,10 @@ if __name__=='__main__':
 
     # test2()
 
-    # 事件循环
+    # 事件循环（调度）
+    # loop = asyncio.get_event_loop()
+    # loop.run_until_complete(asyncio.wait([func1(2), func2(1)]))
+    # loop.close()
+
     # 任务列表
     asyncio.run(main())

@@ -21,6 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	conn.Close()
 
 	fmt.Println(reply)
 }
