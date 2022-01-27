@@ -17,6 +17,13 @@ import (
 var N int32
 var c1 = make(chan struct{})
 
+const (
+	a = 3
+	b = iota
+	c
+	d = iota
+)
+
 type s1 struct {
 	name string
 	age  int
@@ -365,14 +372,40 @@ func maxLenStr(s string) int {
 }
 
 // defer栈
-func b() {
+func defer_() {
 	for i := 0; i < 4; i++ {
 		defer fmt.Print(i)
 	}
 }
 
+func inout() {
+	var (
+		arr [][]int
+		// str int
+	)
+	s := make([]int, 2)
+	// reader := bufio.NewReader(os.Stdin)
+	// arr, _ = reader.ReadSlice('#')
+	fmt.Println(">>>")
+	for i := 0; i < 3; i++ {
+		fmt.Scanln(&s[0], &s[1])
+		arr = append(arr, s)
+	}
+	// fmt.Scan(&str)
+	fmt.Println(arr)
+}
+
+func test(n int) int {
+	a, b := 1, 1
+	for ; n > 0; n-- {
+		a, b = b, a+b
+	}
+	return a
+}
+
 func main() {
 	fmt.Println("hello")
+	inout()
 	// i2s()
 	// fmt.Println(fun1())
 	// fun2_2()
@@ -380,7 +413,7 @@ func main() {
 	// fun3_0()
 	// fun5()
 	// fun7()
-	// b()
+	// defer_()
 	// var t1, t3 s1
 	// var t2 s2
 	// fmt.Println(reflect.DeepEqual(t1, t3))
