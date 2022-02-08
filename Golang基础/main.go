@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
 	_ "reflect"
@@ -24,6 +25,8 @@ const (
 	d = iota
 )
 
+type T interface{}
+
 type s1 struct {
 	name string
 	age  int
@@ -32,6 +35,23 @@ type s1 struct {
 type s2 struct {
 	name string
 	age  int
+}
+
+type Set struct {
+	m map[T]bool
+	sync.RWMutex
+}
+
+func New() *Set {
+	return &Set{
+		m: map[T]bool{},
+	}
+}
+
+func (s *Set) Add(item T) {
+	s.Lock()
+	defer s.Unlock()
+	s.m[item] = true
 }
 
 func hello(n int) {
@@ -233,7 +253,7 @@ func fun4() {
 	}(ctx)
 
 	<-sig
-	cancel() // 调用137行
+	cancel() // 调用ctx.Done()
 
 	fmt.Println("finished")
 }
@@ -357,6 +377,24 @@ func maxSumStr(s []int) {
 	fmt.Println(dp, max, index)
 }
 
+func maxSum() {
+	max := math.MinInt32
+	var n int
+	fmt.Scanln(&n)
+	arr := make([]int, n+1)
+
+	for i := 1; i <= n; i++ {
+		fmt.Scanf("%d", &arr[i])
+		if temp := arr[i] + arr[i-1]; temp > arr[i] {
+			arr[i] = temp
+		}
+		if max < arr[i] {
+			max = arr[i]
+		}
+	}
+	fmt.Println(max)
+}
+
 // 滑动窗口
 func maxLenStr(s string) int {
 	var start, end int
@@ -380,10 +418,12 @@ func defer_() {
 
 func inout() {
 	var (
-		arr [][]int
-		// str int
+		arr [][2]int
+		// str string
+		s [2]int
 	)
-	s := make([]int, 2)
+	// s := make([]int, 2)
+
 	// reader := bufio.NewReader(os.Stdin)
 	// arr, _ = reader.ReadSlice('#')
 	fmt.Println(">>>")
@@ -393,6 +433,7 @@ func inout() {
 	}
 	// fmt.Scan(&str)
 	fmt.Println(arr)
+	fmt.Printf("%T", arr)
 }
 
 func test(n int) int {
@@ -405,7 +446,14 @@ func test(n int) int {
 
 func main() {
 	fmt.Println("hello")
-	inout()
+	fmt.Scanln(&N)
+
+	arr := make([]int, N)
+	for i := range arr {
+		fmt.Scanf("%d", &arr[i])
+	}
+	fmt.Println(arr)
+	// inout()
 	// i2s()
 	// fmt.Println(fun1())
 	// fun2_2()
