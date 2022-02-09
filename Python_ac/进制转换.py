@@ -4,6 +4,7 @@
 print(bin(64)[2:])
 print(oct(64)[2:])
 print(hex(188)[2:].upper())
+format(177, "0b")
 
 # 其他进制转十进制 int(str,base=10)
 print(int("1000", 2))
