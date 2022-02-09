@@ -368,6 +368,7 @@ func str_re() {
 
 // 动态规划（dp数组存放标记）
 func maxSumStr(s []int) {
+	fmt.Println(s)
 	l := len(s)
 	var dp = make([]int, l)
 	var index int
@@ -466,10 +467,11 @@ func main() {
 	// }
 	// fmt.Println(arr)
 
-	A := "a"
-	fmt.Println(A, byte('a'))
-	fmt.Println(string([]byte{65}))
+	// A := "a"
+	// fmt.Println(A, byte('a'))
+	// fmt.Println(string([]byte{65}))
 
+	maxSumStr([]int{2, 4, 2, -20, 2, -2, 1, 1})
 	// inout()
 	// i2s()
 	// fmt.Println(fun1())
