@@ -148,6 +148,18 @@ func fun2_3() {
 	fmt.Println(N)
 }
 
+/*
+对象池，减轻GC压力
+var s1Pool = sync.Pool {
+	New: func() interface{} {
+		return new(s1)
+	},
+}
+
+var s1_1 = s1Pool.Get().(*s1) 获取实例
+s1Pool.Put(s1_1) 归还对象
+*/
+
 type singleton struct{}
 
 type Once struct {
@@ -446,13 +458,18 @@ func test(n int) int {
 
 func main() {
 	fmt.Println("hello")
-	fmt.Scanln(&N)
+	// fmt.Scanln(&N)
 
-	arr := make([]int, N)
-	for i := range arr {
-		fmt.Scanf("%d", &arr[i])
-	}
-	fmt.Println(arr)
+	// arr := make([]int, N)
+	// for i := range arr {
+	// 	fmt.Scanf("%d", &arr[i])
+	// }
+	// fmt.Println(arr)
+
+	A := "a"
+	fmt.Println(A, byte('a'))
+	fmt.Println(string([]byte{65}))
+
 	// inout()
 	// i2s()
 	// fmt.Println(fun1())

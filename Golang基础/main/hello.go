@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"os"
 	"reflect"
+	re "regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -225,8 +226,9 @@ func testStr() {
 
 	// 与数字互转
 	n, err := strconv.Atoi("123")
+	// s = strconv.ParseInt("321", 10, 32) // 类似 python int()
 	// s = strconv.Itoa(321)
-	// s = strconv.FormatInt(321, 2) // 类似 python int()
+	// s = strconv.FormatInt(321, 2) // 类似 python formart()
 	if err != nil {
 		fmt.Println("不能转换")
 	} else {
@@ -262,6 +264,12 @@ func testStr() {
 	// 去除
 	fmt.Printf("%q\n", strings.TrimSpace(" jksj  kjsj  ")) // 两边空格
 	// strings.Trim("**hello**","**") // 两边**
+
+	myRe, _ := re.Compile("l.?o")
+	fmt.Println(myRe.FindString(str1))
+	/*
+		Find(All)?(String)?(Submatch)?(Index) //16个组合
+	*/
 }
 
 func testArr() {
