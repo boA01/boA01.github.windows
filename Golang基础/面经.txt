@@ -23,7 +23,8 @@
 func QuickSort(s []int) []int {
 	if len(s) > 1 {
 		var larr, rarr, mid []int
-		mid = append(mid, s[0])
+        splitdata := s[0]
+		mid = append(mid, splitdata)
 
 		for _, v := range s[1:] {
 			if v > splitdata {
@@ -203,6 +204,40 @@ go如何关闭协程？
 close(ch)，广播
 
 go协程池？
+func worker(id int, jobCh <-chan int, retCh chan<- strint) {
+    for job := range jobCh {
+        ret := fmt.Sprintf("worker %d processed job: %d", id, job)
+        retCh <- ret
+    }
+}
+
+func workerPool(n int, jobCh <-chan int, retCh chan<- string) {
+    for i := 0; i < n; i++ {
+        go worker(i, jobCh, retCh)
+    }
+}
+
+func genJob(n int) <-chan int {
+    jobCh := main(chan int, n)
+    go func() {
+        for i := 0; i < n; i++ {
+            jobCh <- i
+        }
+        close(jobCh)
+    }
+    return jobCh
+}
+
+func main() {
+    jobCh := genJob(10)
+    retCh := make(chan string, 200)
+    workerPool(5, jobCh, retCh)
+
+    close(retCh)
+    for ret := range retCh {
+        fmt.Println(ret)
+    }
+}
 
 go的调度？
 1.14后，协作式抢占调度，用户态的协程调度器

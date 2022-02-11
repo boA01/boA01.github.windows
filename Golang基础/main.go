@@ -469,9 +469,12 @@ func main() {
 
 	// A := "a"
 	// fmt.Println(A, byte('a'))
-	// fmt.Println(string([]byte{65}))
+	fmt.Println(string([]byte{65, 68, 70}))
 
-	maxSumStr([]int{2, 4, 2, -20, 2, -2, 1, 1})
+	// fmt.Println("a1" > "A1")
+	// fmt.Println(strings.Compare("a1", "A1"))
+
+	// maxSumStr([]int{2, 4, 2, -20, 2, -2, 1, 1})
 	// inout()
 	// i2s()
 	// fmt.Println(fun1())

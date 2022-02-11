@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 
-	ArrayList "ds/ArrayList"
-	LinkList "ds/LinkList"
+	// ArrayList "ds/ArrayList"
+	// LinkList "ds/LinkList"
+	Tree "ds/Tree"
 )
 
 type List interface {
@@ -39,10 +40,41 @@ func testLink(l Link) {
 	l.Select()
 }
 
-func main() {
-	list := ArrayList.NewArray()
-	link := LinkList.Init()
+func test2Tree() {
+	// tree := NewBinaryTree()
+	// tree.InitBinaryTree(0)
+	tree := Tree.InitBinaryTree(10)
 
-	testList(list)
-	testLink(link)
+	for i := range [5]struct{}{} {
+		tree.AddNode(i)
+	}
+
+	tree.Bfs()
+
+	tree.Dfs()
+
+	Tree.Preorder(tree)
+	fmt.Println()
+
+	Tree.Inorder(tree)
+	fmt.Println()
+
+	Tree.Postorder(tree)
+	fmt.Println()
+
+	fmt.Println("结点数目：", Tree.GetNodeNum(tree))
+	fmt.Println("层数：", Tree.Layers(tree))
+	fmt.Println("2层结点个数：", Tree.GetKthNum(tree, 2))
+	fmt.Println("叶子结点数目：", Tree.GetLeavNum(tree))
+	fmt.Println("是否平衡：", Tree.IsBalanced(tree))
+}
+
+func main() {
+	// list := ArrayList.NewArray()
+	// link := LinkList.Init()
+
+	// testList(list)
+	// testLink(link)
+
+	test2Tree()
 }
