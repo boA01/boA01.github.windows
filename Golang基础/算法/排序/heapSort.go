@@ -1,5 +1,6 @@
 /*
-	堆排，逻辑结构二叉树
+	堆排，逻辑结构二叉树：n，2*n+1和2*n+2三项选出登顶项
+	一趟找到最值为根（arr[0]）。适合topK问题
 */
 
 package main
@@ -9,7 +10,7 @@ import (
 )
 
 func heapSortMax(arr []int, length int) {
-	depth := length/2 - 1 //深度-1
+	depth := length/2 - 1 //深度-1，最后一个父节点
 
 	for i := depth; i >= 0; i-- {
 		topMax := i
