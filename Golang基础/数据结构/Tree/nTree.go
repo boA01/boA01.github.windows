@@ -1,4 +1,4 @@
-package Tree
+package main
 
 import "fmt"
 
@@ -28,26 +28,26 @@ func InitDeptTree(dept Dept) *Node {
 	}
 }
 
-var cur_ = new(Node)
-
 func (root *Node) FindNode(id int) *Node {
-	if root.id == id {
-		cur_ = root
-	} else {
-		for _, v := range root.son {
-			if v.id == id {
-				cur_ = v
-			} else if len(v.son) != 0 {
-				v.FindNode(id)
-			}
+	for _, v := range root.son {
+		if v.id == id {
+			return v
+		} else if len(v.son) != 0 {
+			return v.FindNode(id)
 		}
 	}
-	return cur_
+	return nil
 }
 
 func (root *Node) Add(dept Dept) {
-	pNode := root.FindNode(dept.pid)
-	pNode.son[dept.id] = InitDeptTree(dept)
+	node := InitDeptTree(dept)
+	if root.id == dept.pid {
+		root.son[dept.id] = node
+	} else if pNode := root.FindNode(dept.pid); pNode != nil {
+		pNode.son[dept.id] = node
+	} else {
+		fmt.Println("添加失败，无父节点")
+	}
 }
 
 func main() {
