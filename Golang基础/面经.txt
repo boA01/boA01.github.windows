@@ -136,12 +136,16 @@ slice扩容？
 <1024  cap() *= 2
 >=1024 cap() *= 1.25（注意内存对齐，查看growslice()）
 
-struct比较？
+struct比较？（==，!=）
 相同类型
-    不存在slice，map，func可以比较
+    不存在不可比较类型，可以比较
+    匿名字段留意
     否则reflect.DeepEqual()比较
 不同类型（强类型）
     强制类型转换后比较
+结构体不能排序（<, >, <=, >=）
+不可比较类型：slice，map，func
+不可序列化类型：chanle，func，complex
 
 判断接口是否为nil？
 类型，数据

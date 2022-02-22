@@ -314,7 +314,10 @@ func testSlice() {
 	var slice []int32 // 区别数组，不写长度；nil Slice
 
 	arr := [...]int32{1, 2, 3, 4}
-	slice = arr[1:3] // [i:j:K], 长度=j-i, 容量=k-i；不同于python切片
+	slice = arr[1:3]
+	// [i:j:K], 长度=j-i, 容量=k-i；不同于python切片
+	// i默认=0，j默认=长度，k默认=容量
+	// 0 <= i <= j <= k <= cap(arr)
 	/*
 	   slice    = &{&arr[1], len(slice), cap(slice)} 伪代码
 	   结构体指针  结构体地址
@@ -327,7 +330,7 @@ func testSlice() {
 	fmt.Println(slice)
 	fmt.Printf("长度：%d, 容量：%d\n", len(slice), cap(slice))
 
-	slice1 := append(slice, 10, 11) // 追加；创建新的数组
+	slice1 := append(slice, 10, 11) // 追加；发生扩容时创建新的数组
 	// slice = append(slice, slice...) // 追加切片，注意...（拆包）
 	fmt.Println(slice1)
 	fmt.Printf("长度：%d, 容量：%d\n", len(slice1), cap(slice1))
