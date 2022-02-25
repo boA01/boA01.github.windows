@@ -673,7 +673,7 @@ func testStruct() {
 	if err != nil {
 		fmt.Println("反序列化失败...", err)
 	}
-	fmt.Println(&h2) // 必须取地址，实参与方法类型一致；不同于下面的str()调用
+	fmt.Println(&h2) // 必须取地址，实参与形参类型一致；不同于下面的str()调用
 	// h2.String() // 无限递归循环，栈溢出
 
 	h1.str()    // 调用方法
@@ -772,13 +772,13 @@ func testInterface() {
 	sb := SchoolBoy{&Students{"小学生", 6}}
 	cs := CollegeStudent{&Students{age: 20, identity: "大学生"}}
 
-	p1 := People{} // 不用取地址，传递方式取决权不在调用，在于定义（同559）
+	p1 := People{} // 不用取地址，传递方式取决权不在调用，在于定义
 	// fmt.Printf("%d %T\n", unsafe.Sizeof(cs), cs) // 8 main.CollegeStudent
 	p1.Status(sb) // 不用取地址，因为类型里面就是指针<<<<<
 	p1.Status(cs) //解释上一行 组合的是 *Student <<<<<<
 
 	s := Students{"未知", 0}
-	var l Life = &s // 必须取地址，接口是指针类型<<<<<<<<<
+	var l Life = &s // 必须取地址，(一般指针类型，go自动解引用)<<<<<<<<<
 	// fmt.Printf("%d %d\n", unsafe.Sizeof(s), unsafe.Sizeof(&s)) //24 8
 	// fmt.Printf("%d\n", unsafe.Sizeof(l))  //16
 	l.Classing() // 接口调用方法
