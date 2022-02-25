@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"math"
@@ -8,6 +9,7 @@ import (
 	"os/signal"
 	_ "reflect"
 	re "regexp"
+	"strings"
 	str "strings"
 	"sync"
 	"sync/atomic"
@@ -71,10 +73,10 @@ func i2s() {
 
 // 闭包
 func fun1() (a int) {
-	// a = 10
+	a = 10
 	defer func() {
 		a += 1
-		fmt.Println(a) // 11
+		fmt.Println(a) // 21
 	}()
 
 	return 20 // 具名返回值就是21
@@ -408,6 +410,30 @@ func maxSum() {
 	fmt.Println(max)
 }
 
+// 最长递增子列
+func maxAddStr() int {
+	arr := []int{10, 9, 2, 5, 3, 6, 101, 18}
+	//     dp = {1,  1, 1, 2, 2, 3, 4,   4}
+	res := 1
+	len_ := len(arr)
+	dp := make([]int, len_)
+	dp[0] = 1
+	for i := 1; i < len_; i++ {
+		dp[i] = 1
+		for j := 0; j < i; j++ {
+			if arr[i] > arr[j] {
+				if tmp := dp[j] + 1; dp[i] < tmp {
+					dp[i] = tmp
+				}
+			}
+		}
+		if res < dp[i] {
+			res = dp[i]
+		}
+	}
+	return res
+}
+
 // 滑动窗口
 func maxLenStr(s string) int {
 	var start, end int
@@ -427,6 +453,35 @@ func defer_() {
 	for i := 0; i < 4; i++ {
 		defer fmt.Print(i)
 	}
+}
+
+// 图遍历
+func numIslands(grid [][]byte) int {
+	res := 0
+	y_l := len(grid)
+	x_l := len(grid[0])
+	for y := 0; y < y_l; y++ {
+		for x := 0; x < x_l; x++ {
+			if grid[y][x] == 1 {
+				dfs(grid, y, x)
+				res++
+			}
+		}
+	}
+	return res
+}
+
+func dfs(grid [][]byte, y, x int) {
+	y_l := len(grid)
+	x_l := len(grid[0])
+	if x >= x_l || x < 0 || y >= y_l || y < 0 || grid[y][x] == 0 {
+		return
+	}
+	grid[y][x] = 0
+	dfs(grid, y+1, x)
+	dfs(grid, y-1, x)
+	dfs(grid, y, x+1)
+	dfs(grid, y, x-1)
 }
 
 func inout() {
@@ -449,7 +504,34 @@ func inout() {
 	fmt.Printf("%T", arr)
 }
 
-func test(n int) int {
+/*// 泛型函数
+func min(T constraints.Ordered) (x, y T) T {
+	if x < y {
+		return x
+	}
+	return y
+}
+*/
+
+// 杨辉三角
+/*
+  1   4    6    4    1
+  1  4/1  12/2 24/6 24/24
+*/
+func yhsj(n int) {
+	var arr = []int{1}
+	fz, fm := 1, 1
+
+	for i := 1; i < n; i++ {
+		fz *= (n - i)
+		fm *= i
+		arr = append(arr, fz/fm)
+	}
+	fmt.Println(arr)
+}
+
+// 爬楼梯 An = A(n-1) + A(n-2)
+func plt(n int) int {
 	a, b := 1, 1
 	for ; n > 0; n-- {
 		a, b = b, a+b
@@ -457,10 +539,204 @@ func test(n int) int {
 	return a
 }
 
+// 发钱-爬楼梯变种 An = S(n-1)
+func fq(num int) int {
+	if num == 1 {
+		return 1
+	}
+	count := 0
+	for i := num - 1; i > 0; i-- {
+		count += fq(i)
+	}
+	return count + 1
+}
+
+func CalulateMethodCount(num_money int) int {
+	// write code here
+	var arr = []int{1, 2, 4}
+	if num_money <= 3 {
+		return arr[num_money-1]
+	}
+	for i := 4; i <= num_money; i++ {
+		arr[0], arr[1], arr[2] = arr[1], arr[2], arr[0]+arr[1]+arr[2]
+	}
+	return arr[2]
+}
+
+// 栈
+func ur() {
+	var (
+		arr  []string
+		temp []string
+	)
+	input := bufio.NewReader(os.Stdin)
+
+	str, _ := input.ReadString('\n')
+	fmt.Println(str)
+	for _, v := range strings.Split(str, " ") {
+		if v == "undo" {
+			temp = append(temp, arr[len(arr)-1])
+			arr = append(arr[:0], arr[:len(arr)-1]...)
+		} else if v == "redo" {
+			arr = append(arr, temp[0])
+			temp = temp[1:]
+		} else {
+			arr = append(arr, v)
+		}
+	}
+
+	for _, v := range arr {
+		fmt.Print(v, " ")
+	}
+}
+
+// 分解质因数
+func fjzys() {
+	var n int
+	fmt.Scanln(&n)
+	arr := make([]int, n)
+	ans := 0
+	for i := 0; i < n; i++ {
+		fmt.Scan(&arr[i])
+		ans += arr[i] / 2
+	}
+	fmt.Println(ans)
+}
+
+var xxS, zxS, hxS []int
+
+// 逻辑二叉树遍历
+func binaryTreeScan(input []int) [][]int {
+	// write code here
+	res := make([][]int, 3)
+	xx(input, 0)
+	zx(input, 0)
+	hx(input, 0)
+	res[0] = xxS
+	res[1] = zxS
+	res[2] = hxS
+	return res
+}
+
+// 根=n，左=2*n+1，右=2*n+2
+func xx(arr []int, root int) {
+	if root >= len(arr) {
+		return
+	}
+	if tmp := arr[root]; tmp != -1 {
+		xxS = append(xxS, tmp)
+	}
+	xx(arr, root<<1|1)
+	xx(arr, (root<<1)+2)
+}
+func zx(arr []int, root int) {
+	if root >= len(arr) {
+		return
+	}
+	zx(arr, root<<1|1)
+	if tmp := arr[root]; tmp != -1 {
+		zxS = append(zxS, tmp)
+	}
+	zx(arr, (root<<1)+2)
+}
+func hx(arr []int, root int) {
+	if root >= len(arr) {
+		return
+	}
+	hx(arr, root<<1|1)
+	hx(arr, (root<<1)+2)
+	if tmp := arr[root]; tmp != -1 {
+		hxS = append(hxS, tmp)
+	}
+}
+
+// 二分查找
+func binarySearch(arr []int, num int) int {
+	l_index, r_index := 0, len(arr)
+
+	for l_index < r_index {
+		mid := (r_index + l_index) >> 1
+		if arr[mid] > num {
+			r_index = mid - 1
+		} else if arr[mid] < num {
+			l_index = mid + 1
+		} else {
+			return mid
+		}
+	}
+	return -1
+}
+
+func f(num *[]int) {
+	(*num)[0] = 18
+	*num = append(*num, 3)
+}
+
 func main() {
 	fmt.Println("hello")
-	// fmt.Scanln(&N)
 
+	// i := []int{6, 8, 8, 5, 6, 1}
+	// f(&i)
+	// fmt.Println(i[0], i)
+
+	// yhsj(5) // 1 4 6 4 1
+	// fmt.Println(CalulateMethodCount(4))
+	// ur()
+	// fmt.Println(maxAddStr())
+	// fmt.Println(binaryTreeScan([]int{1, 7, 2, 6, -1, 4, 8}))
+	// fjzys()
+	// fmt.Println(numIslands([][]byte{
+	// 	{1, 1, 1, 1, 0},
+	// 	{1, 1, 0, 1, 0},
+	// 	{1, 1, 0, 0, 0},
+	// 	{0, 0, 1, 0, 1},
+	// }))
+	// fmt.Println(binarySearch([]int{1, 2, 4, 6, 8, 9, 10}, 10))
+
+	// m := min[int](2, 3) 泛型函数调用
+
+	// var p = new(int) // new(),返回指针，并且*p=0
+	// var p1 = new(int)
+	// var i interface{} = p1 // T=*int, V=p1指向地址
+	// fmt.Println(p != i)
+
+	// s := []string{"a", "b", "c"}
+	// copy(s[1:], s) // {"b", "c"}<-替换{"a", "b"}
+	// fmt.Println(s)
+
+	// s2 := []int{1, 2}
+	// s2 = append(s2, 3)
+	// s2 = append(s2, 4)
+	// s2 = append(s2, 5)
+	// s3 := []int{1, 2}
+	// s3 = append(s3, 3, 4, 5)
+	// fmt.Println(cap(s1), cap(s2), cap(s3)) // 8 8 6
+
+	// true, false, nil 不是关键字
+
+	// var y = []string{"A", "B", "C", "D"}
+	// var x = y[:3]
+
+	// for i, s := range x { //{A, Z, C}
+	// 	print(i, s, ",")
+	// 	x = append(x, "Z")
+	// 	x[i+1] = "Z"
+	// }
+	// fmt.Println(y) //[A Z C Z]
+
+	// var f = func() bool {
+	// 	return false
+	// }
+	// switch f(); false {
+	// case true:
+	// 	println(1)
+	// case false:
+	// 	println(0)
+	// default:
+	// 	println(-1)
+	// }
+
+	// fmt.Scanln(&N)
 	// arr := make([]int, N)
 	// for i := range arr {
 	// 	fmt.Scanf("%d", &arr[i])
@@ -469,7 +745,17 @@ func main() {
 
 	// A := "a"
 	// fmt.Println(A, byte('a'))
-	fmt.Println(string([]byte{65, 68, 70}))
+	// fmt.Println(string([]byte{65, 68, 70}))
+
+	// slice_ := []int{1, 2, 3, 4, 5, 6}
+	// fmt.Println(append(slice_[:2], slice_[2+1:]...))
+
+	// map_ := map[int]string{
+	// 	1: "hello",
+	// 	2: "world",
+	// }
+	// map_[3] = "haha"
+	// fmt.Printf("%#v", map_[3] == "")
 
 	// fmt.Println("a1" > "A1")
 	// fmt.Println(strings.Compare("a1", "A1"))
