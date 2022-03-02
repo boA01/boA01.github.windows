@@ -8,9 +8,8 @@ import (
 	"os"
 	"os/signal"
 	_ "reflect"
-	re "regexp"
+	"strconv"
 	"strings"
-	str "strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -39,6 +38,11 @@ type s2 struct {
 	age  int
 }
 
+type ListNode struct {
+	Val  int
+	Next *ListNode
+}
+
 type Set struct {
 	m map[T]bool
 	sync.RWMutex
@@ -64,7 +68,7 @@ func hello(n int) {
 func i2s() {
 	n := 13
 	// s1 := strconv.FormatInt(int64(n), 2)
-	s1 := fmt.Sprintf("%03o", n)
+	s1 := fmt.Sprintf("%d", n)
 	fmt.Println(s1)
 
 	// i1, _ := strconv.ParseInt("1001", 3, 32)
@@ -352,10 +356,11 @@ func fun7() {
 
 func str_re() {
 	s1 := "helllolo string"
-	s2 := "中国"
-	myRe, _ := re.Compile("l.?o")
-	fmt.Println(myRe.FindString(s1))
-	fmt.Println(s2, len(s2))
+	// // s2 := "hello 中国"
+	// myRe, _ := regexp.Compile("lo")
+	// fmt.Println(myRe.FindStringIndex(s1))
+	fmt.Println("lo" == s1[4:6])
+	// fmt.Println(s2, len(s2), len([]rune(s2)), unsafe.Sizeof(s2))
 
 	// for _, v := range s2 {
 	// 	fmt.Printf("%c\n", v)
@@ -365,7 +370,33 @@ func str_re() {
 		Find(All)?(String)?(Submatch)?(Index) //16个组合
 	*/
 
-	fmt.Println(str.TrimRight(s1, "rign"))
+	// s*n
+	// fmt.Println(strings.Repeat("jj", 3))
+
+	// 包含
+	// fmt.Println(strings.Contains(s1, "i"))
+
+	// rep := strings.NewReplacer(" ", "+") //替换规则，类似re.Compile()
+	// fmt.Println(rep.Replace(s1))
+
+	// 分割
+	// fmt.Println(strings.FieldsFunc("ab	s*1 a", func(r rune) bool {
+	// 	return !unicode.IsLetter(r) && !unicode.IsNumber(r)
+	// }))
+
+	// 翻转
+	// reverse := func(T []string) string {
+	// 	for i, j := 0, len(T)-1; i < j; i, j = i+1, j-1 {
+	// 		T[i], T[j] = T[j], T[i]
+	// 	}
+	// 	return strings.Join(T, " ")
+	// }
+	// fmt.Println(reverse(strings.Split(s1, " ")))
+
+	// s_l := []string{"hello", "world", "boa", "baa1"}
+	// sort.Strings(s_l)
+	// sort.Slice(s_l, func(i, j int) bool { return s_l[i][1] < s_l[j][1] })
+	// fmt.Println(strings.Join(s_l, " "))
 }
 
 // 动态规划（dp数组存放标记）
@@ -434,6 +465,8 @@ func maxAddStr() int {
 	return res
 }
 
+// 双栈实现队列
+
 // 滑动窗口
 func maxLenStr(s string) int {
 	var start, end int
@@ -455,6 +488,102 @@ func defer_() {
 	}
 }
 
+// 翻转链表
+func ReverseList(pHead *ListNode) *ListNode {
+	// write code here
+	if pHead == nil {
+		return nil
+	}
+
+	// 简单双指针
+	/*
+		cur与pre一起向后移动
+	*/
+	// var cur *ListNode
+	// for pHead != nil {
+	// 	pHead.Next, cur, pHead = cur, pHead, pHead.Next
+	//  pre.next = cur, cur = pre, pre = pre.next
+	// }
+
+	// 双头指针
+	/*
+		head不动，cur向后移动
+	*/
+	cur := pHead
+	for pHead.Next != nil {
+		pHead.Next, pHead.Next.Next, cur = cur.Next.Next, cur, pHead.Next
+	}
+
+	return cur
+}
+
+func LRU1(operators [][]int, k int) []int {
+	// write code here
+	queue := make([][]int, 0, k)
+	res := make([]int, 0)
+fig:
+	for _, v := range operators {
+		if v[0] == 1 {
+			for m, n := range queue {
+				if n[0] == v[1] {
+					queue[m][1] = v[2]
+					continue fig
+				}
+			}
+			if len(queue) < k {
+				queue = append(queue, []int{v[1], v[2]})
+			} else {
+				queue = append(queue[:0], queue[1:]...)
+				queue = append(queue, []int{v[1], v[2]})
+			}
+		} else {
+			for idx, val := range queue {
+				if val[0] == v[1] {
+					res = append(res, val[1])
+					for j := idx; j < len(queue)-1; j++ {
+						queue[j], queue[j+1] = queue[j+1], queue[j]
+					}
+					continue fig
+				}
+			}
+			res = append(res, -1)
+		}
+	}
+	return res
+}
+
+func LRU(operators [][]int, k int) []int {
+	// write code here
+	map_ := make(map[int]int)    // key:index
+	queue := make([][]int, 0, k) // key:value
+	res := make([]int, 0)        // value
+	for _, v := range operators {
+		if v[0] == 1 {
+			if len(queue) < k {
+				queue = append(queue, []int{v[1], v[2]})
+			} else {
+				delete(map_, queue[0][0])
+				queue = append(queue[:0], queue[1:]...) // pop(0)
+				queue = append(queue, []int{v[1], v[2]})
+			}
+		} else {
+			if idx, ok := map_[v[1]]; ok {
+				res = append(res, queue[idx][1])
+				for j := idx; j < len(queue)-1; j++ {
+					queue[j], queue[j+1] = queue[j+1], queue[j] // 后移
+				}
+			} else {
+				print("-1")
+				res = append(res, -1)
+			}
+		}
+		for i, v := range queue {
+			map_[v[0]] = i // 更新索引
+		}
+	}
+	return res
+}
+
 // 图遍历
 func numIslands(grid [][]byte) int {
 	res := 0
@@ -470,7 +599,6 @@ func numIslands(grid [][]byte) int {
 	}
 	return res
 }
-
 func dfs(grid [][]byte, y, x int) {
 	y_l := len(grid)
 	x_l := len(grid[0])
@@ -532,8 +660,8 @@ func yhsj(n int) {
 
 // 爬楼梯 An = A(n-1) + A(n-2)
 func plt(n int) int {
-	a, b := 1, 1
-	for ; n > 0; n-- {
+	a, b := 1, 2
+	for ; n > 1; n-- {
 		a, b = b, a+b
 	}
 	return a
@@ -590,6 +718,17 @@ func ur() {
 	}
 }
 
+func sqrt(x int) int {
+	// write code here
+	n := 1
+	sum := n
+	for sum <= x {
+		n += 2
+		sum += n
+	}
+	return n / 2
+}
+
 // 分解质因数
 func fjzys() {
 	var n int
@@ -617,6 +756,55 @@ func binaryTreeScan(input []int) [][]int {
 	res[2] = hxS
 	return res
 }
+
+// 层序遍历
+/*
+  func levelOrder( root *TreeNode ) [][]int {
+    // write code here
+	递归（同层结点深度遍历）
+    result := make([][]int, 0)
+	var dfs func(* TreeNode, int) // 匿名函数递归调用要提前申明
+	dfs = func(node *TreeNode, level int) {
+		if node == nil {
+			return
+		}
+		if level == len(result) {
+			result = append(result, []int{})
+		}
+		result[level] = append(result[level], node.Val)
+		dfs(node.Left, level+1)
+		dfs(node.Right, level+1)
+	}
+	dfs(root, 0)
+	return result
+
+	队列（逐层遍历）
+	if root == nil {
+		return nil
+	}
+	result := [][]int{root.Val}
+	queue := make([]*TreeNode, 0)
+	queue = append(queue, root)
+	for len(queue) != 0 {
+		level := make([]int, 0)
+		levelNum := len(queue)
+		for i := 0; i < levelNum; i++ {
+			cur := queue[0]
+			if cur.Left != nil {
+				level = append(level, cur.Left.Val)
+				queue = append(queue, cur.Left)
+			}
+			if cur.Right != nil {
+				level = append(level, cur.Right.Val)
+				queue = append(queue, cur.Right)
+			}
+			queue = queue[1:]
+		}
+		result = append(result, level)
+	}
+	return result
+  }
+*/
 
 // 根=n，左=2*n+1，右=2*n+2
 func xx(arr []int, root int) {
@@ -652,19 +840,23 @@ func hx(arr []int, root int) {
 
 // 二分查找
 func binarySearch(arr []int, num int) int {
-	l_index, r_index := 0, len(arr)
+	l_index, r_index := 0, len(arr)-1
+	idx := -1
 
-	for l_index < r_index {
+	for l_index <= r_index {
 		mid := (r_index + l_index) >> 1
 		if arr[mid] > num {
 			r_index = mid - 1
 		} else if arr[mid] < num {
 			l_index = mid + 1
 		} else {
-			return mid
+			// return mid
+			idx = mid
+			r_index = mid - 1
 		}
 	}
-	return -1
+	// return -1
+	return idx
 }
 
 func f(num *[]int) {
@@ -672,10 +864,136 @@ func f(num *[]int) {
 	*num = append(*num, 3)
 }
 
+// 旋转90度
+func rotateMatrix(mat [][]int, n int) [][]int {
+	// write code here
+	// [1,2,3] [7 4 1]
+	// [4,5,6] [8 5 2]
+	// [7,8,9] [9 6 3]
+
+	// 对角线交换
+	for i := 0; i < n; i++ {
+		for j := 0; j < i; j++ {
+			mat[i][j], mat[j][i] = mat[j][i], mat[i][j]
+		}
+	}
+	// 左右旋转
+	for i := 0; i < n; i++ {
+		for j := 0; j < n/2; j++ {
+			mat[i][n-1-j], mat[i][j] = mat[i][j], mat[i][n-1-j]
+		}
+	}
+	return mat
+}
+
+// kmp
+func kmp(S string, T string) int {
+	// write code here
+	ls, lt, num := len(S), len(T), 0
+	if ls > lt {
+		return num
+	}
+	next := make([]int, ls)
+
+	for i, j := 1, 0; i < ls; i++ {
+		for j > 0 && S[j] != S[i] {
+			j = next[j-1]
+		}
+		if S[j] == S[i] {
+			j += 1
+		}
+		next[i] = j
+	}
+
+	// fmt.Println(next)
+
+	for i, j := 0, 0; i < lt; i++ {
+		for j > 0 && S[j] != T[i] {
+			j = next[j-1]
+		}
+		if S[j] == T[i] {
+			j += 1
+		}
+		if j == ls {
+			num++
+			j = next[j-1]
+		}
+	}
+	return num
+}
+
+// topK
+func topKstrings(strings []string, k int) [][]string {
+	// write code here
+	map_ := make(map[string]int, 0)
+	sl := make([][]string, 0)
+	for _, v := range strings {
+		map_[v] += 1
+	}
+	for k := range map_ {
+		sl = append(sl, []string{k, fmt.Sprintf("%d", map_[k])})
+	}
+	/*
+	   sort.Slice(sl, func(i, j int) bool {
+	       if sl[i][1] == sl[j][1] {
+	           return sl[i][0] < sl[j][0]
+	       }
+	       i_i,_ := strconv.Atoi(sl[i][1])
+	       i_j,_ := strconv.Atoi(sl[j][1])
+	       return i_i > i_j
+	   })
+	*/
+	return HeapSort(sl, k)
+}
+func heapSortMax(arr [][]string, length int) {
+	last_root := length/2 - 1
+	for i := last_root; i >= 0; i-- {
+		topMax := i
+		lc := (i << 1) + 1
+		rc := (i << 1) + 2
+		top_1, _ := strconv.Atoi(arr[topMax][1])
+		lc_1, _ := strconv.Atoi(arr[lc][1])
+		if lc_1 > top_1 {
+			topMax = lc
+		} else if lc_1 == top_1 {
+			if arr[lc][0] < arr[topMax][0] {
+				topMax = lc
+			}
+		}
+		if rc < length {
+			rc_1, _ := strconv.Atoi(arr[rc][1])
+			if rc_1 > top_1 {
+				topMax = rc
+			} else if rc_1 == top_1 {
+				if arr[rc][0] < arr[topMax][0] {
+					topMax = rc
+				}
+			}
+		}
+		if topMax != i {
+			arr[i], arr[topMax] = arr[topMax], arr[i]
+		}
+	}
+}
+func HeapSort(arr [][]string, k int) (res [][]string) {
+	length := len(arr)
+
+	for i := length; i > length-k; i-- {
+		heapSortMax(arr, i)
+		last := i - 1
+		arr[0], arr[last] = arr[last], arr[0]
+		res = append(res, arr[last])
+	}
+	return
+}
+
 func main() {
 	fmt.Println("hello")
 
-	// i := []int{6, 8, 8, 5, 6, 1}
+	i := []int{6, 8, 8, 5, 6, 1}
+	for j, v := range i[1:] {
+		fmt.Println(j, v)
+	}
 	// f(&i)
 	// fmt.Println(i[0], i)
 
@@ -692,7 +1010,10 @@ func main() {
 	// 	{0, 0, 1, 0, 1},
 	// }))
 	// fmt.Println(binarySearch([]int{1, 2, 4, 6, 8, 9, 10}, 10))
-
+	// fmt.Println(rotateMatrix([][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}, 3))
+	// fmt.Println(LRU([][]int{{1, 1, 1}, {1, 2, 2}, {2, 1}, {1, 3, 3}, {2, 2}, {1, 4, 4}, {2, 1}, {2, 3}, {2, 4}}, 2))
+	// fmt.Println(topKstrings([]string{"a", "c", "b", "a", "c", "b"}, 3))
+	// fmt.Println(kmp("ababab", "abababab"))
 	// m := min[int](2, 3) 泛型函数调用
 
 	// var p = new(int) // new(),返回指针，并且*p=0
@@ -700,8 +1021,12 @@ func main() {
 	// var i interface{} = p1 // T=*int, V=p1指向地址
 	// fmt.Println(p != i)
 
-	// s := []string{"a", "b", "c"}
-	// copy(s[1:], s) // {"b", "c"}<-替换{"a", "b"}
+	// s := make([]string, 6)
+	// s[0] = "a"
+	// s[1] = "b"
+	// s[2] = "c"
+	// // copy(s[1:], s) // {"b", "c"}<-替换{"a", "b"}
+	// s = append(s[:1], append([]string{"a"}, s[1:]...)...)
 	// fmt.Println(s)
 
 	// s2 := []int{1, 2}
@@ -713,6 +1038,8 @@ func main() {
 	// fmt.Println(cap(s1), cap(s2), cap(s3)) // 8 8 6
 
 	// true, false, nil 不是关键字
+
+	// str_re()
 
 	// var y = []string{"A", "B", "C", "D"}
 	// var x = y[:3]
@@ -748,7 +1075,9 @@ func main() {
 	// fmt.Println(string([]byte{65, 68, 70}))
 
 	// slice_ := []int{1, 2, 3, 4, 5, 6}
-	// fmt.Println(append(slice_[:2], slice_[2+1:]...))
+	// slice_ = append(slice_[:2], slice_[2+1:]...)
+	// fmt.Println(slice_)
+	// fmt.Println(len(slice_))
 
 	// map_ := map[int]string{
 	// 	1: "hello",
