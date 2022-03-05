@@ -667,19 +667,8 @@ func plt(n int) int {
 	return a
 }
 
-// 发钱-爬楼梯变种 An = S(n-1)
-func fq(num int) int {
-	if num == 1 {
-		return 1
-	}
-	count := 0
-	for i := num - 1; i > 0; i-- {
-		count += fq(i)
-	}
-	return count + 1
-}
-
-func CalulateMethodCount(num_money int) int {
+// 发钱-爬楼梯变种 An = A(n-1)+A(n-2)+A(n-3)
+func fq(num_money int) int {
 	// write code here
 	var arr = []int{1, 2, 4}
 	if num_money <= 3 {
@@ -698,7 +687,6 @@ func ur() {
 		temp []string
 	)
 	input := bufio.NewReader(os.Stdin)
-
 	str, _ := input.ReadString('\n')
 	fmt.Println(str)
 	for _, v := range strings.Split(str, " ") {
@@ -718,6 +706,33 @@ func ur() {
 	}
 }
 
+// ()匹配
+func count(arr []string) int {
+	// write code here
+	res := 0
+flag:
+	for _, str := range arr {
+		stack := []byte{}
+		if str == "" {
+			continue
+		}
+		mid := len(str) >> 1
+		for _, c := range str {
+			if c == '(' && len(stack) < mid {
+				stack = append(stack, byte(c))
+			} else if c == ')' && len(stack) != 0 {
+				stack = append(stack[:0], stack[:len(stack)-1]...)
+			} else {
+				continue flag
+			}
+		}
+		if len(stack) == 0 {
+			res++
+		}
+	}
+	return res
+}
+
 func sqrt(x int) int {
 	// write code here
 	n := 1
@@ -731,15 +746,18 @@ func sqrt(x int) int {
 
 // 分解质因数
 func fjzys() {
-	var n int
+	var n, res int
 	fmt.Scanln(&n)
-	arr := make([]int, n)
-	ans := 0
-	for i := 0; i < n; i++ {
-		fmt.Scan(&arr[i])
-		ans += arr[i] / 2
+	input := bufio.NewReader(os.Stdin)
+	str, _ := input.ReadString('\n')
+	arr := strings.Split(str, " ")
+	arr[n-1] = arr[n-1][:len(arr[n-1])-1]
+
+	for _, v := range arr {
+		val, _ := strconv.Atoi(v)
+		res += val >> 1
 	}
-	fmt.Println(ans)
+	fmt.Println(res)
 }
 
 var xxS, zxS, hxS []int
@@ -987,13 +1005,125 @@ func HeapSort(arr [][]string, k int) (res [][]string) {
 	return
 }
 
+/*
+  cbaccceba
+    aaabce
+  6 = 9 - 3
+*/
+func t1(a, b string) int {
+	la, lb, res := len(a), len(b), 0
+	for i := 0; i < lb; i++ {
+		for j := 0; j < la; j++ {
+			if b[i] == a[j] {
+				res++
+				break
+			}
+		}
+	}
+	if la > lb {
+		return la - res
+	} else {
+		return lb - res
+	}
+}
+
+// 染色
+func t2(arr [][]int) int {
+	res, y, x := 0, len(arr), len(arr[0])
+	for i := 0; i < y; i++ {
+		for j := 0; j < x; j++ {
+			if arr[i][j] == 1 {
+				if j+1 < x && arr[i][j+1] == 0 {
+					arr[i][j+1] = 2
+					res++
+				}
+				if j-1 >= 0 && arr[i][j-1] == 0 {
+					arr[i][j-1] = 2
+					res++
+				}
+				if i+1 < y && arr[i+1][j] == 0 {
+					arr[i+1][j] = 2
+					res++
+				}
+				if i-1 >= 0 && arr[i-1][j] == 0 {
+					arr[i-1][j] = 2
+					res++
+				}
+			}
+		}
+	}
+	return res
+}
+
+// 站点（快慢指针）
+func zd() int {
+	n, maxDis, res, size := 0, 0, 0, 0
+	fmt.Scanf("%d %d\n", &n, &maxDis)
+	input := bufio.NewReader(os.Stdin)
+	str, _ := input.ReadString('\n')
+	if n < 3 {
+		return res
+	}
+	s_str := strings.Split(str, " ")
+	s_str[n-1] = s_str[n-1][:len(s_str[n-1])-1]
+
+	for i, j := 0, 2; i < j-1; {
+		v_i, _ := strconv.Atoi(s_str[i])
+		v_j, _ := strconv.Atoi(s_str[j])
+		cha := v_j - v_i
+		// 寻找最大窗口
+		if cha < maxDis { // 最大窗口小于规定距离
+			if j != n-1 {
+				j++ // 快指针尝试前进
+				continue
+			}
+			// 快指针到达终点，只移动慢指针
+			size = j - i - 1
+			res += (size + 1) * size / 2
+			i++
+			continue
+		} else if cha > maxDis { // 当前窗口大于规定距离
+			j-- // 快指针回退
+		}
+		size = j - i - 1 // 窗口点数
+		res += (size + 1) * size / 2
+		i++
+	}
+	return res % 99997867
+}
+
 func main() {
 	fmt.Println("hello")
 
-	i := []int{6, 8, 8, 5, 6, 1}
-	for j, v := range i[1:] {
-		fmt.Println(j, v)
-	}
+	// str := "2\n"
+	// fmt.Print(str[:len(str)-1] + "k")
+	/*
+		fmt.Println(t2([][]int{
+			{0, 1, 0, 0, 0, 0, 0, 1},
+			{0, 1, 0, 0, 0, 0, 0, 1},
+			{0, 0, 0, 0, 0, 0, 0, 1},
+			{0, 0, 0, 0, 0, 0, 0, 0},
+		}))
+	*/
+	// fmt.Println(t1("dbcddbdca", "abc"))
+
+	// for i := 0; i < 8; i++ {
+	// 	fmt.Println(i)
+	// 	if i == 2 {
+	// 		i = 5
+	// 	}
+	// }
+
+	// intSlice := new([3]int)
+	// intSlice[0] = 1
+	// for i, v := range intSlice {
+	// 	fmt.Println(i, v)
+	// }
+
+	// i := []int{6, 8, 8, 5, 6, 1}
+	// for j, v := range i[1:] {
+	// 	fmt.Println(j, v)
+	// }
 	// f(&i)
 	// fmt.Println(i[0], i)
 
@@ -1003,6 +1133,7 @@ func main() {
 	// fmt.Println(maxAddStr())
 	// fmt.Println(binaryTreeScan([]int{1, 7, 2, 6, -1, 4, 8}))
 	// fjzys()
+	// fmt.Println(zd())
 	// fmt.Println(numIslands([][]byte{
 	// 	{1, 1, 1, 1, 0},
 	// 	{1, 1, 0, 1, 0},
@@ -1044,12 +1175,12 @@ func main() {
 	// var y = []string{"A", "B", "C", "D"}
 	// var x = y[:3]
 
-	// for i, s := range x { //{A, Z, C}
+	// for i, s := range x { //x = y[:3] = {A, Z, C}
 	// 	print(i, s, ",")
 	// 	x = append(x, "Z")
 	// 	x[i+1] = "Z"
 	// }
-	// fmt.Println(y) //[A Z C Z]
+	// fmt.Println(y, x) //[A Z C Z] [A Z Z Z Z Z]
 
 	// var f = func() bool {
 	// 	return false
@@ -1063,10 +1194,20 @@ func main() {
 	// 	println(-1)
 	// }
 
-	// fmt.Scanln(&N)
-	// arr := make([]int, N)
+	// var str string
+	// fmt.Scanln(&str)
+	// fmt.Println(str[3] == 'l')
+
+	// 二维数组输入
+	// var x, y int
+	// fmt.Scan("%d %d\n", &x, &y)
+	// arr := make([][]int, x)
 	// for i := range arr {
-	// 	fmt.Scanf("%d", &arr[i])
+	// 	arr[i] = make([]int, y)
+	// 	for j := range arr[i] {
+	// 		fmt.Scanf("%d", &arr[i][j])
+	// 	}
+	// 	fmt.Scanln()
 	// }
 	// fmt.Println(arr)
 
