@@ -497,12 +497,11 @@ func ReverseList(pHead *ListNode) *ListNode {
 
 	// 简单双指针
 	/*
-		cur与pre一起向后移动
+		cur与pHead一起向后移动
 	*/
 	// var cur *ListNode
 	// for pHead != nil {
 	// 	pHead.Next, cur, pHead = cur, pHead, pHead.Next
-	//  pre.next = cur, cur = pre, pre = pre.next
 	// }
 
 	// 双头指针
@@ -1094,6 +1093,11 @@ func zd() int {
 
 func main() {
 	fmt.Println("hello")
+
+	// arr := [2]int{}
+	map_ := make(map[int]int, 6)
+	// chanl := make(chan int, 3)
+	fmt.Println(len(map_), cap(map_))
 
 	// str := "2\n"
 	// fmt.Print(str[:len(str)-1] + "k")

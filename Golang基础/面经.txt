@@ -111,11 +111,24 @@ func maxStr(s []int) {
 
 // 翻转链表
 func reverseList(head *ListNode) *ListNode {
-    cur := head
-    var pre *ListNode = nil // 前驱结点
-    for cur != nil {
-        cur.next, pre, cur = pre, cur, cur.next
+	/*
+        简单双指针
+		cur与head一起向后移动
+	*/
+    var cur *ListNode // 前驱结点
+    for head != nil {
+        head.next, cur, head = cur, head, head.next
     }
+
+	/*
+        双头指针
+		head不动，cur向后移动
+	*/
+	cur := pHead
+	for pHead.Next != nil {
+		pHead.Next, pHead.Next.Next, cur = cur.Next.Next, cur, pHead.Next
+	}
+
     return pre
 }
 
@@ -190,7 +203,7 @@ select作用？
 
 阻塞？
 atomic （原子操作）
-<-make(chan int)
+make(chan int) （无缓冲chan是同步的）
 sync.Mutex（不可赋值, 不可重复上锁）
 for{}
 select{}
