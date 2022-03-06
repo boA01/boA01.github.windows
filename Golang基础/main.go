@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	_ "reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -1091,13 +1092,67 @@ func zd() int {
 	return res % 99997867
 }
 
+// 考试
+func qh1() {
+	var n, p, q int
+	fmt.Scanf("%d %d %d\n", &n, &p, &q)
+	arr := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Scan(&arr[i])
+	}
+	sort.Slice(arr, func(i, j int) bool { return arr[i] > arr[j] })
+	ps := 100
+	if (arr[0]*p+ps*q)/100 < 60 {
+		fmt.Println(0)
+		return
+	}
+	num := 1
+	for i, v := range arr[1:] {
+		if arr[i] != v {
+			ps--
+		}
+		if (v*p+ps*q)/100 < 60 {
+			break
+		}
+		num++
+	}
+	fmt.Println(num)
+}
+
+// 贪心（组队吃鸡）
+func qh2() {
+	var (
+		n   int
+		arr [4]int
+	)
+	fmt.Scanln(&n)
+	for i := 0; i < n; i++ {
+		res := 0
+		fmt.Scanf("%d %d %d %d\n", &arr[0], &arr[1], &arr[2], &arr[3])
+		res += (arr[3] + arr[1]>>1)
+		if arr[0] <= arr[2] {
+			res += arr[0]
+		} else {
+			res += arr[2]
+			yu1 := arr[0] - arr[2]
+			if yu1 >= 2 && arr[1]%2 != 0 {
+				res++
+				yu1 -= 2
+			}
+			res += yu1 >> 2
+		}
+		fmt.Println(res)
+	}
+}
+
 func main() {
 	fmt.Println("hello")
 
-	// arr := [2]int{}
-	map_ := make(map[int]int, 6)
-	// chanl := make(chan int, 3)
-	fmt.Println(len(map_), cap(map_))
+	// arr := [3]int{2, 1}
+	// fmt.Println(len(arr), cap(arr)) // 数组的容量和长度相同，区别于切片
+
+	// qh1()
+	// qh2()
 
 	// str := "2\n"
 	// fmt.Print(str[:len(str)-1] + "k")
