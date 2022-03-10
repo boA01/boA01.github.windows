@@ -1148,6 +1148,14 @@ func qh2() {
 func main() {
 	fmt.Println("hello")
 
+	// var it interface{}
+	// // it = new(int)
+	// tp := reflect.TypeOf(it)
+	// va := reflect.ValueOf(it)
+	// fmt.Println(tp == nil, va)
+
+	fmt.Println(time.Now().Date())
+
 	// arr := [3]int{2, 1}
 	// fmt.Println(len(arr), cap(arr)) // 数组的容量和长度相同，区别于切片
 

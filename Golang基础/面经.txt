@@ -149,6 +149,22 @@ slice扩容？
 <1024  cap() *= 2
 >=1024 cap() *= 1.25（注意内存对齐，查看growslice()）
 
+map原理？
+hashmap；利用hash函数对key做计算，得出下标
+hashCode碰撞一定会下标冲突；下标冲突，不一定hashCode碰撞
+拉链法：数组+链表
+       数组+红黑树
+hmap和bmap两种数据结构
+    hmap中有指向bmap数组的指针
+    hashCode低位用于bmap数组的下标，判断桶的位置
+        高位放在bmap的[8]uint8，确定在桶中的哪个元素
+        key和value放在bmap的字节数组中，
+        pointer指向扩容bucket。
+        桶：8对kv，k/k/...v/v/...存储，避免内存对齐，节省空间。
+等量扩容：溢出桶太多，重新排列，放入新桶，让数据更紧凑
+双倍扩容：装填因子大于6.5，只是与分配，具体访问bukect时，才迁移
+         不是全量扩容，而是增量扩容，分摊工作，不至于系统卡顿
+
 struct比较？（==，!=）
 相同类型
     不存在不可比较类型，可以比较
@@ -171,17 +187,17 @@ func IsNil(i interface{}) {
 }
 
 go init 的执行顺序？
-一个文件里，从上到下
-一个包里面，官方没明确说明，文件名大小
-不同包，按导入的依赖关系
+    一个文件里，从上到下
+    一个包里面，官方没明确说明，文件名大小
+    不同包，按导入的依赖关系
 
 CSP并发模型
-不以共享内存通信，要用通信来共享内存
+    不以共享内存通信，要用通信来共享内存
 
 GMP模型？
-M：系统线程（有固定大小的栈）
-G：协程（栈动态扩缩；都需要一个P）
-P：上下文（运行在M上的调度器，默认大小cpu核数，原生代码不需要）
+    M：系统线程（有固定大小的栈）
+    G：协程（栈动态扩缩；都需要一个P）
+    P：逻辑处理器（运行在M上的调度器，默认大小cpu核数，原生代码不需要）
 
 go协程的4种状态
 Runnable
@@ -190,28 +206,23 @@ Syscall
 Waiting
 
 goroutine与coroutine
-py协程：1:N，采用EVENTLOOP模型；需要await主动交出控制权，
-        虽然可以实现异步io，但是不能多效利用多核（GIL）
-go协程：M:N，采用CSP模型；可以多线程分配到不同核心上
-相同点：都引人消息调度系统模型，通过消息机制交流，
-
-context有什么作用？
-上下文，上层向下层传递内容（常用于 关闭后台协程）；阻塞
-
-select作用？
-阻塞；随机
+    py协程：1:N，采用EVENTLOOP模型；需要await主动交出控制权，
+            虽然可以实现异步io，但是不能多效利用多核（GIL）
+    go协程：M:N，采用CSP模型；可以多线程分配到不同核心上
+    相同点：都引人消息调度系统模型，通过消息机制交流，
 
 阻塞？
-atomic （原子操作）
-make(chan int) （无缓冲chan是同步的）
-sync.Mutex（不可赋值, 不可重复上锁）
-for{}
-select{}
-wg = sync.WaitGroup{}
-wg.Add(num)
-wg.Done()
-wg.Wait()
-runtime.Gosched() // 调度语句
+  1：同步阻塞（原子操作，互斥量，管道）：
+     相当于执行runtime.Goexit，G阻塞，M不阻塞
+     锁：G追加到可运行队列中
+     管道：G挂到chan的recvq和sendq这个两队列上
+  2：异步IO（网络io，文件io）：
+     使用异步的系统调用和多路复用的事件监听优化，G阻塞，M不阻塞
+     G挂到netpoller网络io轮询器上，io事件结束后，追加到可运行队列中
+  3：调用阻塞的系统调用：
+     G和M都阻塞，P与M解除关系
+  4：Sleep或ticker计时器：
+     类似与2
 
 一颗CPU，两个协程，其中一个协程在死循环，会发生什么？
 1.14前跑死；以后不会，
@@ -220,6 +231,58 @@ go如何关闭协程？
 上下文，cancel()调用 <-ctx.Done() （控制流）
 close(ch)，广播
 
+context有什么作用？
+上下文，上层向下层传递内容（常用于 关闭后台协程）；阻塞
+
+select作用？
+阻塞；随机
+
+// 交替打印奇偶数
+func f(n int, chx, chy chan struct{}) {
+	for ; n <= 10; n += 2 {
+		<-chx
+		fmt.Println(n)
+		chy <- struct{}{}
+		if n == 10 {
+			close(ch)
+		}
+	}
+}
+func main() {
+    var (
+	    ch  = make(chan struct{})
+        ch1 = make(chan struct{}, 1)
+        ch2 = make(chan struct{}, 1)
+    )
+    ch1 <- struct{}{}
+    go f(0, ch1, ch2)
+    go f(1, ch2, ch1)
+    <-ch
+    close(ch1)
+    close(ch2)
+}
+
+// 限流
+func xl(num, n int) {
+	var (
+		wg  *sync.WaitGroup
+		chn = make(chan struct{}, n)
+	)
+	wg.Add(num)
+
+	for i := 0; i < num; i++ {
+		chn <- struct{}{}
+		go func(wg *sync.WaitGroup) {
+			for i := 0; i < 10; i += 2 {
+				fmt.Println(i)
+			}
+			wg.Done()
+			<-chn
+		}(wg)
+	}
+	wg.Wait()
+}
+
 go协程池？
 func worker(id int, jobCh <-chan int, retCh chan<- strint) {
     for job := range jobCh {
@@ -227,13 +290,11 @@ func worker(id int, jobCh <-chan int, retCh chan<- strint) {
         retCh <- ret
     }
 }
-
 func workerPool(n int, jobCh <-chan int, retCh chan<- string) {
     for i := 0; i < n; i++ {
         go worker(i, jobCh, retCh)
     }
 }
-
 func genJob(n int) <-chan int {
     jobCh := main(chan int, n)
     go func() {
@@ -244,7 +305,6 @@ func genJob(n int) <-chan int {
     }
     return jobCh
 }
-
 func main() {
     jobCh := genJob(10)
     retCh := make(chan string, 200)
@@ -274,24 +334,84 @@ def add(a,b):
 
 #############减法#############
 def sub(a,b):
-    return add(a, add(~b, 1)) #
-
-cpu
+    return add(a, add(~b, 1)) # add(a, -b)
 
 内存：
     内核段：kernel
     用户段：app
 
-调用：FC：方法内存地址调用（快）
-      SC：系统调用（慢；安全）
- 
-中断：晶振，网卡（io设备）；IDT（中断向量表）
+虚拟内存：内存与外存的组合（不是直接相加的和）
+交换空间：内存满了，数据放到外存中
+都是缓解内存压力，改善进程组合（cpu密集型与io密集型）
+
+CPU：
+    x86：4个特权等级（ring 0~3）
+        ring 0：内核态（管态）
+        ring 3：用户态（目态）
+    架构：
+        复杂指令集
+        精简指令集
+
+内核架构：
+    单内核：林纳斯（linux），系统调用的方法都放在内核，运行在同一地址空间；
+    微内核：谭宁邦（minix），模块化设计，简化内核功能，仅提供少量基础功能，
+            基础功能通过IPC调用来组合出常用服务；（分布式，微服务理念）
+            优点：增加功能不用重新编译内核，扩展性更强；
+                内核服务间隔离，一个服务挂掉，不影响其他服务，OS更安全。
+            缺点：大量IPC，影响性能。
+    关系：谭教授是林佬半个老师
+
+调用：
+    FC：方法内存地址调用（开销小——快）——用户空间进行
+    SC：系统调用（上下文切换——慢，安全）——软中断陷入，调用内核态方法
+        广义：调用库函数（libc，glibc）
+        狭义：调用内核API
+
+中断：硬件打断CPU，让其执行下一个任务
+    晶振，网卡（io设备）；IDT（中断向量表）
+软中断：软件打断CPU
+    int $0x80（陷入） iret（返回）
+    sysenter/syscall（陷入） sysexit/sysret（返回）
+
+就绪，运行
+阻塞：来自运行态，有资源等待（io，信号量，锁等）；有超时限制，占用内存资源
+挂起：来自运行或就绪态，主动性（暂停），通过唤醒恢复；没有超时限制，调出到磁盘
+注意：系统调用是上下文切换（状态改变），阻塞和挂起是进程切换（进程改变）
 
 strace -ff -o out [go main] #跟踪系统调用
 ls /proc #查看运行时的资源
 进程：资源分配的最小单位
+进程间通信（管道<pipe，fifo>，消息队列<queue>，信号，共享内存，套接字<网络，UNIX域>）
 ls /proc/xxx/task #查看进程中的线程
-线程：执行的最小单位，共享进程资源，栈空间独立
+线程：执行的最小单位，共享进程资源，栈空间独立，固定大小
+协程：用户态线程，栈空间动态扩容
+
+串行：顺序
+并发：交替（任务数大于核数）；切换（保存现场，准备新环境等）是占用时间的
+并行：同时（多处理器或多核）
+
+同步：任务依次完成，协同步调，会阻塞其他任务
+异步：任务可以中断，不阻塞别的任务
+
+IO复用模型
+  select
+    io发生，不知道具体哪个流，需要无差别轮询fd_set，复杂度=O(n)
+    copy_from_user()把用户空间fd_set拷贝到内核空间，开销大
+  poll
+    同上；区别：拷贝到内核空间用pollfd链表存储，没有最大连接数限制
+  epoll
+    event poll，事件驱动（每个事件关联上fd），复杂度=O(1)
+    利用mmap()文件映射内存加速与内核空间消息传递，共享内存，减少了复制开销
+      LT：默认模式，水平触发；
+      ET：高速模式，边缘触发；
+  select与poll只提供一个函数，selct或poll；适用：连接数少，都十分活跃
+  epoll提供三个函数，epoll_create, epoll_ctl, epoll_wait(轮询就绪链表)
+  以上都是同步IO；
+  而异步IO，把数据从内核拷到用户空间，充分利用cpu
+
+goroutine被网络IO阻塞，对应的M会被阻塞么？
+  不会，net包对网络IO做了封装，底层基于epool机制，进行监听。
+  其他系统调用可能就阻塞M。
 
 集群：一种物理形态：同一个业务部署到多个服务器，实现负载均衡，高可用
 微服务：一种架构风格：大型复杂软件应用由一个或多个具有独立业务能力的微服务组成
@@ -313,25 +433,47 @@ nc www.baidu.com #连接
 curl www.baidu.com #连接加请求加断开
 tcpdump -nn -i eth0 port 80 #监听eth0网卡上80端口的tcp进程
 
+HTTP协议基于TCP/IP协议
+    http1.0：使用keep-alive参数建立长连接，不支持host域
+    http1.1：默认长连接，减小三次握手和四次挥手的开销
+    http2.0：使用了多路复用技术，一个连接并发处理多个请求，
+             支持header数据的压缩，使用HPACK算法，减小了数据体积，传输更快。
+    状态码：
+        1xx：提示信息
+        2xx：成功处理客户请求
+        3xx：请求资源变动，发生重定向
+            301：永久重定向
+            302：临时重定向
+        4xx：客户端请求异常
+            400：请求报文有问题
+            403：服务器禁止访问资源
+            404：请求资源找不到
+        5xx：服务器内部错误
+            500：服务器出错
+            503：网络繁忙
+
 TIME-Wait和CLOSE-Wait
-socket是全双工，关闭时四次挥手；
-CLOSE-Wait：第二挥后，被动方进入，直到第三挥
-作用：等待发送完成
-TIME-Wait：第三挥后，主动方进入，第四挥后再等2MSL
-作用：异常处理，解决网络丢包等不稳定带来的其他问题
+    socket是全双工，关闭时四次挥手；
+    CLOSE-Wait：第二挥后，被动方进入，直到第三挥
+      作用：等待发送完成
+    TIME-Wait：第三挥后，主动方进入，第四挥后再等2MSL
+      作用：异常处理，解决网络丢包等不稳定带来的其他问题
 
 web应用程序使用http协议传输，http是无状态协议。需要会话机制来记录
 cookie
-客户端记录确定用户信息，携带通行证建立连接，具有不可跨域名性；不安全，但可以加密；记住密码
+    客户端记录确定用户信息，携带通行证建立连接，具有不可跨域名性；不安全，但可以加密；记住密码
 session
-服务端记录用户确认信息，sessionID在客户端；容易失效，
+    服务端记录用户确认信息，sessionID在客户端；容易失效，
+
+redis作用：
+    缓存，消息队列，分布式锁
 
 Redis淘汰策略？
-默认策略，不淘汰任何key
-LRU，LFU
-随机淘汰，过期，TTL短的
+    默认策略，不淘汰任何key
+    LRU，LFU
+    随机淘汰，过期，TTL短的
 
 Redis高可用？
-主从复制：
-哨兵模式：无法较好的进行水平扩展
-集群模式：
+    主从复制：
+    哨兵模式：无法较好的进行水平扩展
+    集群模式：
