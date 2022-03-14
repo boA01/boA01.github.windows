@@ -465,7 +465,34 @@ cookie
 session
     服务端记录用户确认信息，sessionID在客户端；容易失效，
 
-redis作用：
+Mysql:
+    架构：
+        server层：连接器，分析器，优化器，执行器
+        存储引擎层：
+    ACID：
+    undo：原子性
+    redo：一致性
+    
+    WAL：先写日志，再写磁盘。
+
+    自增主键不连续：
+        8.0，自增值放redo.log中，
+             事务回滚，自增值不回退，
+             唯一键冲突，自增值+1。
+        5.7及以前没有持久化。
+
+Redis：
+    string：set  k   v
+    list：  push l_k v1 v2 ...
+        ziplist：压缩表
+        linkedlist：
+        brpop：类似golang的chan读取
+    set：   add  s_k v1 v2 ...
+    zset：  sadd zs_k 1 v1 1 v2 2 v3 ...（score可重复）
+        ziplist：压缩表（结点<128 && 元素长度<64B）
+        skiplist：跳表
+    hash:   hset h_k   k1 v1 k2 v2 ...
+        渐进式rehash：类似goalng的map迁移，惰性的。
     缓存，消息队列，分布式锁
 
 Redis淘汰策略？

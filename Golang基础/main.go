@@ -680,8 +680,35 @@ func fq(num_money int) int {
 	return arr[2]
 }
 
+// 跳房子-爬楼梯变种
+func tfz(n int) int {
+	a, b := 0, 1
+	if n == 2 {
+		return 1
+	}
+	for i := (n + 1) >> 1; i > 1; i-- {
+		a, b = b, a+b<<1
+	}
+	return b
+}
+
+func getCount(m int) int {
+	dp := make([]int, m+1)
+	dp[0] = 0
+	dp[1] = 1
+	dp[2] = 1
+	for i := 3; i <= m; i++ {
+		if i%2 == 0 {
+			dp[i] = dp[i-1]
+		} else {
+			dp[i] = dp[i-1] + dp[i-2] + dp[i-3]
+		}
+	}
+	return dp[m]
+}
+
 // 栈
-func ur() {
+func ur_do() {
 	var (
 		arr  []string
 		temp []string
@@ -1145,8 +1172,107 @@ func qh2() {
 	}
 }
 
+// 点菜-dp
+func dc() {
+	var n, m, res int
+	fmt.Scanf("%d %d\n", &n, &m)
+	arr := make([][2]int, n)
+	dp := make([]int, n)
+
+	for i := 0; i < n; i++ {
+		fmt.Scanf("%d %d\n", &arr[i][0], &arr[i][1])
+	}
+
+	dp[0] = 1
+	for i := 1; i < n; i++ {
+		dp[i] = 1
+		// 利用map记录是否被点过了
+		map_ := map[int]bool{arr[i][0]: true, arr[i][1]: true}
+		for j := 0; j < i; j++ {
+			if map_[arr[j][0]] || map_[arr[j][1]] {
+				continue
+			}
+			if tmp := dp[i] + 1; dp[i] < tmp {
+				dp[i] = tmp
+			}
+		}
+		if res < dp[i] {
+			res = dp[i]
+		}
+	}
+	fmt.Println(res)
+}
+
+// 炸弹-map缓存
+func zdan() {
+	var n, m, res int
+	fmt.Scanf("%d %d\n", &n, &m)
+	input := bufio.NewReader(os.Stdin)
+	str, _ := input.ReadString('\n')
+	arr := strings.Split(str, " ")
+	arr[m-1] = arr[m-1][:len(arr[m-1])-2]
+	map_status := make(map[string]bool, n) // 缓存房间的未来状态
+	for i := 1; i <= n; i++ {
+		map_status[strconv.Itoa(i)] = true
+	}
+	ptr := "1"
+	for i, v := range arr {
+		if ptr == v { // 被炸才浪费能量
+			res++
+			flag := n // 安全房间数目（优化处理，类似冒泡）
+			for _, val := range arr[i:] {
+				if map_status[val] {
+					ptr = val // 找到最后被炸的房号
+					map_status[val] = false
+					flag-- // 安全房间减一
+				}
+				if flag == 0 {
+					break // 提前退出
+				}
+			}
+			for k, v := range map_status {
+				if v {
+					ptr = k // 找到不会被炸的房号
+				}
+				map_status[k] = true // 刷新状态
+			}
+		}
+	}
+	fmt.Println(res)
+}
+
 func main() {
 	fmt.Println("hello")
+
+	// arr := []int{-1, 0, -2}
+	// sort.Slice(arr, func(i, j int) bool { return arr[i] < arr[j] })
+	// fmt.Println(arr)
+
+	// map_ := map[string]bool{"c": false, "v": true, "b": false}
+	// ptr := "a"
+	// for k, v := range map_ {
+	// 	if v {
+	// 		ptr = k
+	// 	}
+	// 	map_[k] = true
+	// }
+	// fmt.Println(ptr, map_)
+
+	// dc()
+	// zdan()
+
+	// for i := 0; i < 100; i += 10 {
+	// 	sq := math.Sqrt(float64(i))
+	// 	fmt.Println(9 < sq)
+	// }
+
+	// defer func() {
+	// 	fmt.Println(recover())
+	// }()
+	// defer panic(1)
+	// defer panic(2)
+	// defer panic(3)
+	// panic(4)
 
 	// var it interface{}
 	// // it = new(int)
@@ -1154,7 +1280,7 @@ func main() {
 	// va := reflect.ValueOf(it)
 	// fmt.Println(tp == nil, va)
 
-	fmt.Println(time.Now().Date())
+	// fmt.Println(time.Now().Format("2006-05-04 15:02:01"))
 
 	// arr := [3]int{2, 1}
 	// fmt.Println(len(arr), cap(arr)) // 数组的容量和长度相同，区别于切片
@@ -1195,8 +1321,10 @@ func main() {
 	// fmt.Println(i[0], i)
 
 	// yhsj(5) // 1 4 6 4 1
-	// fmt.Println(CalulateMethodCount(4))
-	// ur()
+	// fmt.Println(plt(7))
+	// fmt.Println(tfz(9))
+	// fmt.Println(getCount(9))
+	// ur_do()
 	// fmt.Println(maxAddStr())
 	// fmt.Println(binaryTreeScan([]int{1, 7, 2, 6, -1, 4, 8}))
 	// fjzys()
