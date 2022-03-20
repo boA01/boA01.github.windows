@@ -33,5 +33,13 @@ func main() {}
 /*
 //export Foo 必须写
 
+Linux
 go build -buildmode=c-shared -o _foo.so pycall.go
+
+Windows
+go build -ldflags "-s -w" -o main.dll -buildmode=c-shared main.go 动态库
+
+go build -o libpycall.a -buildmode=c-archive pycall.go 静态库
+gcc -shared -fpic -o demo.so demo.c
+gcc -v test.c -o test1 libpycall.a demo.so -lWinMM -lntdll -lWS2_32
 */

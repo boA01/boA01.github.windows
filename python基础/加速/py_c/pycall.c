@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 int foo(int x, int y){
-    printf("you input %d and %d\n", a, b);
-    return a+b;
+    printf("you input %d and %d\n", x, y);
+    return x+y;
 }
 
 // gcc -o libpycall.so -shared -fPIC pycall.c #.so 生成动态链接

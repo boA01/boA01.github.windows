@@ -36,19 +36,19 @@ func OutStr(str *C.char) {
 }
 
 //export Out1Arr
-func Out1Arr(cArray *C.int, cSize C.int) {
+func Out1Arr(cArray uintptr, cSize int) {
 	gSlice := (*[1 << 30]C.int)(unsafe.Pointer(cArray))[:cSize:cSize]
-	// gSlice := (*[3][3]C.int)(unsafe.Pointer(cArray))[:cSize:cSize]
+	// gSlice := (*[3][3]C.int)(unsafe.Pointer(cArray))[:3:3]
 	fmt.Println(gSlice)
 }
 
 //export Out2Arr
-func Out2Arr(carr *C.int, size int) {
+func Out2Arr(carr uintptr, size int) {
 	var slice [][3]int32
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&slice))
 	header.Cap = size
 	header.Len = size
-	header.Data = uintptr(unsafe.Pointer(carr))
+	header.Data = carr
 	fmt.Println(slice)
 }
 

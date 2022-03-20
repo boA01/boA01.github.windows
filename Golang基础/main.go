@@ -216,10 +216,12 @@ func fun3_0() {
 func fun3_1() {
 	defer close(c1)
 
-	for i := 0; i < 10; i++ {
-		go hello(1)
+	for i := 0; i < 10; {
+		i++
+		go hello(i)
 		<-c1
-		go hello(2)
+		i++
+		go hello(i)
 		<-c1
 	}
 	fmt.Println("End...")
@@ -466,7 +468,39 @@ func maxAddStr() int {
 	return res
 }
 
-// 双栈实现队列
+// 最长等差子列
+func maxLenDc() int {
+	arr := []int{8, 5, 2, 0, -4, -3, -2, -1, 0, 1}
+	leng, temp := len(arr), 1
+	var tmp, res, pti int
+	dc := arr[1] - arr[0]
+	jh := 0
+	for i := 1; i < leng; {
+		if dc == (arr[i] - arr[i-1]) {
+			temp++
+			if temp > res {
+				res = temp
+				if jh < 1 {
+					res++
+				}
+			}
+			i++
+		} else if jh < 1 {
+			tmp = arr[i]
+			pti = i
+			arr[i] = arr[i-1] + dc
+			jh++
+		} else {
+			if pti == i-1 {
+				arr[pti] = tmp
+			}
+			dc = arr[i] - arr[i-1]
+			temp = 1
+			jh = 0
+		}
+	}
+	return res
+}
 
 // 滑动窗口
 func maxLenStr(s string) int {
@@ -480,6 +514,102 @@ func maxLenStr(s string) int {
 		}
 	}
 	return end - start
+}
+
+// 盛水-双指针
+func maxArea(height []int) int {
+	// write code here
+	left, right, tmp, res := 0, len(height)-1, 0, 0
+	for left < right {
+		if height[left] < height[right] {
+			tmp = height[left] * (right - left)
+			left++
+		} else {
+			tmp = height[right] * (right - left)
+			right--
+		}
+		if res < tmp {
+			res = tmp
+		}
+	}
+	return res
+}
+
+// 接雨水-双指针
+func maxWater(arr []int) int64 {
+	// write code here
+	l, r, lmax, rmax, res := 0, len(arr)-1, 0, 0, 0
+	for l < r {
+		if arr[l] < arr[r] {
+			if arr[l] > lmax {
+				lmax = arr[l]
+			} else {
+				res += lmax - arr[l]
+			}
+			l++
+		} else {
+			if arr[r] > rmax {
+				rmax = arr[r]
+			} else {
+				res += rmax - arr[r]
+			}
+			r--
+		}
+	}
+	return int64(res)
+}
+
+func min(m, n int) int {
+	if m > n {
+		return n
+	}
+	return m
+}
+func maxWater1(arr []int) int64 {
+	// write code here
+	l, r, res := 0, len(arr)-1, 0
+	mark := min(arr[l], arr[r])
+	for l < r {
+		if arr[l] < arr[r] {
+			l++
+			if arr[l] < mark {
+				res += mark - arr[l]
+			} else {
+				mark = min(arr[l], arr[r])
+			}
+		} else {
+			r--
+			if arr[r] < mark {
+				res += mark - arr[r]
+			} else {
+				mark = min(arr[l], arr[r])
+			}
+		}
+	}
+	return int64(res)
+}
+
+func max(m, n int) int {
+	if m < n {
+		return n
+	}
+	return m
+}
+func maxWater2(arr []int) int64 {
+	// write code here
+	l, r, ml, mr, res := 0, len(arr)-1, 0, 0, 0
+	for l < r {
+		ml = max(arr[l], ml)
+		mr = max(arr[r], mr)
+		if mr > ml {
+			res += ml - arr[l]
+			l++
+		} else {
+			res += mr - arr[r]
+			r--
+		}
+	}
+	return int64(res)
 }
 
 // defer栈
@@ -957,7 +1087,7 @@ func kmp(S string, T string) int {
 			j = next[j-1]
 		}
 		if S[j] == T[i] {
-			j += 1
+			j++
 		}
 		if j == ls {
 			num++
@@ -1326,6 +1456,7 @@ func main() {
 	// fmt.Println(getCount(9))
 	// ur_do()
 	// fmt.Println(maxAddStr())
+	fmt.Println(maxLenDc())
 	// fmt.Println(binaryTreeScan([]int{1, 7, 2, 6, -1, 4, 8}))
 	// fjzys()
 	// fmt.Println(zd())
@@ -1432,6 +1563,7 @@ func main() {
 	// fun2_2()
 	// fun2_3()
 	// fun3_0()
+	// fun3_1()
 	// fun5()
 	// fun7()
 	// defer_()
