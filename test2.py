@@ -6,7 +6,7 @@ import test3 as t3
 
 R = 5
 W = 820
-H = 520
+H = 500
 w = 400
 h = 400
 gray = (128, 128, 128)
@@ -134,8 +134,8 @@ def main():
                 screen.blit(drawText(f'结点数目: {len(df_x)}个'), (0, 50))
                 screen.blit(drawText(f'结点数目: {len(arr_y)}个'), (420, 50))
                 # 子窗口
-                screen.blit(sf("white", n, df_x.values), (0, 100))
-                screen.blit(sf("white", n, arr_y), (420, 100))
+                screen.blit(sf("white", n, df_x.values), (0, 80))
+                screen.blit(sf("white", n, arr_y), (420, 80))
                 # 刷新显示
                 pygame.display.flip() # 全局刷新
 

@@ -40,7 +40,18 @@ def qz(num):
 def jd_append(arr_100, Y, Z, r):
     y1, z1 = qz(floor(Y-r)), qz(floor(Z-r))
     y2, z2 = qz(ceil(Y+r)), qz(ceil(Z+r))
-    res = 0
+    res, flag = 0, False
+    for z in range(z1, z2):
+        zz = abs(Z-z)
+        for y in range(y1, y2):
+            if hypot(abs(Y-y), zz) <= r:
+                if arr_100[y, z] == 0: # 存在唯一标记
+                    flag = True
+                    break
+        if flag:
+            break
+    else:
+        return 0
     for z in range(z1, z2):
         zz = abs(Z-z)
         for y in range(y1, y2):
