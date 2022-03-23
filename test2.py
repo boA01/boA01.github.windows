@@ -1,103 +1,144 @@
-from pywebio.output import *
-from pywebio.pin import *
-from pywebio import start_server
-
-import plotly.graph_objects as go
+import pygame
 import pandas as pd
-import numpy as np
+from math import sqrt
+import plotly.graph_objects as go
+import test3 as t3
 
-# Helix equation
-# t = np.linspace(0, 10, 100) # 
-# x, y, z = np.cos(t), np.sin(t), t
-# x, y, z = np.random.random(10),np.random.random(10),np.random.random(10)
-# x, y, z = np.random.rand(3, 1000)
-# x, y, z = np.random.randn(3, 5000) # 正态分布
+R = 5
+W = 820
+H = 520
+w = 400
+h = 400
+gray = (128, 128, 128)
+coloes = [
+    (255, 0, 0),
+    (255,255,0), #黄
+    (255,165,0), #橙
+    (0,255,0), #绿
+    (0,255,255), #青
+    (128,0,128), #紫
+    (0,191,255), #天蓝
+    (0,0,255),
+    (0,0,0)
+]
 
-# x = np.arange(8) #
-# y = np.linspace(10,20,5) #线性序列 
-# z = np.logspace(1,3,3,base=3) #等比数列
-# np.zeros((m,n))
-# np.ones((m,n))
-# np.empty((m,n))
-# np.fromfunction(fun,(m,n))
+# 初始化pygame模块
+pygame.init()
+# 设置窗口
+screen = pygame.display.set_mode((W,H))
+# 设置图标
+# pygame.display.set_icon()
+# 设置窗口标题
+pygame.display.set_caption('毕业设计')
+# 字体设置
+font = pygame.font.Font("STXINGKA.TTF", 28)
 
-# a*b multiplu(a,b)对应元素相乘
-# kronx(a,b) 张量积
-# outer(a,b) 外积, 叉乘；|a||b|sin<a,b> (张量积的一种形式)
-# dot(a,b) matnul(a,b) 内积，点乘；|a||b|cos<a,b> 
+# 文本处理
+def drawText(content):
+    score_text = font.render(content, True, gray)
+    return score_text
 
-def reset():
-    x = np.random.normal(25, 8, 400).astype(int)
-    y, z = np.random.randint(0, 51, (2,400))
+# 图片
+# def drawImage(pth):
+#     surface_img = pygame.image.load(pth).convert()
 
-    df = pd.DataFrame(data = {
-        "x":x,
-        "y":y,
-        "z":z
-    })
-    df1 = df.sort_values(by='x',ascending=False)
-    df1.to_csv(r"data.csv", index=False)
+# 网格线
+def draw_wgx(face):
+    for x in range(0, w, 20):
+        pygame.draw.line(face, gray, (x, 0), (x, 400))
+    for y in range(0, h, 20):
+        pygame.draw.line(face, gray, (0, y), (400, y))
 
-def reset1():
-    toast("Clicked")
-    reset()
+# 切面图
+def draw_qm(face, i, arr):
+    draw_wgx(face)
+    x1 = -1
+    for x, y, z in arr:
+        if x1 != x:
+            x1 = x
+            l = i-x1 # 圆心到切面距离
+            r = sqrt(R**2-l**2) # 半径
+        pygame.draw.circle(face, coloes[l], (y*8, z*8), r*8, width = 1)
 
-def d1(df):
-    fig = go.Figure(data=[go.Scatter3d(
-        x=df["x"],
-        y=df["y"],
-        z=df["z"],
-        mode='markers',
-        marker=dict(
-            size=20,
-            color=df["x"],
-            colorscale='Viridis',   # choose a colorscale
-            opacity=1               # 不透明度
-        )
-    )])
+# 子Surface
+def sf(col, i, data):
+    face = pygame.Surface(size=(400,400), flags=pygame.HWACCEL)
+    face.fill(color=col)
+    # 切面图
+    draw_qm(face, i, data)
+    return face
 
+# 折线图
+def sca_show(df):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df['x'],
+        y=df['f'],
+        mode='lines+markers',
+        name='覆盖率',
+    ))
+    fig.add_trace(go.Scatter(
+        x = df['x'],
+        y = df['n1'],
+        mode = "lines+markers",
+        name = "节点数目"
+    ))
+    fig.add_trace(go.Scatter(
+        x = df['x'],
+        y = df['n2'],
+        mode = "lines+markers",
+        name = "优化后节点数目"
+    ))
+    fig.update_layout(
+        title = "栅栏情况折线统计图",
+        xaxis_title = "栅栏面/x",
+        yaxis_title = "(覆盖率)/(数目)"
+    )
     fig.show()
-    # fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
-    # html = fig.to_html(include_plotlyjs="require", full_html=False)
-    # return html
-
-def d2(df):
-    put_slider(name="x", value=-1, min_value=-1, max_value=100, step=1)
-    while True:
-        pin_wait_change("x")
-        x = pin.x
-        if x == -1:
-            df1 = df
-        else:
-            if x-2 < 0:
-                df1 = df.loc[(df['x']>=0) & (df['x']<x+3)]
-            elif x+2 > 100:
-                df1 = df.loc[(df['x']>= x-2) & (df['x']<= x)]
-            else:
-                df1 = df.loc[(df['x']>= x-2) & (df['x']<= x+2)]
-        d1(df1)
-        # with use_scope("res", clear=True):
-        #     put_text(f"x = {pin.x}")
-
-def d3():
-    print("start")
-    put_button("重置", onclick=reset1, color='success', outline=True)
-
-def index(df):
-    put_column([
-        d3(),
-        d2(df),
-    ])
 
 def main():
-    df = pd.read_csv(r"E:\Py代码\boA01.github.windows\data.csv")
-    index(df)
+    # 切面x
+    n = 0
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                screen.fill((0))
+                if event.key == pygame.K_q:
+                    exit()
+                elif event.key == pygame.K_RIGHT:
+                    if n < 50:
+                        n+=1
+                elif event.key == pygame.K_LEFT:
+                    if n > 0:
+                        n-=1
+                elif event.key == pygame.K_UP:
+                    if n <= 40:
+                        n+=10
+                elif event.key == pygame.K_DOWN:
+                    if n >= 10:
+                        n-=10
+                elif event.key == pygame.K_z:
+                    # 优化数据
+                    df1 = pd.read_csv("data1.csv")
+                    sca_show(df1)
+                df_x = t3.read_zl_x(n)
+                f, arr_y = t3.cover_jd(n)
+                # 栅栏面
+                screen.blit(drawText(f'x={n}'), (10, 10))
+                # 覆盖率
+                screen.blit(drawText(f"覆盖率: {f}%"), (300, 10))
+                # 结点数目
+                screen.blit(drawText(f'结点数目: {len(df_x)}个'), (0, 50))
+                screen.blit(drawText(f'结点数目: {len(arr_y)}个'), (420, 50))
+                # 子窗口
+                screen.blit(sf("white", n, df_x.values), (0, 100))
+                screen.blit(sf("white", n, arr_y), (420, 100))
+                # 刷新显示
+                pygame.display.flip() # 全局刷新
 
-# start_server(main, port=9090, auto_open_webbrowser=True)
-reset()
-# '''
-
-# [0,'n',0] [100, 'n', 100]
-
-# r=10
-# (0,0) l (0,20)
+if __name__ == '__main__':
+    # t3.main()
+    main()
