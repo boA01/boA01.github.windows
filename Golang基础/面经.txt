@@ -1,3 +1,7 @@
+2005-01-02 15:04:05 提出
+2009                首推
+2012                稳定版发布
+
 垃圾回收算法：
     引用计数：引用+1，销毁-1，0回收
         优点：回收快
@@ -18,6 +22,105 @@
          增长率大于1时启动GC；GOGC监控增长率，默认100%
          2min必触发GC
          runtime.GC() 手动触发
+
+reflect.StringHeader{}
+reflect.SliceHeader{}
+unsafe.Pointer(&x)
+
+slice扩容？
+<1024  cap() *= 2
+>=1024 cap() *= 1.25（注意内存对齐，查看growslice()）
+
+map原理？
+hashmap；利用hash函数对key做计算，得出下标
+hashCode碰撞一定会下标冲突；下标冲突，不一定hashCode碰撞
+拉链法：数组+链表
+       数组+红黑树
+hmap和bmap两种数据结构
+    hmap中有指向bmap数组的指针
+    hashCode低位用于bmap数组的下标，判断桶的位置
+        高位放在bmap的topbits [8]uint8，确定在桶中的哪个元素
+        key和value分别放在bmap的[8]keys，[8]values数组中，
+        pad指向扩容bucket。
+        桶：8对kv，k/k/... v/v/...存储，避免内存对齐，节省空间。
+等量扩容：溢出桶太多，重新排列，放入新桶，让数据更紧凑
+双倍扩容：装填因子大于0.65，只是分配，具体访问bukect时，才迁移
+         不是全量扩容，而是增量扩容，分摊工作，不至于系统卡顿
+
+struct比较？（==，!=）
+相同类型
+    不存在不可比较类型，可以比较
+    匿名字段留意
+    否则reflect.DeepEqual()比较
+不同类型（强类型）
+    强制类型转换后比较
+结构体不能排序（<, >, <=, >=）
+不可比较类型：slice，map，func
+不可序列化类型：chanle，func，complex
+
+判断接口是否为nil？
+类型，数据
+func IsNil(i interface{}) {
+    vi := reflect.ValueOf(i)
+    if vi.Kind() == reflect.Ptr {
+        return vi.IsNil()
+    }
+    return false
+}
+
+go init 的执行顺序？
+    一个文件里，从上到下
+    一个包里面，官方没明确说明，文件名大小
+    不同包，按导入的依赖关系
+
+CSP并发模型
+    不以共享内存通信，要用通信来共享内存
+
+GMP模型？
+    M：系统线程（有固定大小的栈）
+    G：协程（栈动态扩缩；都需要一个P）
+    P：逻辑处理器（运行在M上的调度器，默认大小cpu核数，原生代码不需要）
+
+go协程的4种状态
+Runnable
+Running
+Syscall
+Waiting
+
+goroutine与coroutine
+    py协程：1:N，采用EVENTLOOP模型；需要await主动交出控制权，
+            虽然可以实现异步io，但是不能多效利用多核（GIL）
+    go协程：M:N，采用CSP模型；可以多线程分配到不同核心上
+    相同点：都引人消息调度系统模型，通过消息机制交流，
+
+阻塞？
+  1：同步阻塞（原子操作，互斥量，管道）：
+     相当于执行runtime.Goexit，G阻塞，M不阻塞
+     锁：G追加到可运行队列中
+     管道：G挂到chan的recvq和sendq这个两队列上
+  2：异步IO（网络io，文件io）：
+     使用异步的系统调用和多路复用的事件监听优化，G阻塞，M不阻塞
+     G挂到netpoller网络io轮询器上，io事件结束后，追加到可运行队列中
+  3：调用阻塞的系统调用：
+     G和M都阻塞，P与M解除关系
+  4：Sleep或ticker计时器：
+     类似与2
+
+一颗CPU，两个协程，其中一个协程在死循环，会发生什么？
+1.14前跑死；以后不会，
+
+go的调度？
+1.14后，协作式抢占调度，用户态的协程调度器
+
+go如何关闭协程？
+上下文，cancel()调用 <-ctx.Done() （控制流）
+close(ch)，广播
+
+context有什么作用？
+上下文，上层向下层传递内容（常用于 关闭后台协程）；阻塞
+
+select作用？
+阻塞；随机
 
 // 分治(nlog2 n; n^2; nlog2 n; log2 n)
 func QuickSort(s []int) []int {
@@ -141,102 +244,6 @@ func reverseStr(str string) string {
     return string(s)
 }
 
-reflect.StringHeader{}
-reflect.SliceHeader{}
-unsafe.Pointer(&x)
-
-slice扩容？
-<1024  cap() *= 2
->=1024 cap() *= 1.25（注意内存对齐，查看growslice()）
-
-map原理？
-hashmap；利用hash函数对key做计算，得出下标
-hashCode碰撞一定会下标冲突；下标冲突，不一定hashCode碰撞
-拉链法：数组+链表
-       数组+红黑树
-hmap和bmap两种数据结构
-    hmap中有指向bmap数组的指针
-    hashCode低位用于bmap数组的下标，判断桶的位置
-        高位放在bmap的topbits [8]uint8，确定在桶中的哪个元素
-        key和value分别放在bmap的[8]keys，[8]values数组中，
-        pad指向扩容bucket。
-        桶：8对kv，k/k/... v/v/...存储，避免内存对齐，节省空间。
-等量扩容：溢出桶太多，重新排列，放入新桶，让数据更紧凑
-双倍扩容：装填因子大于6.5，只是与分配，具体访问bukect时，才迁移
-         不是全量扩容，而是增量扩容，分摊工作，不至于系统卡顿
-
-struct比较？（==，!=）
-相同类型
-    不存在不可比较类型，可以比较
-    匿名字段留意
-    否则reflect.DeepEqual()比较
-不同类型（强类型）
-    强制类型转换后比较
-结构体不能排序（<, >, <=, >=）
-不可比较类型：slice，map，func
-不可序列化类型：chanle，func，complex
-
-判断接口是否为nil？
-类型，数据
-func IsNil(i interface{}) {
-    vi := reflect.ValueOf(i)
-    if vi.Kind() == reflect.Ptr {
-        return vi.IsNil()
-    }
-    return false
-}
-
-go init 的执行顺序？
-    一个文件里，从上到下
-    一个包里面，官方没明确说明，文件名大小
-    不同包，按导入的依赖关系
-
-CSP并发模型
-    不以共享内存通信，要用通信来共享内存
-
-GMP模型？
-    M：系统线程（有固定大小的栈）
-    G：协程（栈动态扩缩；都需要一个P）
-    P：逻辑处理器（运行在M上的调度器，默认大小cpu核数，原生代码不需要）
-
-go协程的4种状态
-Runnable
-Running
-Syscall
-Waiting
-
-goroutine与coroutine
-    py协程：1:N，采用EVENTLOOP模型；需要await主动交出控制权，
-            虽然可以实现异步io，但是不能多效利用多核（GIL）
-    go协程：M:N，采用CSP模型；可以多线程分配到不同核心上
-    相同点：都引人消息调度系统模型，通过消息机制交流，
-
-阻塞？
-  1：同步阻塞（原子操作，互斥量，管道）：
-     相当于执行runtime.Goexit，G阻塞，M不阻塞
-     锁：G追加到可运行队列中
-     管道：G挂到chan的recvq和sendq这个两队列上
-  2：异步IO（网络io，文件io）：
-     使用异步的系统调用和多路复用的事件监听优化，G阻塞，M不阻塞
-     G挂到netpoller网络io轮询器上，io事件结束后，追加到可运行队列中
-  3：调用阻塞的系统调用：
-     G和M都阻塞，P与M解除关系
-  4：Sleep或ticker计时器：
-     类似与2
-
-一颗CPU，两个协程，其中一个协程在死循环，会发生什么？
-1.14前跑死；以后不会，
-
-go如何关闭协程？
-上下文，cancel()调用 <-ctx.Done() （控制流）
-close(ch)，广播
-
-context有什么作用？
-上下文，上层向下层传递内容（常用于 关闭后台协程）；阻塞
-
-select作用？
-阻塞；随机
-
 // 交替打印奇偶数
 func f(n int, chx, chy chan struct{}) {
 	for ; n <= 10; n += 2 {
@@ -315,9 +322,6 @@ func main() {
         fmt.Println(ret)
     }
 }
-
-go的调度？
-1.14后，协作式抢占调度，用户态的协程调度器
 
 #############加法#############
 a, b = 2, 3
@@ -467,6 +471,54 @@ cookie
 session
     服务端记录用户确认信息，sessionID在客户端；容易失效，
 
+信息安全
+    网络安全
+        SQL注入
+            GET xx/userinfo?id=1%20or%201=1
+            措施：输入检测
+        跨站脚本攻击（XSS）
+            反射型：将js嵌入URL
+                http://localhost:90/test?name=<script>alert("hell")</script>
+            存储型：js提交到数据库，影响别人
+            措施：内容检测
+        CRRG攻击
+            A网站进入后，利用浏览器对身份认证的缓存，B网页诱骗用户对A网站误操作请求
+        DDos攻击
+            利用分布式网络集群，攻击服务器，影响正常请求服务
+        DNS劫持
+            hosts文件修改
+            DNS应答修改
+        TCP劫持
+            三次握手中没有身份认证，获取seq和ack，冒充通信
+        ARP欺骗
+            冒充mac，充当中间人            
+    系统安全
+        溢出攻击
+            栈
+            整数
+        释放后攻击
+        空指针攻击
+        HOOK
+            键盘记录器
+            补丁
+        可信计算
+    密码学
+        对称加密
+            DES：密钥：56位，密文：64位
+            3DES：密钥：112位
+            IDEA：密钥：128位
+            AES：密钥：128，192或256位
+            RC4：流加密，加密快，常用于WIFI
+        非对称加密
+            RSA：
+            DH：
+            ECC：
+            公钥加密，私钥解密    保密通信
+            私钥加密，公钥解密    数字签名：抗抵赖性
+        摘要算法：数据完整性，单向性，防止篡改
+            MD5：按512分组，生成128位hash值
+            SHA：按512分组，生成160位hash值
+
 Mysql:
     架构：
         server层：连接器，分析器，优化器，执行器
@@ -474,7 +526,6 @@ Mysql:
     ACID：
     undo：原子性
     redo：一致性
-    
     WAL：先写日志，再写磁盘。
 
     自增主键不连续：

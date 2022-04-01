@@ -12,7 +12,7 @@
     更换/关闭 包校验
         go env -w GOSUMDB="sum.golang.goole.cn"或off
 
-go env 查看环境变量
+go env 查看环境信息
 
 项目结构
 go-mod-test -->模块名
@@ -53,13 +53,19 @@ go build ./src/main.go -o ./bin/ // 编译main包
 go test -v  [-test.run 函数名] // 单元测试
 
 go get xxx // 拉取并下载依赖
-
 go install test-folder // 安装
+go fix 修正为新版本
+go fmt 格式化代码
+go doc 程序实体上的文档
+go vet 源码中静态错误
+go tool compile -S 生成汇编
 
-go fix
-go fmt
-go doc
-go vet
+gcc
+预处理（Preprocess）：-E -o .i
+编译（Compile）：     -S -o .s
+汇编（Assemble）：    -c -o .o
+链接（Link）：        -o .exe
+
 
 make build // 编译项目
 make test // 执行测试

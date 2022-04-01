@@ -777,13 +777,14 @@ func min(T constraints.Ordered) (x, y T) T {
   1  4/1  12/2 24/6 24/24
 */
 func yhsj(n int) {
-	var arr = []int{1}
+	var arr = make([]int, n)
+	arr[0] = 1
 	fz, fm := 1, 1
 
 	for i := 1; i < n; i++ {
 		fz *= (n - i)
 		fm *= i
-		arr = append(arr, fz/fm)
+		arr[i] = fz / fm
 	}
 	fmt.Println(arr)
 }
@@ -1214,7 +1215,7 @@ func t2(arr [][]int) int {
 
 // 站点（快慢指针）
 func zd() int {
-	n, maxDis, res, size := 0, 0, 0, 0
+	var n, maxDis, res, size int
 	fmt.Scanf("%d %d\n", &n, &maxDis)
 	input := bufio.NewReader(os.Stdin)
 	str, _ := input.ReadString('\n')
@@ -1371,8 +1372,131 @@ func zdan() {
 	fmt.Println(res)
 }
 
+// 猴子爬杆
+func xhs1() int {
+	var n, maxH int
+	fmt.Scanln(&n)
+	dp := make([]int, n)
+	reader := bufio.NewReader(os.Stdin)
+	str, _ := reader.ReadString('\n')
+	arr := strings.Split(str, " ")
+	arr[n-1] = arr[n-1][:len(arr[n-1])-2]
+
+	for i, v := range arr {
+		if i <= maxH {
+			num, _ := strconv.Atoi(v)
+			dp[i] = i + num
+			maxH = max(dp[i], maxH)
+		} else {
+			return 0
+		}
+	}
+	return 1
+}
+
+// 组合——二进制
+func zuhe(s, e int) {
+	for i := 1 << s; i < 1<<e; i++ {
+		b := fmt.Sprintf("%05b", i)
+		fmt.Println(b)
+	}
+}
+
+// 盲盒——等值拆分
+func qanx() int {
+	var Sum, Max int
+	reader := bufio.NewReader(os.Stdin)
+	line, _ := reader.ReadString('\n')
+	arrStr := strings.Split(line, " ")
+	long := len(arrStr)
+	end := long - 1
+	arrStr[end] = arrStr[end][:len(arrStr[end])-2]
+	arr := make([]int, end+1)
+
+	for i, v := range arrStr {
+		num, _ := strconv.Atoi(v)
+		Sum += num
+		Max = max(num, Max)
+		arr[i] = num
+	}
+
+	for i := Sum / Max; i > 0; i-- {
+		if Sum%i == 0 {
+			avg := Sum / i
+			fmt.Println(avg, i)
+			_arr := arr
+			leng := len(_arr)
+		f1:
+			for leng != 0 {
+				// 组合种类
+				for j := 1; j < 1<<long; j++ {
+					b := fmt.Sprintf("%0"+strconv.Itoa(long)+"b", j)
+					mh := 0
+					for idx, val := range b {
+						if val == '1' {
+							mh += _arr[idx]
+						}
+					}
+					if mh == avg {
+						for idx, val := range b {
+							if val == '1' {
+								_arr[idx] = 0
+								leng -= 1
+							}
+						}
+						goto f1 // continue f1
+					}
+				}
+				break
+			}
+			if leng == 0 {
+				return i
+			}
+		}
+	}
+	return 1
+}
+
+// 重复数——二分查找
+func findDuplicate_(arr []int) {
+	leng := len(arr)
+	start, end := 0, leng-1
+	for start <= end {
+		mid := (end + start) >> 1
+		counter := 0
+		for _, v := range arr {
+			if v <= mid {
+				counter++
+			}
+		}
+		if counter > mid {
+			end = mid
+		} else {
+			start = mid + 1
+		}
+	}
+	fmt.Println(start)
+}
+
+// 重复数——快慢指针
+func findDuplicate(arr []int) {
+	var f, s = arr[arr[0]], arr[0]
+	for f != s {
+		f = arr[arr[f]]
+		s = arr[s]
+	}
+	for s = 0; s != f; {
+		f = arr[f]
+		s = arr[s]
+	}
+	print(s)
+}
+
 func main() {
 	fmt.Println("hello")
+
+	findDuplicate_([]int{3, 3, 6, 2, 1, 4, 5})
+	// findDuplicate([]int{1, 3, 6, 2, 3, 4, 5})
 
 	// arr := []int{-1, 0, -2}
 	// sort.Slice(arr, func(i, j int) bool { return arr[i] < arr[j] })
@@ -1418,6 +1542,11 @@ func main() {
 	// qh1()
 	// qh2()
 
+	// fmt.Println(xhs1())
+
+	// zuhe(0, 5)
+	// fmt.Println(qanx())
+
 	// str := "2\n"
 	// fmt.Print(str[:len(str)-1] + "k")
 	/*
@@ -1456,7 +1585,7 @@ func main() {
 	// fmt.Println(getCount(9))
 	// ur_do()
 	// fmt.Println(maxAddStr())
-	fmt.Println(maxLenDc())
+	// fmt.Println(maxLenDc())
 	// fmt.Println(binaryTreeScan([]int{1, 7, 2, 6, -1, 4, 8}))
 	// fjzys()
 	// fmt.Println(zd())

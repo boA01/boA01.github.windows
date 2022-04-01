@@ -28,7 +28,7 @@ import (
 
 // ********作用域
 // 函数内部，类似private
-// 函数外部，类似product
+// 函数外部，类似protect
 // 函数外部且首字母大写，类似public
 
 /*
@@ -38,7 +38,7 @@ import (
   编译器优化，自动加“;”（所以“{”不能单独一行等）
 */
 
-var n int           //首字母小写，product
+var n int           //首字母小写，protect
 var N = 10          //首字母大写，public
 const C, c = 1, 'c' //不用写类型，但必须赋值
 
@@ -278,7 +278,8 @@ func testArr() {
 	/*
 	   intArr := [3]int32{1,2,3}
 	   intArr := [...]int32{1,2,3} // 隐式指定长度
-	   intArr := [...]int32{1:2, 2:3, 0:1}
+	   intArr := [...]int32{1:2, 2:3, 0:1} // 最大索引长度
+	   intArr := [...][2]int32{{1:2}, {2:3}, {0:1}} // 只能省略第一维度
 	*/
 
 	fmt.Printf("%p,%p\n", &intArr, &intArr[0])
@@ -286,7 +287,7 @@ func testArr() {
 	for i := 0; i < len(intArr); i++ {
 		// fmt.Scanln(intArr[i])
 		rand.Seed(time.Now().UnixNano()) // 随机种子
-		intArr[i] = int32(rand.Intn(10)) //0<=x<10
+		intArr[i] = int32(rand.Intn(10)) // 0<=x<10
 	}
 
 	for index, value := range intArr {
