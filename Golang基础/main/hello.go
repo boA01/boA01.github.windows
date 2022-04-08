@@ -203,7 +203,7 @@ label1: // 标点
 // pn    = new(int) // var pn *int,并且*pn=0；主要分配值类型
 // slice = make([]int32, 1, 5)；      切片分配内存（必须有长度，底层是数组）
 // chan  = make(chan int32, 5)；      管道分配内存（容量为5）
-// map_  = make(map[string]int32, 2)；map分配内存（长度可忽略，没有容量cap）
+// map_  = make(map[string]int32, 2)；map分配内存（容量可忽略，没有cap）
 // new()返回指针，make()返回本身
 
 func testStr() {
@@ -379,7 +379,7 @@ func testMap() {
 
 	/*
 	   var map_ map[string]int // nil map，只是申明
-	   map_ := make(map[sting]int, 3) // 分配空间，长度可以省略
+	   map_ := make(map[sting]int, 3) // 分配空间，容量可以省略，没有cap
 
 	   map_ := map[string]int {
 	       "A":1,
@@ -688,7 +688,7 @@ func testStruct() {
     unsafe.Alignof("abc") // 对齐系数
     unsafe.Sizeof("abc") // 内存长度
     成员对齐：成员变量偏移量%对齐系数==0；第一个为0
-    整体对齐：总长度%Max对齐系数==0
+    整体对齐：总长度%对齐系数==0
 
  C:防止内存对齐
     __attribute__((packed)) // 关闭对齐优化
