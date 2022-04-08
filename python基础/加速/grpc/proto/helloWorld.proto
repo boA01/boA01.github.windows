@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "./;proto"; // golang的包名
+
+message HelloRequest {
+    string name = 1; // name表示名称，1表示编号
+    // repeated int32 arr = 1; // repeated表示复合属性
+}
+
+message HelloResponse {
+    string message = 1;
+}
+
+service Hello {
+    rpc SayHello (HelloRequest) returns (HelloResponse);
+}
