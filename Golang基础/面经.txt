@@ -12,6 +12,7 @@
         优化：三色并发标记法：不用一次性完成
                 三种状态，由 白->灰->黑，回收白色
                 写屏障，本轮中指针传递时直接标记指针
+                读屏障，
         注意：GC过程中，新分配的内存立即标记，不属于写屏障技术
     分代回收：按生命周期划分不同代空间，不同代的回收算法和频率不同
         优点：回收性能好
@@ -23,29 +24,51 @@
          2min必触发GC
          runtime.GC() 手动触发
 
-reflect.StringHeader{}
-reflect.SliceHeader{}
 unsafe.Pointer(&x)
 
-slice扩容？
-<1024  cap() *= 2
->=1024 cap() *= 1.25（注意内存对齐，查看growslice()）
+字符：
+    utf-8编码：
+        0开头，一字节：0???????
+        110开头，两字节：110????? 10??????
+        1110开头，三字节：1110???? 10?????? 10??????
+    go：utf-8
+        byte -> uint8
+        rune -> int32
+    c：ascll
+        char（1B）
+    java：unicode
+        char（2B）
 
-map原理？
-hashmap；利用hash函数对key做计算，得出下标
-hashCode碰撞一定会下标冲突；下标冲突，不一定hashCode碰撞
-拉链法：数组+链表
-       数组+红黑树
-hmap和bmap两种数据结构
-    hmap中有指向bmap数组的指针
-    hashCode低位用于bmap数组的下标，判断桶的位置
-        高位放在bmap的topbits [8]uint8，确定在桶中的哪个元素
-        key和value分别放在bmap的[8]keys，[8]values数组中，
-        pad指向扩容bucket。
-        桶：8对kv，k/k/... v/v/...存储，避免内存对齐，节省空间。
-等量扩容：溢出桶太多，重新排列，放入新桶，让数据更紧凑
-双倍扩容：装填因子大于0.65，只是分配，具体访问bukect时，才迁移
-         不是全量扩容，而是增量扩容，分摊工作，不至于系统卡顿
+字符串：
+    reflect.StringHeader{}
+    go：dataArr, len(字节个数)
+    c：dataArr+'\0'
+
+切片：
+    reflect.SliceHeader{}
+    扩容：原容量 * 扩容系数 * 字长 ~= 匹配规格 / 字长
+        <1024  cap() *= 2
+        >=1024 cap() *= 1.25
+        注意：内存对齐、growslice()
+        内存对齐：
+            成员对齐：偏移量%对齐系数 == 0
+            整体对齐：总偏移量%对齐系数 == 0
+
+map：
+    hashmap：利用hash函数对key做计算，得出下标
+    hashCode碰撞一定会下标冲突；下标冲突，不一定hashCode碰撞
+    拉链法：数组+链表
+        数组+红黑树（java）
+    hmap和bmap两种数据结构
+        hmap中有指向bmap数组的指针
+        hashCode低位用于bmap数组的下标，判断桶的位置
+            高位放在bmap的topbits [8]uint8，确定在桶中的哪个元素
+            key和value分别放在bmap的[8]keys，[8]values数组中，
+            overflow指向扩容bucket。
+            桶：8对kv，k/k/... v/v/...存储，避免内存对齐，节省空间。
+    等量扩容：溢出桶太多，重新排列，放入新桶，让数据更紧凑
+    双倍扩容：装填因子大于6.5，只是分配，具体访问bukect时，才迁移
+            不是全量扩容，而是增量扩容，分摊工作，不至于系统卡顿
 
 struct比较？（==，!=）
 相同类型
@@ -58,8 +81,17 @@ struct比较？（==，!=）
 不可比较类型：slice，map，func
 不可序列化类型：chanle，func，complex
 
+接口：
+    runtime.eface{
+        _type *_type # 动态类型
+        data unsafe.Pointer # 动态值
+    }
+    断言：接口.(空接口|非空接口)
+    反射：操作 实参拷贝后临时变量的地址
+        TypeOf() # 拷贝到栈上
+        ValueOf() # 拷贝到堆上
+
 判断接口是否为nil？
-类型，数据
 func IsNil(i interface{}) {
     vi := reflect.ValueOf(i)
     if vi.Kind() == reflect.Ptr {
@@ -67,6 +99,52 @@ func IsNil(i interface{}) {
     }
     return false
 }
+
+函数：
+    函数变量（二级指针）：
+        funcval {*func}
+    方法：
+        obj.fun() <==> T.fun(obj)
+        接口：
+            需要考虑obj的类型
+    call：调用
+    ret：返回，恢复
+    bp寄存器
+    sp寄存器
+    ip寄存器
+    堆：
+    栈：
+        caller's bp: 栈基 
+        局部变量:
+            _defer{}：复杂defer
+            _panic{}
+        返回值
+        参数
+        返回地址
+
+        ...
+        caller's sp：栈指针
+
+数据段：
+    g0，m0，sched，...
+    allg，allm，allp
+
+代码段：
+    goexti()
+    exit
+    defer func() {
+        if err := recover(); err != nil {}
+    }
+    panic()
+    ... newproc() # 创建协程
+    main.main
+    package init
+    入口：runtime.main
+    mstart # 线程启动，m0执行g0
+    newMainGoroutine
+    schedinit
+    osinit
+    ...
 
 go init 的执行顺序？
     一个文件里，从上到下
@@ -76,10 +154,19 @@ go init 的执行顺序？
 CSP并发模型
     不以共享内存通信，要用通信来共享内存
 
+channel：
+    runtime.hchan
+    环形缓冲区
+
 GMP模型？
     M：系统线程（有固定大小的栈）
     G：协程（栈动态扩缩；都需要一个P）
-    P：逻辑处理器（运行在M上的调度器，默认大小cpu核数，原生代码不需要）
+    P：逻辑处理器（运行在M上的调度器，默认大小cpu核数，原生代码不需要(监控线程sysmon)）
+
+runtime.g
+runtime.m
+runtime.p
+runtime.sched
 
 go协程的4种状态
 Runnable
@@ -107,7 +194,7 @@ goroutine与coroutine
      类似与2
 
 一颗CPU，两个协程，其中一个协程在死循环，会发生什么？
-1.14前跑死；以后不会，
+1.14前跑死；以后不会（异步抢占）
 
 go的调度？
 1.14后，协作式抢占调度，用户态的协程调度器
@@ -115,6 +202,12 @@ go的调度？
 go如何关闭协程？
 上下文，cancel()调用 <-ctx.Done() （控制流）
 close(ch)，广播
+
+Mutex：
+    state int32 # 状态
+    sema unit32 # 信号量
+    正常模式：高吞入，尾端延迟
+    解饿模式：严格FIFO
 
 context有什么作用？
 上下文，上层向下层传递内容（常用于 关闭后台协程）；阻塞
@@ -386,15 +479,27 @@ CPU：
 
 strace -ff -o out [go main] #跟踪系统调用
 ls /proc #查看运行时的资源
-进程：资源分配的最小单位
-进程间通信（管道<pipe，fifo>，消息队列<queue>，信号，共享内存，套接字<网络，UNIX域>）
 ls /proc/xxx/task #查看进程中的线程
+
+进程：资源分配的最小单位
+    逻辑内存（寻址范围 = 2^地址位数)bit）（独立）
+    文件/网络句柄（共享）
+    通信：（管道<pipe，fifo>，消息队列<queue>，信号，共享内存，套接字<网络，UNIX域>）
 线程：执行的最小单位，共享进程资源，栈空间独立，固定大小
-协程：用户态线程，栈空间动态扩容
+    栈，TLS（独立）
+    PC
+协程：用户态线程，栈空间动态扩缩容
 
 串行：顺序
 并发：交替（任务数大于核数）；切换（保存现场，准备新环境等）是占用时间的
 并行：同时（多处理器或多核）
+
+死锁：多个并发任务因争夺系统资源而产生相互等待的现象
+    四个必要条件：
+        互斥：同一时间，资源只能供一个任务使用
+        请求与保持：请求阻塞时，对获取的资源保持不放
+        不可抢占：获取的资源，未使用完前不能强行剥夺
+        循环等待：多个任务之间形成循环等待资源
 
 同步：任务依次完成，协同步调，会阻塞其他任务
 异步：任务可以中断，不阻塞别的任务
