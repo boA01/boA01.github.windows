@@ -1,3 +1,4 @@
+import numpy as np
 import pygame
 from math import sqrt
 from pandas import read_csv as rcv
@@ -33,7 +34,7 @@ screen = pygame.display.set_mode((FW, FH))
 # pygame.display.set_icon()
 
 # 设置窗口标题
-pygame.display.set_caption('毕业设计')
+pygame.display.set_caption('水下无线传感器网络三维栅栏覆盖')
 
 # 字体设置
 font = pygame.font.Font("STXINGKA.TTF", 28)
@@ -140,11 +141,13 @@ def main():
                     t3.reset()
 
                 df_x = t3.read_zl_x(n)
-                pre, arr_y = t3.cover_jd(n, df_x)
+                # pre, arr_y = t3.cover_jd(n, df_x)
+                rate, arr_y = t3.jd_move(n, df_x)
+
                 # 栅栏面
                 screen.blit(drawText(f'x={n}'), (10, 10))
                 # 覆盖率
-                screen.blit(drawText(f"覆盖率: {pre}%"), (300, 10))
+                screen.blit(drawText(f"覆盖率: {rate*100:.4}%"), (300, 10))
                 # 结点数目
                 screen.blit(drawText(f'结点数目: {len(df_x)}个'), (0, 50))
                 screen.blit(drawText(f'结点数目: {len(arr_y)}个'), (420, 50))

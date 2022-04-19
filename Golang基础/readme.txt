@@ -59,6 +59,7 @@ go fmt 格式化代码
 go doc 程序实体上的文档
 go vet 源码中静态错误
 go tool compile -S 生成汇编
+dlv attach pid 调试
 
 gcc
 预处理（Preprocess）：-E -o .i

@@ -7,7 +7,6 @@ import (
 	"math"
 	"os"
 	"os/signal"
-	_ "reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -45,20 +44,20 @@ type ListNode struct {
 }
 
 type Set struct {
-	m map[T]bool
+	m map[T]struct{}
 	sync.RWMutex
 }
 
 func New() *Set {
 	return &Set{
-		m: map[T]bool{},
+		m: map[T]struct{}{},
 	}
 }
 
 func (s *Set) Add(item T) {
 	s.Lock()
 	defer s.Unlock()
-	s.m[item] = true
+	s.m[item] = struct{}{}
 }
 
 func hello(n int) {
@@ -100,15 +99,13 @@ func fun2_0() {
 }
 
 func fun2_1() {
-	ch := make(chan struct{})
-
 	go func() {
 		fmt.Println("hello world")
 		// ch <- struct{}{}
-		close(ch) // 也行
+		close(c1) // 也行
 	}()
 
-	<-ch // 阻塞
+	<-c1 // 阻塞
 }
 
 // 同步-sync.Mutex
@@ -256,10 +253,12 @@ func fun3_2() {
 // context，上下文（既是数据流，也是控制流），只能上层向下层传递数据
 func fun4() {
 	sig := make(chan os.Signal)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL) // 优雅退出
-	ctx, cancel := context.WithCancel(context.Background())
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)     // 信号量
+	ctx, cancel := context.WithCancel(context.Background()) // 上下文
+	// 超时context（自动调用cancel()）
 	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	// finishCh := make(chan struct{})
+	// 定时context
+	// context.WithDeadline()
 
 	go func(ctx context.Context) {
 		for {
@@ -1323,7 +1322,7 @@ func dc() {
 			if map_[arr[j][0]] || map_[arr[j][1]] {
 				continue
 			}
-			if tmp := dp[i] + 1; dp[i] < tmp {
+			if tmp := dp[j] + 1; dp[i] < tmp {
 				dp[i] = tmp
 			}
 		}
@@ -1347,14 +1346,14 @@ func zdan() {
 		map_status[strconv.Itoa(i)] = true
 	}
 	ptr := "1"
-	for i, v := range arr {
-		if ptr == v { // 被炸才浪费能量
+	for i := 0; i < m; {
+		if ptr == arr[i] { // 被炸才浪费能量
 			res++
 			flag := n // 安全房间数目（优化处理，类似冒泡）
-			for _, val := range arr[i:] {
-				if map_status[val] {
-					ptr = val // 找到最后被炸的房号
-					map_status[val] = false
+			for j := i; j < m; i, j = i+1, j+1 {
+				if map_status[arr[j]] {
+					ptr = arr[j] // 找到最后被炸的房号
+					map_status[arr[j]] = false
 					flag-- // 安全房间减一
 				}
 				if flag == 0 {
@@ -1367,7 +1366,9 @@ func zdan() {
 				}
 				map_status[k] = true // 刷新状态
 			}
+			continue
 		}
+		i++
 	}
 	fmt.Println(res)
 }
@@ -1396,8 +1397,9 @@ func xhs1() int {
 
 // 组合——二进制
 func zuhe(s, e int) {
+	str := "%0" + strconv.Itoa(e) + "b"
 	for i := 1 << s; i < 1<<e; i++ {
-		b := fmt.Sprintf("%05b", i)
+		b := fmt.Sprintf(str, i)
 		fmt.Println(b)
 	}
 }
@@ -1412,6 +1414,7 @@ func qanx() int {
 	end := long - 1
 	arrStr[end] = arrStr[end][:len(arrStr[end])-2]
 	arr := make([]int, end+1)
+	fstr := "%0" + strconv.Itoa(long) + "b"
 
 	for i, v := range arrStr {
 		num, _ := strconv.Atoi(v)
@@ -1430,7 +1433,7 @@ func qanx() int {
 			for leng != 0 {
 				// 组合种类
 				for j := 1; j < 1<<long; j++ {
-					b := fmt.Sprintf("%0"+strconv.Itoa(long)+"b", j)
+					b := fmt.Sprintf(fstr, j)
 					mh := 0
 					for idx, val := range b {
 						if val == '1' {
@@ -1495,7 +1498,7 @@ func findDuplicate(arr []int) {
 func main() {
 	fmt.Println("hello")
 
-	findDuplicate_([]int{3, 3, 6, 2, 1, 4, 5})
+	// findDuplicate_([]int{3, 3, 6, 2, 1, 4, 5})
 	// findDuplicate([]int{1, 3, 6, 2, 3, 4, 5})
 
 	// arr := []int{-1, 0, -2}
@@ -1675,13 +1678,6 @@ func main() {
 	// fmt.Println(slice_)
 	// fmt.Println(len(slice_))
 
-	// map_ := map[int]string{
-	// 	1: "hello",
-	// 	2: "world",
-	// }
-	// map_[3] = "haha"
-	// fmt.Printf("%#v", map_[3] == "")
-
 	// fmt.Println("a1" > "A1")
 	// fmt.Println(strings.Compare("a1", "A1"))
 
@@ -1689,6 +1685,7 @@ func main() {
 	// inout()
 	// i2s()
 	// fmt.Println(fun1())
+	// fun2_1()
 	// fun2_2()
 	// fun2_3()
 	// fun3_0()
