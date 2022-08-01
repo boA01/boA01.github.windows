@@ -197,8 +197,8 @@ label1: // 标点
 	fmt.Println("3")
 }
 
-//值类型    通常栈区 int, string, struct, 数组（不同于c）
-//指针类型  通常堆区 指针, slice, map, chan, interface  零值：nil
+// 通常栈区 int, string, struct, 数组（不同于c）
+// 通常堆区 指针, slice, map, chan, interface  零值：nil
 //         内存逃逸 （例：fmt.Println()逃到堆，println()不逃） <<<<<重要概念
 // pn    = new(int) // var pn *int,并且*pn=0；主要分配值类型
 // slice = make([]int32, 1, 5)；      切片分配内存（必须有长度，底层是数组）
@@ -776,7 +776,7 @@ func testInterface() {
 	p1 := People{} // 不用取地址，传递方式取决权不在调用，在于定义
 	// fmt.Printf("%d %T\n", unsafe.Sizeof(cs), cs) // 8 main.CollegeStudent
 	p1.Status(sb) // 不用取地址，因为类型里面就是指针<<<<<
-	p1.Status(cs) //解释上一行 组合的是 *Student <<<<<<
+	p1.Status(cs) // 解释上一行 组合的是 *Student <<<<<<
 
 	s := Students{"未知", 0}
 	var l Life = &s // 必须取地址，(一般指针类型，go自动解引用)<<<<<<<<<
@@ -925,6 +925,9 @@ func testFile() {
 	    if os.IsNotExist(err) {
 	        return false, nil
 	    }
+		if os.IsPermission(err) {
+			return false, nil
+		}
 	    return false, err
 	}*/
 }

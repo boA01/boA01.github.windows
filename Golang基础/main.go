@@ -1532,12 +1532,12 @@ func main() {
 	// panic(4)
 
 	// var it interface{}
-	// // it = new(int)
+	// it = new(int)
 	// tp := reflect.TypeOf(it)
 	// va := reflect.ValueOf(it)
-	// fmt.Println(tp == nil, va)
+	// fmt.Println(tp, va)
 
-	// fmt.Println(time.Now().Format("2006-05-04 15:02:01"))
+	// fmt.Println(time.Now().Format("2006-01-02 15:04:05"))
 
 	// arr := [3]int{2, 1}
 	// fmt.Println(len(arr), cap(arr)) // 数组的容量和长度相同，区别于切片
@@ -1631,11 +1631,11 @@ func main() {
 	// str_re()
 
 	// var y = []string{"A", "B", "C", "D"}
-	// var x = y[:3]
+	// var x = y[:3] // 浅拷贝
 
-	// for i, s := range x { //x = y[:3] = {A, Z, C}
+	// for i, s := range x { // s为深拷贝
 	// 	print(i, s, ",")
-	// 	x = append(x, "Z")
+	// 	x = append(x, "Z") // 第二趟，发生深拷贝，x已经不是以前的x了
 	// 	x[i+1] = "Z"
 	// }
 	// fmt.Println(y, x) //[A Z C Z] [A Z Z Z Z Z]

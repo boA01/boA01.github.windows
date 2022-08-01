@@ -39,14 +39,14 @@ unsafe.Pointer(&x)
     java：unicode
         char（2B）
 
-字符串：
+字符串：字节数组
     reflect.StringHeader{}
     go：dataArr, len(字节个数)
     c：dataArr+'\0'
 
 切片：
     reflect.SliceHeader{}
-    扩容：原容量 * 扩容系数 * 字长 ~= 匹配规格 / 字长
+    扩容：匹配规格 / 字长 ~= 原容量 * 扩容系数 * 字长 / 字长
         <1024  cap() *= 2
         >=1024 cap() *= 1.25
         注意：内存对齐、growslice()
@@ -79,7 +79,7 @@ struct比较？（==，!=）
     强制类型转换后比较
 结构体不能排序（<, >, <=, >=）
 不可比较类型：slice，map，func
-不可序列化类型：chanle，func，complex
+不可序列化类型：complex，chanle，func
 
 接口：
     runtime.eface{

@@ -4,6 +4,9 @@
 # GoModule模式——解决项目结构问题
     项目文件存放位置
 
+# GoWork模式——解决本地多模块依赖问题
+
+
 开启
     go env -w GO111MODULE=on
 墙问题解决
