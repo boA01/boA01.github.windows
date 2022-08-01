@@ -1,4 +1,3 @@
-import numpy as np
 import pygame
 from math import sqrt
 from pandas import read_csv as rcv
@@ -62,14 +61,14 @@ def draw_qm(face, i, arr):
     # 优化处理
     x1 = -1
     for x, y, z in arr:
-        # 非同一维度才计算
+        # 非同一梯队才计算
         if x1 != x:
             x1 = x
             # 圆心到切面距离
             l = i-x1
             # 半径
             r = sqrt(t3.R**2-l**2)
-        pygame.draw.circle(face, coloes[l], (y*RATIO, z*RATIO), r*RATIO, width = 1)
+        pygame.draw.circle(face, coloes[-1], (y*RATIO, z*RATIO), r*RATIO, width = 1)
 
 # 子Surface
 def sf(col, i, data):
@@ -134,19 +133,22 @@ def main():
                         n-=10
                 elif event.key == pygame.K_z:
                     # 优化数据
-                    df1 = rcv.read_csv(r"data1.csv")
+                    df1 = rcv.read_csv(r"db1.csv")
                     sca_show(df1)
                 elif event.key == pygame.K_r:
                     # 重构数据
                     t3.reset()
-
+                
+                # 读取切面范围内节点
                 df_x = t3.read_zl_x(n)
                 # pre, arr_y = t3.cover_jd(n, df_x)
-                rate, arr_y = t3.jd_move(n, df_x)
+                # 栅栏覆盖率和有效节点
+                rate, arr_y = t3.jd_move1(n, df_x)
 
                 # 栅栏面
                 screen.blit(drawText(f'x={n}'), (10, 10))
                 # 覆盖率
+                # screen.blit(drawText(f"覆盖率: {pre}%"), (300, 10))
                 screen.blit(drawText(f"覆盖率: {rate*100:.4}%"), (300, 10))
                 # 结点数目
                 screen.blit(drawText(f'结点数目: {len(df_x)}个'), (0, 50))

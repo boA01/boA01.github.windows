@@ -1,4 +1,3 @@
-from ast import Num
 import pandas as pd
 import numpy as np
 from math import sqrt, hypot, floor, ceil
@@ -10,6 +9,7 @@ MATRIX = 100     # 矩阵大小
 MS = MATRIX**2   # 矩阵面积
 MR = MATRIX/L    # 标记比例
 ML = 10          # 最大移动距离
+Arr_1 = np.ones(MATRIX, dtype=int) # 非零列
 
 # 读取文件
 df = pd.read_csv(r"data.csv")
@@ -21,7 +21,8 @@ def reset():
     # 随机分布
     y = np.random.randint(0, L, NUM)
     # 零值
-    z = np.zeros(NUM, dtype = int)
+    z = np.random.randint(0, L, NUM)
+    # z = np.zeros(NUM, dtype = int)
     df = pd.DataFrame(data = {
         "x":x,
         "y":y,
@@ -47,6 +48,27 @@ def qz(num):
     elif (m:=MATRIX-1) < num:
         return m
     return int(num)
+
+# 结点分类(x==n)
+def sort_y(df_xy):
+    return df_xy.sort_values(by = 'y', ascending = False).values
+
+# 标记
+def mark(arr_100, Y, Z, r):
+    y1, z1 = qz(floor(Y-r)), qz(floor(Z-r))
+    y2, z2 = qz(ceil(Y+r)), qz(ceil(Z+r))
+    res = 0
+
+    for z in range(z1, z2):
+        zz = abs(Z-z)
+        for y in range(y1, y2):
+            if hypot(abs(Y-y), zz) <= r:
+                # 上色
+                arr_100[z, y] += 1
+                # 唯一标记
+                if arr_100[z, y] == 1:
+                    res += 1
+    return res
 
 # 正向标记
 def jd_append(arr_100, Y, Z, r):
@@ -97,7 +119,7 @@ def jd_remove(arr_100, Y, Z, r):
                 arr_100[y, z] -= 1 
     return False
 
-# 优化
+# 优化-随机部署去冗余
 def optimize(i, df_x):
     arr_100 = np.zeros([MATRIX, MATRIX], dtype=int)
     arr = df_x.values
@@ -127,46 +149,10 @@ def optimize(i, df_x):
 
     return r1/MS, arr_y
 
-# 切面优化信息
-def cover(i, df_x):
-    rate, arr_y = optimize(i, df_x)
-    return pd.DataFrame(
-        [
-            [
-                i,
-                round(rate, 4),
-                len(df_x),
-                len(arr_y),
-            ],
-        ], 
-        columns = ['x', 'f', 'n1', 'n2']
-    )
-
 # 优化后栅栏面
 def cover_jd(i, df_x):
     rate, arr_y = optimize(i, df_x)
     return round(rate*100, 2), arr_y
-
-# 结点分类(x==n)
-def sort_y(df_xy):
-    return df_xy.sort_values(by = 'y', ascending = False).values
-
-# 标记
-def mark(arr_100, Y, Z, r):
-    y1, z1 = qz(floor(Y-r)), qz(floor(Z-r))
-    y2, z2 = qz(ceil(Y+r)), qz(ceil(Z+r))
-    res = 0
-
-    for z in range(z1, z2):
-        zz = abs(Z-z)
-        for y in range(y1, y2):
-            if hypot(abs(Y-y), zz) <= r:
-                # 上色
-                arr_100[z, y] += 1
-                # 唯一标记
-                if arr_100[z, y] == 1:
-                    res += 1
-    return res
 
 # 获取高度
 def h_z(h, arr_l, arr_r):
@@ -180,7 +166,7 @@ def h_z(h, arr_l, arr_r):
                 return s+tmp
     return 0
 
-# 结点移动
+# 结点移动-双探测线
 def jd_move(i, df_x):
     arr_100 = np.zeros([MATRIX, MATRIX], dtype=int)
     arr = []
@@ -216,13 +202,87 @@ def jd_move(i, df_x):
                 arr.append([x, y, z//MR])
     return round(mk/MS, 4), arr
 
+# 获取高度
+def h_z1(h, arr, arr_l, arr_r):
+    # h2 = h*2
+    # 快慢指针
+    s = 0
+    for f in range(MATRIX):
+        if (
+            (arr_l[f] != 0 and arr[f] != 0) or 
+            (arr[f] != 0 and arr_r[f] != 0) or 
+            (arr_l[f] != 0 and arr_r[f] != 0)
+        ):
+            s = f
+        else:
+            if f-s >= h:
+                return f
+    return 0
+
+# 结点移动--三探测线
+def jd_move1(i, df_x):
+    arr_100 = np.zeros([MATRIX, MATRIX], dtype=int)
+    arr = []
+    mk = 0
+    for d in range(R):
+        # 相同距离结点
+        arr_d = sort_y(df_x.loc[df_x["x"].isin([i-d, i+d])])
+        # 切面圆半径
+        r = sqrt(R**2-d**2)
+        # 探测线间距
+        dr = r*sqrt(2)/2
+        for x, y, _ in arr_d:
+            # 中探测线
+            c_l = qz(y*MR)
+            # 左探测线
+            l_l = qz((y-dr)*MR)
+            # 右探测线
+            r_l = qz((y+dr)*MR)
+            if l_l == c_l:
+                arr_l = Arr_1
+            else:
+                arr_l = arr_100[:, l_l]
+            if r_l == y:
+                arr_r = Arr_1
+            else:
+                arr_r = arr_100[:, r_l]
+            # 高度
+            z = h_z1(dr*MR, arr_100[:, c_l], arr_l, arr_r)
+            if z == 0:
+                continue
+            # 标记个数
+            tmp = mark(arr_100, y*MR, z, r*MR)
+            if tmp:
+                mk += tmp
+                # 添加结点
+                arr.append([x, y, z//MR])
+    return round(mk/MS, 4), arr
+
+# 切面优化信息
+def cover(i, df_x):
+    # rate, arr_y = optimize(i, df_x)
+    # rate, arr_y = jd_move(i, df_x)
+    rate, arr_y = jd_move1(i, df_x)
+    return pd.DataFrame(
+        [
+            [
+                i,
+                round(rate, 4),
+                len(df_x),
+                len(arr_y),
+            ],
+        ], 
+        columns = ['x', 'f', 'n1', 'n2']
+    )
+
 def main():
     df_x = pd.DataFrame(columns=['x'])
     for i in range(L):
-        # df_x = pd.concat([df_x, cover(i, read_zl_x(i))])
-        df_x = pd.concat([df_x, jd_move(i, read_zl_x(i))])
-    df_x.to_csv(r"data1.csv", index=False)
+        df_x = pd.concat([df_x, cover(i, read_zl_x(i))])
+    df_x.to_csv(r"db1.csv", index=False)
+    # df_x.to_excel(r"fz3.xls", index=False)
 
 if __name__ == "__main__":
-    main()
-    # print(jd_move(6, read_zl_x(6)))
+    reset()
+    # main()
+    # print(jd_move1(6, read_zl_x(6)))
