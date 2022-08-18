@@ -1,0 +1,1 @@
+CreateObject("SAPI.SpVoice").Speak"下课，，老，，，，，师，，，，，，再，，，，，，见"

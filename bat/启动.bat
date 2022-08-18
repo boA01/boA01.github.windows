@@ -1,0 +1,1 @@
+﻿rem start F:\CloudMusic\cloudmusic.exe
